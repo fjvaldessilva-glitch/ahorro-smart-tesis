@@ -14,6 +14,7 @@ Este sprint inicia la construcción del sistema web responsivo propuesto en el p
 | --- | --- | --- | --- | --- |
 | T01 | Crear carpeta oficial del proyecto | Pendiente de confirmación | Pendiente | Pendiente |
 | T02 | Inicializar repositorio Git y crear archivos base mínimos | En desarrollo | Pendiente | Pendiente |
+| T03 | Crear estructura base del monorepo oficial | En revisión | Captura de estructura de carpetas y `git status` | `chore: crear estructura base del monorepo` |
 
 ## Espacio para evidencias
 

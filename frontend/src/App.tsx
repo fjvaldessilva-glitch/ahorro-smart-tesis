@@ -1,0 +1,450 @@
+import { useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
+import ahorroSmartLogo from './assets/ahorro-smart-logo.png'
+import './App.css'
+
+type Tab = 'movements' | 'analysis' | 'projection'
+type MovementType = 'Ingreso' | 'Gasto'
+
+type Movement = {
+  id: number
+  description: string
+  category: string
+  type: MovementType
+  amount: number
+  date: string
+}
+
+const incomeCategories = [
+  'Sueldo',
+  'Otros ingresos',
+]
+
+const expenseCategories = [
+  'Alimentación',
+  'Transporte',
+  'Vivienda',
+  'Servicios básicos',
+  'Salud',
+  'Educación',
+  'Pago de deudas y créditos',
+  'Entretenimiento',
+  'Mascotas',
+  'Otros gastos',
+]
+
+const categoriesByType: Record<MovementType, string[]> = {
+  Ingreso: incomeCategories,
+  Gasto: expenseCategories,
+}
+
+const currencyFormatter = new Intl.NumberFormat('es-CL', {
+  style: 'currency',
+  currency: 'CLP',
+  maximumFractionDigits: 0,
+})
+
+function App() {
+  const [activeTab, setActiveTab] = useState<Tab>('movements')
+  const [movements, setMovements] = useState<Movement[]>([])
+  const [description, setDescription] = useState('')
+  const [category, setCategory] = useState(incomeCategories[0])
+  const [type, setType] = useState<MovementType>('Ingreso')
+  const [amount, setAmount] = useState('')
+  const [date, setDate] = useState('')
+
+  const summary = useMemo(() => {
+    const totalIncome = movements
+      .filter((movement) => movement.type === 'Ingreso')
+      .reduce((total, movement) => total + movement.amount, 0)
+    const totalExpenses = movements
+      .filter((movement) => movement.type === 'Gasto')
+      .reduce((total, movement) => total + movement.amount, 0)
+
+    return {
+      totalIncome,
+      totalExpenses,
+      balance: totalIncome - totalExpenses,
+      budgetUsed: totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0,
+    }
+  }, [movements])
+
+  const expensesByCategory = useMemo(() => {
+    const totals = movements
+      .filter((movement) => movement.type === 'Gasto')
+      .reduce<Record<string, number>>((result, movement) => {
+        result[movement.category] = (result[movement.category] ?? 0) + movement.amount
+        return result
+      }, {})
+
+    return Object.entries(totals)
+      .map(([name, total]) => ({
+        name,
+        total,
+        percentage: summary.totalExpenses > 0
+          ? (total / summary.totalExpenses) * 100
+          : 0,
+      }))
+      .sort((first, second) => second.total - first.total)
+  }, [movements, summary.totalExpenses])
+
+  const comparisonMaximum = Math.max(summary.totalIncome, summary.totalExpenses)
+  const incomeBarWidth = comparisonMaximum > 0
+    ? (summary.totalIncome / comparisonMaximum) * 100
+    : 0
+  const expenseBarWidth = comparisonMaximum > 0
+    ? (summary.totalExpenses / comparisonMaximum) * 100
+    : 0
+
+  const availableCategories = categoriesByType[type]
+
+  const handleTypeChange = (newType: MovementType) => {
+    setType(newType)
+    setCategory('')
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const movementDescription = String(formData.get('description') ?? '').trim()
+    const movementCategory = String(formData.get('category') ?? '')
+    const movementType = String(formData.get('type') ?? '') as MovementType
+    const numericAmount = Number(formData.get('amount'))
+    const movementDate = String(formData.get('date') ?? '')
+
+    const isKnownType = movementType === 'Ingreso' || movementType === 'Gasto'
+    const isCompatibleCategory = isKnownType
+      && categoriesByType[movementType].includes(movementCategory)
+
+    if (
+      !movementDescription
+      || !movementDate
+      || numericAmount <= 0
+      || !isCompatibleCategory
+    ) return
+
+    setMovements((currentMovements) => [
+      ...currentMovements,
+      {
+        id: Date.now(),
+        description: movementDescription,
+        category: movementCategory,
+        type: movementType,
+        amount: numericAmount,
+        date: movementDate,
+      },
+    ])
+
+    setDescription('')
+    setAmount('')
+    setDate('')
+  }
+
+  const removeMovement = (id: number) => {
+    setMovements((currentMovements) =>
+      currentMovements.filter((movement) => movement.id !== id),
+    )
+  }
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="app-header__content">
+          <img
+            className="app-header__logo"
+            src={ahorroSmartLogo}
+            alt="Logo de Ahorro Smart"
+          />
+          <p>Controla tus gastos y organiza tu presupuesto.</p>
+        </div>
+      </header>
+
+      <nav className="main-nav" aria-label="Módulos principales">
+        <div className="main-nav__content" role="tablist">
+          <button
+            className={activeTab === 'movements' ? 'tab tab--active' : 'tab'}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'movements'}
+            onClick={() => setActiveTab('movements')}
+          >
+            Ingresos/Gastos
+          </button>
+          <button
+            className={activeTab === 'analysis' ? 'tab tab--active' : 'tab'}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'analysis'}
+            onClick={() => setActiveTab('analysis')}
+          >
+            Análisis
+          </button>
+          <button
+            className={activeTab === 'projection' ? 'tab tab--active' : 'tab'}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'projection'}
+            onClick={() => setActiveTab('projection')}
+          >
+            Proyección IA
+          </button>
+        </div>
+      </nav>
+
+      <main className="workspace">
+        {activeTab === 'movements' && (
+          <div className="tab-panel" role="tabpanel">
+            <section className="panel" aria-labelledby="register-title">
+              <div className="panel__heading">
+                <p>Nuevo registro</p>
+                <h2 id="register-title">Registrar movimiento</h2>
+              </div>
+
+              <form className="movement-form" onSubmit={handleSubmit}>
+                <label className="field field--wide">
+                  <span>Descripción</span>
+                  <input
+                    type="text"
+                    name="description"
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Ej: Sueldo, supermercado..."
+                    required
+                  />
+                </label>
+
+                <label className="field">
+                  <span>Categoría</span>
+                  <select
+                    name="category"
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Selecciona una categoría</option>
+                    {availableCategories.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Tipo</span>
+                  <select
+                    name="type"
+                    value={type}
+                    onChange={(event) => handleTypeChange(event.target.value as MovementType)}
+                  >
+                    <option>Ingreso</option>
+                    <option>Gasto</option>
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Monto</span>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    min="1"
+                    step="1"
+                    placeholder="0"
+                    required
+                  />
+                </label>
+
+                <label className="field">
+                  <span>Fecha</span>
+                  <input
+                    type="date"
+                    name="date"
+                    value={date}
+                    onChange={(event) => setDate(event.target.value)}
+                    required
+                  />
+                </label>
+
+                <div className="form-actions">
+                  <button className="primary-button" type="submit">Agregar</button>
+                </div>
+              </form>
+            </section>
+
+            <section className="panel movements-panel" aria-labelledby="movements-title">
+              <div className="panel__heading">
+                <p>Historial temporal</p>
+                <h2 id="movements-title">Movimientos registrados</h2>
+              </div>
+
+              {movements.length === 0 ? (
+                <div className="empty-state">
+                  <span aria-hidden="true">$</span>
+                  <p>Aún no existen movimientos registrados.</p>
+                </div>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {movements.map((movement) => (
+                        <tr key={movement.id}>
+                          <td>{movement.description}</td>
+                          <td>{movement.category}</td>
+                          <td>
+                            <span className={`type-badge type-badge--${movement.type.toLowerCase()}`}>
+                              {movement.type}
+                            </span>
+                          </td>
+                          <td className={movement.type === 'Ingreso' ? 'amount--income' : 'amount--expense'}>
+                            {movement.type === 'Ingreso' ? '+' : '-'}
+                            {currencyFormatter.format(movement.amount)}
+                          </td>
+                          <td>{movement.date}</td>
+                          <td>
+                            <button
+                              className="delete-button"
+                              type="button"
+                              onClick={() => removeMovement(movement.id)}
+                              aria-label={`Eliminar movimiento ${movement.description}`}
+                            >
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+
+        {activeTab === 'analysis' && (
+          <div className="tab-panel" role="tabpanel">
+            <section className="view-heading">
+              <p>Estado financiero</p>
+              <h2>Análisis</h2>
+            </section>
+
+            <section className="summary-grid" aria-label="Indicadores financieros">
+              <article className="summary-card summary-card--income">
+                <p>Total ingresos</p>
+                <strong>{currencyFormatter.format(summary.totalIncome)}</strong>
+              </article>
+              <article className="summary-card summary-card--expense">
+                <p>Total gastos</p>
+                <strong>{currencyFormatter.format(summary.totalExpenses)}</strong>
+              </article>
+              <article className="summary-card summary-card--balance">
+                <p>Balance</p>
+                <strong>{currencyFormatter.format(summary.balance)}</strong>
+              </article>
+              <article className="summary-card summary-card--budget">
+                <p>Gasto sobre ingresos</p>
+                <strong>{summary.budgetUsed.toFixed(1)}%</strong>
+              </article>
+            </section>
+
+            {movements.length === 0 && (
+              <div className="analysis-message">
+                Registra movimientos para visualizar el análisis financiero.
+              </div>
+            )}
+
+            <section className="chart-panel" aria-labelledby="comparison-title">
+              <div className="chart-panel__heading">
+                <p>Vista comparativa</p>
+                <h3 id="comparison-title">Comparación de ingresos y gastos</h3>
+              </div>
+              <div className="bar-chart">
+                <div className="bar-row">
+                  <div className="bar-row__label">
+                    <span>Ingresos</span>
+                    <strong>{currencyFormatter.format(summary.totalIncome)}</strong>
+                  </div>
+                  <div className="bar-track" aria-hidden="true">
+                    <div
+                      className="bar-fill bar-fill--income"
+                      style={{ width: `${incomeBarWidth}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="bar-row">
+                  <div className="bar-row__label">
+                    <span>Gastos</span>
+                    <strong>{currencyFormatter.format(summary.totalExpenses)}</strong>
+                  </div>
+                  <div className="bar-track" aria-hidden="true">
+                    <div
+                      className="bar-fill bar-fill--expense"
+                      style={{ width: `${expenseBarWidth}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="chart-panel" aria-labelledby="categories-title">
+              <div className="chart-panel__heading">
+                <p>Distribución</p>
+                <h3 id="categories-title">Gastos por categoría</h3>
+              </div>
+              {expensesByCategory.length === 0 ? (
+                <div className="analysis-message">
+                  Registra gastos para visualizar la distribución por categoría.
+                </div>
+              ) : (
+                <div className="category-chart">
+                  {expensesByCategory.map((categoryItem) => (
+                    <div className="category-row" key={categoryItem.name}>
+                      <div className="category-row__label">
+                        <span>{categoryItem.name}</span>
+                        <strong>
+                          {currencyFormatter.format(categoryItem.total)} · {categoryItem.percentage.toFixed(1)}%
+                        </strong>
+                      </div>
+                      <div className="bar-track" aria-hidden="true">
+                        <div
+                          className="bar-fill bar-fill--category"
+                          style={{ width: `${categoryItem.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+
+        {activeTab === 'projection' && (
+          <div className="tab-panel" role="tabpanel">
+            <section className="projection-panel">
+              <div className="projection-panel__badge">IA</div>
+              <p>Módulo en preparación</p>
+              <h2>Proyección IA</h2>
+              <p className="projection-panel__description">
+                La proyección IA permitirá estimar gasto futuro, balance esperado
+                y riesgo de superar el presupuesto a partir del historial financiero
+                del usuario.
+              </p>
+            </section>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+export default App

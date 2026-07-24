@@ -16,38 +16,38 @@ Este proyecto corresponde a un **sistema web responsivo**, accesible desde naveg
 
 No corresponde a una aplicación móvil nativa ni híbrida. Por lo tanto, no se utilizarán tecnologías como React Native, Expo, Flutter o Ionic.
 
-## Stack definido en la tesis
+## Tecnologías y herramientas del proyecto
 
-### Frontend
+### Tecnología principal del frontend
 
-- React
-- Vite
-- TypeScript
-- Tailwind CSS
+- React.
 
-### Backend
+### Herramientas de apoyo utilizadas en el frontend
 
-- Node.js
-- Express
-- TypeScript
-- MongoDB
-- Mongoose
-- JWT
+- Vite, utilizado para crear y ejecutar el entorno de desarrollo.
+- TypeScript, utilizado como apoyo técnico para mejorar el orden y mantenimiento del código.
+
+Vite y TypeScript apoyan la implementación del frontend y no modifican el alcance funcional definido para el proyecto.
+
+### Backend pendiente
+
+- Node.js.
+- Express.
+
+El backend todavía no está implementado. Su desarrollo se iniciará en una microtarea posterior y no incorporará tecnologías o configuraciones adicionales sin justificación en la tesis o en el Product Backlog acordado.
 
 ### Servicio predictivo futuro
 
-- Python
-- FastAPI
-- Scikit-learn
+El servicio predictivo corresponde a una etapa futura del proyecto. No está implementado actualmente.
 
-### Herramientas de apoyo
+### Herramientas generales de apoyo
 
-- Git
-- GitHub
-- Postman
-- Navegador web para pruebas responsivas
+- Git.
+- GitHub.
+- Postman para futuras pruebas de API.
+- Navegador web para pruebas responsivas.
 
-## Estructura planificada del monorepo
+## Estructura actual del monorepo
 
 ```txt
 AhorroSmart_Tesis/
@@ -58,14 +58,17 @@ AhorroSmart_Tesis/
 │  └─ sprints/
 │     └─ sprint-01.md
 ├─ README.md
-├─ .gitignore
-└─ package.json
+└─ .gitignore
 ```
+
+El frontend contiene la base implementada durante el Sprint 1. Las carpetas `backend/` e `ia-service/` permanecen sin implementación.
 
 ## Metodología de trabajo
 
-El desarrollo se organizará bajo Scrum adaptado a un proyecto individual. Cada avance se trabajará como una microtarea documentable, con cambios pequeños, pruebas claras, evidencia sugerida y mensaje de commit específico.
+El desarrollo se organiza bajo Scrum adaptado a un proyecto individual. Cada avance se trabaja como una microtarea documentable, con cambios pequeños, pruebas claras, evidencia sugerida y un mensaje de commit específico.
 
 ## Estado actual
 
-Sprint 1 iniciado: configuración inicial y diseño base del proyecto.
+Sprint 1 completado: configuración inicial, estructura del monorepo y frontend base del proyecto.
+
+El backend aún no ha sido iniciado.

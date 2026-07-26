@@ -1,0 +1,13 @@
+{
+  "name": "ahorro-smart-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend base de la API de Ahorro Smart",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

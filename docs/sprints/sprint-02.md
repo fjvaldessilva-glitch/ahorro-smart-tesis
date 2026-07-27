@@ -18,7 +18,8 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 | --- | --- | --- | --- |
 | T07 | Crear backend base con Node.js y Express | Sprint 2 | Completada |
 | T08 | Crear estructura inicial de rutas para movimientos financieros | Sprint 2 | Completada |
-| T09 | Implementar registro y consulta temporal de movimientos financieros en backend | Sprint 2 | En revisión |
+| T09 | Implementar registro y consulta temporal de movimientos financieros en backend | Sprint 2 | Completada |
+| T10 | Implementar edición y eliminación temporal de movimientos financieros en backend | Sprint 2 | En revisión |
 
 ## Ítems del Product Backlog relacionados
 
@@ -63,6 +64,15 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 - Sin edición, eliminación, base de datos, autenticación, conexión con frontend o dependencias adicionales.
 - Los datos se pierden al reiniciar el servidor.
 
+## Alcance técnico de T10
+
+- `PUT /api/movements/:id` para editar un movimiento temporal existente.
+- PUT reutiliza las mismas validaciones de campos, tipo, categoría, monto y fecha aplicadas por POST.
+- `DELETE /api/movements/:id` para eliminar un movimiento temporal existente.
+- Respuesta `404` cuando el identificador solicitado no existe.
+- Confirmación JSON después de una eliminación exitosa.
+- Sin base de datos, persistencia, autenticación, conexión con frontend o dependencias adicionales.
+
 ## Pruebas realizadas
 
 | Prueba | Resultado esperado | Resultado |
@@ -77,6 +87,12 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 | `POST /api/movements` con categoría incompatible | Rechazar el movimiento con estado `400` | Exitosa; combinación incompatible rechazada |
 | `POST /api/movements` con campos o valores inválidos | Rechazar descripción o fecha vacía, tipo inválido y monto no positivo | Exitosa; todos los casos respondieron con estado `400` |
 | `GET /api/movements` con datos temporales | Retornar los movimientos creados durante la ejecución | Exitosa; lista con ingreso y gasto verificada |
+| `PUT /api/movements/:id` con datos válidos | Actualizar el movimiento y conservar su identificador | Exitosa; movimiento actualizado con estado `200` e ID conservado |
+| `PUT /api/movements/:id` con categoría incompatible | Aplicar las mismas validaciones de POST | Exitosa; actualización rechazada con estado `400` |
+| `PUT /api/movements/:id` con ID inexistente | Responder con estado `404` | Exitosa; identificador inexistente rechazado |
+| `DELETE /api/movements/:id` con ID existente | Eliminar el movimiento y confirmar en JSON | Exitosa; movimiento eliminado con estado `200` |
+| `DELETE /api/movements/:id` con ID inexistente | Responder con estado `404` | Exitosa; identificador inexistente rechazado |
+| `GET /api/movements` después de editar y eliminar | Reflejar el resultado final de las operaciones | Exitosa; lista final contiene solo el movimiento actualizado |
 
 ## Evidencia sugerida
 
@@ -86,8 +102,10 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 - Captura de la respuesta JSON de `GET /api/movements`.
 - Captura de los resultados de `POST /api/movements` con ingreso y gasto válidos.
 - Captura del rechazo de una categoría incompatible.
+- Captura de la edición exitosa y del caso PUT con ID inexistente.
+- Captura de la eliminación exitosa y del caso DELETE con ID inexistente.
 - Captura de `git status --short`.
 
 ## Commit sugerido
 
-`feat: implementar registro temporal de movimientos en backend`
+`feat: implementar edición y eliminación temporal de movimientos`

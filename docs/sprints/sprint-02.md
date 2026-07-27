@@ -2,7 +2,7 @@
 
 ## Estado del sprint
 
-**Iniciado.**
+**Completado y cerrado.**
 
 ## Objetivo del sprint
 
@@ -20,7 +20,8 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 | T08 | Crear estructura inicial de rutas para movimientos financieros | Sprint 2 | Completada |
 | T09 | Implementar registro y consulta temporal de movimientos financieros en backend | Sprint 2 | Completada |
 | T10 | Implementar edición y eliminación temporal de movimientos financieros en backend | Sprint 2 | Completada |
-| T11 | Realizar prueba integral del flujo backend de movimientos financieros | Sprint 2 | En revisión |
+| T11 | Realizar prueba integral del flujo backend de movimientos financieros | Sprint 2 | Completada |
+| T12 | Cerrar documentalmente el Sprint 2 | Sprint 2 | Completada |
 
 ## Ítems del Product Backlog relacionados
 
@@ -121,6 +122,64 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 | `GET /api/movements` final | `200` | Exitosa; lista final contiene únicamente el ingreso actualizado |
 | Detención del servidor | No aplica | Exitosa; puerto 3001 cerrado después de las pruebas |
 
+## Cierre del Sprint 2
+
+### Resumen del trabajo realizado
+
+- Se creó el backend base de Ahorro Smart con Node.js, Express y JavaScript.
+- Se creó la estructura de rutas del módulo de movimientos financieros.
+- Se implementó el registro y la consulta temporal de ingresos y gastos.
+- Se implementó la edición y eliminación temporal de movimientos.
+- Se realizó una prueba integral del flujo backend con operaciones `GET`, `POST`, `PUT` y `DELETE`.
+
+### Commits asociados
+
+- `079a1d0` — `feat: crear backend base con Node.js y Express`.
+- `1257512` — `feat: crear estructura inicial de rutas de movimientos`.
+- `56f6727` — `feat: implementar registro temporal de movimientos en backend`.
+- `4516589` — `feat: implementar edición y eliminación temporal de movimientos`.
+- `30eac0a` — `test: realizar prueba integral del flujo backend de movimientos`.
+
+### Evidencias generadas
+
+- Estructura técnica del backend y del módulo de rutas.
+- Ejecución del servidor en el puerto `3001`.
+- Respuesta de disponibilidad de `GET /api/health`.
+- Lista inicial vacía de movimientos.
+- Registro temporal de un ingreso y un gasto.
+- Edición y eliminación exitosa de movimientos.
+- Rechazo de categorías incompatibles e identificadores inexistentes.
+- Estado final de la colección temporal y salida de `git status --short`.
+
+### Pruebas realizadas
+
+- Validación de sintaxis de `server.js` y `movements.routes.js`.
+- Inicio y detención controlada del servidor.
+- Verificación de respuestas `200` y `201` en operaciones válidas.
+- Verificación de respuestas `400` y `404` en operaciones inválidas.
+- Confirmación del resultado final mediante `GET /api/movements`.
+
+### Alcance logrado
+
+El Sprint 2 dejó disponible y validada una API REST mínima para registrar, consultar, editar y eliminar movimientos financieros almacenados temporalmente en memoria. El trabajo cubre la base técnica del backend y la administración básica de ingresos y gastos prevista para esta etapa.
+
+En este sprint todavía **no se implementaron**:
+
+- Base de datos.
+- Persistencia.
+- MongoDB.
+- Mongoose.
+- JWT.
+- Autenticación.
+- Inteligencia artificial.
+- Conexión con el frontend.
+- CORS.
+
+### Pendientes para el siguiente sprint
+
+- Definir y autorizar el alcance del siguiente sprint antes de realizar cambios.
+- Mantener pendientes la persistencia, la integración con el frontend, la seguridad y la inteligencia artificial hasta que sus microtareas sean autorizadas.
+
 ## Evidencia sugerida
 
 - Captura de la estructura de `backend/`.
@@ -137,4 +196,4 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 
 ## Commit sugerido
 
-`test: realizar prueba integral del flujo backend de movimientos`
+`docs: cerrar sprint 2`

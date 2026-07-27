@@ -19,7 +19,8 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 | T07 | Crear backend base con Node.js y Express | Sprint 2 | Completada |
 | T08 | Crear estructura inicial de rutas para movimientos financieros | Sprint 2 | Completada |
 | T09 | Implementar registro y consulta temporal de movimientos financieros en backend | Sprint 2 | Completada |
-| T10 | Implementar edición y eliminación temporal de movimientos financieros en backend | Sprint 2 | En revisión |
+| T10 | Implementar edición y eliminación temporal de movimientos financieros en backend | Sprint 2 | Completada |
+| T11 | Realizar prueba integral del flujo backend de movimientos financieros | Sprint 2 | En revisión |
 
 ## Ítems del Product Backlog relacionados
 
@@ -73,6 +74,15 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 - Confirmación JSON después de una eliminación exitosa.
 - Sin base de datos, persistencia, autenticación, conexión con frontend o dependencias adicionales.
 
+## Alcance técnico de T11
+
+- Prueba integral de las operaciones `GET`, `POST`, `PUT` y `DELETE` del módulo de movimientos.
+- Verificación del registro de un ingreso y un gasto temporal.
+- Verificación de la edición y eliminación de movimientos existentes.
+- Verificación de respuestas `400` para una categoría incompatible y `404` para identificadores inexistentes.
+- Confirmación del estado final de la colección temporal después de las operaciones.
+- Sin cambios en el código backend, dependencias, persistencia, autenticación o conexión con frontend.
+
 ## Pruebas realizadas
 
 | Prueba | Resultado esperado | Resultado |
@@ -94,6 +104,23 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 | `DELETE /api/movements/:id` con ID inexistente | Responder con estado `404` | Exitosa; identificador inexistente rechazado |
 | `GET /api/movements` después de editar y eliminar | Reflejar el resultado final de las operaciones | Exitosa; lista final contiene solo el movimiento actualizado |
 
+### Prueba integral de T11
+
+| Prueba | Estado HTTP | Resultado |
+| --- | --- | --- |
+| `node --check src/routes/movements.routes.js` | No aplica | Exitosa; sin errores de sintaxis |
+| `GET /api/health` | `200` | Exitosa; servicio disponible |
+| `GET /api/movements` inicial | `200` | Exitosa; lista inicial vacía |
+| `POST /api/movements` con ingreso válido | `201` | Exitosa; ingreso creado con ID 1 |
+| `POST /api/movements` con gasto válido | `201` | Exitosa; gasto creado con ID 2 |
+| `PUT /api/movements/1` con datos válidos | `200` | Exitosa; ingreso actualizado y su ID conservado |
+| `PUT /api/movements/999` | `404` | Exitosa; identificador inexistente rechazado |
+| `POST /api/movements` con categoría incompatible | `400` | Exitosa; combinación entre tipo y categoría rechazada |
+| `DELETE /api/movements/2` | `200` | Exitosa; gasto eliminado y confirmado en JSON |
+| `DELETE /api/movements/999` | `404` | Exitosa; identificador inexistente rechazado |
+| `GET /api/movements` final | `200` | Exitosa; lista final contiene únicamente el ingreso actualizado |
+| Detención del servidor | No aplica | Exitosa; puerto 3001 cerrado después de las pruebas |
+
 ## Evidencia sugerida
 
 - Captura de la estructura de `backend/`.
@@ -104,8 +131,10 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 - Captura del rechazo de una categoría incompatible.
 - Captura de la edición exitosa y del caso PUT con ID inexistente.
 - Captura de la eliminación exitosa y del caso DELETE con ID inexistente.
+- Captura de la lista inicial vacía y del estado final de la colección durante T11.
+- Captura conjunta de los códigos HTTP obtenidos en la prueba integral de T11.
 - Captura de `git status --short`.
 
 ## Commit sugerido
 
-`feat: implementar edición y eliminación temporal de movimientos`
+`test: realizar prueba integral del flujo backend de movimientos`

@@ -1,4 +1,4 @@
-# Sprint 1 - Configuración inicial y diseño base
+# Sprint 1 - Análisis, diseño y configuración inicial
 
 ## Estado del sprint
 
@@ -6,11 +6,11 @@
 
 ## Objetivo del sprint
 
-Crear la base técnica inicial del proyecto Ahorro Smart, estableciendo una estructura limpia, documentada y coherente con el alcance definido para la tesis.
+Documentar los requisitos y las variables iniciales del modelo predictivo, definir el diseño general de la solución y preparar la configuración inicial del frontend del sistema web responsivo Ahorro Smart.
 
 ## Relación con la tesis
 
-Este sprint inició la construcción del sistema web responsivo propuesto en el proyecto de título. Su propósito fue preparar el entorno de trabajo, la documentación técnica inicial, la estructura del monorepo y la base del frontend.
+Este sprint estuvo orientado al análisis, diseño y configuración inicial de Ahorro Smart, considerando la documentación de requisitos, la definición inicial de variables para el modelo predictivo, el diseño general de la solución y la preparación del entorno frontend del sistema web responsivo.
 
 ## Tabla de microtareas
 
@@ -23,13 +23,13 @@ Este sprint inició la construcción del sistema web responsivo propuesto en el 
 
 ## Trazabilidad de T05
 
-- **Relación con Sprint 1:** configuración inicial y diseño base del sistema web responsivo.
-- **Objetivo específico relacionado:** base técnica inicial del frontend responsivo.
-- **Product Backlog relacionado:** Ítem 5 - Configuración inicial del proyecto/frontend web; inicio preparatorio del Ítem 10 - Registro de ingresos y gastos; Ítem 13 - Cálculos financieros principales; e Ítem 14 - Dashboard y gráficos complementarios, solo a nivel frontend temporal.
+- **Relación con Sprint 1:** análisis, diseño y configuración inicial del sistema web responsivo.
+- **Objetivo específico relacionado:** OE2 – preparación del entorno frontend para materializar el diseño de la interfaz web responsiva.
+- **Product Backlog relacionado:** Ítem 5 - Configuración inicial del entorno frontend; inicio preparatorio del Ítem 10 - Registro de ingresos y gastos; Ítem 13 - Cálculos financieros principales; e Ítem 14 - Dashboard y gráficos complementarios, solo a nivel frontend temporal.
 - **Alcance de interfaz:** pestañas Ingresos/Gastos, Análisis y Proyección IA; movimientos temporales en memoria; cálculos de ingresos, gastos, balance y gasto sobre ingresos; barras comparativas y distribución de gastos por categoría.
 - **Categorías controladas:** categorías separadas según el tipo de movimiento, con validación frontend para impedir combinaciones incompatibles.
 - **Tecnología principal del frontend:** React.
-- **Herramientas de apoyo:** Vite fue utilizado para crear y ejecutar el entorno de desarrollo; TypeScript se utilizó para mejorar el orden y mantenimiento del código. Estas herramientas no modificaron el alcance funcional del proyecto.
+- **Herramientas utilizadas en el frontend:** Vite se utilizó para la configuración de la estructura del frontend, su ejecución local y compilación; TypeScript se empleó para incorporar tipado estático, mejorar la organización del código y facilitar su mantenimiento.
 - **Backend:** no fue implementado durante el Sprint 1. Su inicio queda reservado para una microtarea posterior con Node.js y Express.
 
 ## Evidencias
@@ -65,8 +65,17 @@ Este sprint inició la construcción del sistema web responsivo propuesto en el 
 | D01 | Usar un monorepo simple | Facilita organizar frontend, backend e IA futura en un solo repositorio para la tesis. |
 | D02 | Documentar por sprints | Permite mantener trazabilidad del avance bajo Scrum adaptado a un proyecto individual. |
 | D03 | Implementar primero la base del frontend | Permitió cerrar el Sprint 1 sin adelantar backend, persistencia o inteligencia artificial. |
-| D04 | Utilizar Vite y TypeScript como herramientas de apoyo del frontend | Mejoran el entorno de desarrollo y el mantenimiento del código sin alterar el alcance funcional definido. |
+| D04 | Utilizar Vite y TypeScript en el frontend | Vite permite configurar, ejecutar y compilar el frontend; TypeScript aporta tipado estático, organización y mantenibilidad del código. |
 
 ## Cierre
 
 El Sprint 1 quedó completado con el repositorio inicial, la estructura del monorepo y el frontend base. No se inició Sprint 2 ni se implementó backend en este cierre.
+
+## Actualización documental posterior al cierre
+
+Con fecha 13-08-2026 se incorporó la ERS del Sprint 1 como regularización documental de los ítems 1 y 2 del Product Backlog. El documento consolida los requisitos funcionales y no funcionales del sistema, la definición inicial de las variables de entrada y salida requeridas para el futuro modelo predictivo y su trazabilidad con los objetivos específicos del proyecto.
+
+Documento incorporado:
+`docs/ers/ERS_Ahorro_Smart_Sprint_1_Items_1_y_2.docx`
+
+Esta actualización no modifica el incremento técnico desarrollado originalmente durante el Sprint 1 ni altera sus commits históricos.

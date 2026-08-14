@@ -1,4 +1,4 @@
-# Sprint 2 - Base técnica y gestión de movimientos financieros
+# Sprint 2 - Backend base y gestión temporal de movimientos
 
 ## Estado del sprint
 
@@ -6,11 +6,11 @@
 
 ## Objetivo del sprint
 
-Construir la base técnica del backend y preparar la futura gestión de movimientos financieros de Ahorro Smart, respetando el alcance definido en la tesis y el Product Backlog acordado.
+Implementar la base del backend y las operaciones temporales de registro, consulta, edición y eliminación de movimientos financieros mediante una API REST.
 
 ## Relación con la tesis
 
-Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07 establece una base mínima ejecutable con Node.js y Express para preparar la futura API REST, sin implementar todavía movimientos financieros, persistencia, autenticación, base de datos ni integración con el frontend.
+Este sprint implementó la base del backend del sistema web responsivo mediante Node.js y Express, junto con una API REST para registrar, consultar, editar y eliminar movimientos financieros utilizando almacenamiento temporal en memoria. La persistencia, autenticación, base de datos e integración con el frontend permanecen fuera del alcance de esta iteración.
 
 ## Tabla de microtareas
 
@@ -25,7 +25,7 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 
 ## Ítems del Product Backlog relacionados
 
-- **Ítem 6:** Base de datos y servicios principales.
+- **Ítem 6:** Backend base y servicios temporales.
 - **Ítem 10:** Registro de ingresos y gastos.
 - **Ítem 11:** Edición y eliminación de movimientos.
 - **Ítem 24:** Evidencia y cierre por sprint.
@@ -139,6 +139,7 @@ Este sprint inicia la capa backend del sistema web responsivo. La microtarea T07
 - `56f6727` — `feat: implementar registro temporal de movimientos en backend`.
 - `4516589` — `feat: implementar edición y eliminación temporal de movimientos`.
 - `30eac0a` — `test: realizar prueba integral del flujo backend de movimientos`.
+- `e9273af` - `docs: cerrar sprint 2`.
 
 ### Evidencias generadas
 
@@ -177,8 +178,8 @@ En este sprint todavía **no se implementaron**:
 
 ### Pendientes para el siguiente sprint
 
-- Definir y autorizar el alcance del siguiente sprint antes de realizar cambios.
-- Mantener pendientes la persistencia, la integración con el frontend, la seguridad y la inteligencia artificial hasta que sus microtareas sean autorizadas.
+- Iniciar el Sprint 3 de acuerdo con la planificación vigente, orientado a la integración frontend-backend, consulta y visualización financiera.
+- Mantener fuera del alcance del Sprint 3 la persistencia, la autenticación, la seguridad y la inteligencia artificial, de acuerdo con la planificación vigente.
 
 ## Evidencia sugerida
 

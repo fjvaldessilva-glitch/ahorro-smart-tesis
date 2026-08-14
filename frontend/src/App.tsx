@@ -5,6 +5,7 @@ import './App.css'
 
 type Tab = 'movements' | 'analysis' | 'projection'
 type MovementType = 'Ingreso' | 'Gasto'
+type DateFilter = 'all' | 'day' | 'week' | 'month' | 'range'
 
 type Movement = {
   id: number
@@ -46,6 +47,22 @@ const currencyFormatter = new Intl.NumberFormat('es-CL', {
 
 const movementsApiUrl = 'http://localhost:3001/api/movements'
 
+const getWeekRange = (referenceDate: string) => {
+  const [year, month, day] = referenceDate.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const daysSinceMonday = (date.getUTCDay() + 6) % 7
+  const startDate = new Date(date)
+  const endDate = new Date(date)
+
+  startDate.setUTCDate(date.getUTCDate() - daysSinceMonday)
+  endDate.setUTCDate(startDate.getUTCDate() + 6)
+
+  return {
+    start: startDate.toISOString().slice(0, 10),
+    end: endDate.toISOString().slice(0, 10),
+  }
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
@@ -55,6 +72,11 @@ function App() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState('')
   const [communicationError, setCommunicationError] = useState('')
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedMonth, setSelectedMonth] = useState('')
+  const [rangeStart, setRangeStart] = useState('')
+  const [rangeEnd, setRangeEnd] = useState('')
 
   useEffect(() => {
     const loadMovements = async () => {
@@ -111,6 +133,38 @@ function App() {
       }))
       .sort((first, second) => second.total - first.total)
   }, [movements, summary.totalExpenses])
+
+  const filteredMovements = useMemo(() => {
+    if (dateFilter === 'all') return movements
+
+    if (dateFilter === 'day') {
+      return selectedDate
+        ? movements.filter((movement) => movement.date === selectedDate)
+        : []
+    }
+
+    if (dateFilter === 'week') {
+      if (!selectedDate) return []
+
+      const weekRange = getWeekRange(selectedDate)
+      return movements.filter(
+        (movement) => movement.date >= weekRange.start
+          && movement.date <= weekRange.end,
+      )
+    }
+
+    if (dateFilter === 'month') {
+      return selectedMonth
+        ? movements.filter((movement) => movement.date.startsWith(selectedMonth))
+        : []
+    }
+
+    if (!rangeStart || !rangeEnd || rangeStart > rangeEnd) return []
+
+    return movements.filter(
+      (movement) => movement.date >= rangeStart && movement.date <= rangeEnd,
+    )
+  }, [dateFilter, movements, rangeEnd, rangeStart, selectedDate, selectedMonth])
 
   const comparisonMaximum = Math.max(summary.totalIncome, summary.totalExpenses)
   const incomeBarWidth = comparisonMaximum > 0
@@ -338,10 +392,76 @@ function App() {
                 </div>
               )}
 
+              <div className="history-filters" aria-label="Filtros del historial">
+                <label className="field">
+                  <span>Consultar por</span>
+                  <select
+                    value={dateFilter}
+                    onChange={(event) => setDateFilter(event.target.value as DateFilter)}
+                  >
+                    <option value="all">Todos los movimientos</option>
+                    <option value="day">Día</option>
+                    <option value="week">Semana</option>
+                    <option value="month">Mes</option>
+                    <option value="range">Rango personalizado</option>
+                  </select>
+                </label>
+
+                {(dateFilter === 'day' || dateFilter === 'week') && (
+                  <label className="field">
+                    <span>{dateFilter === 'day' ? 'Fecha' : 'Fecha de referencia'}</span>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(event) => setSelectedDate(event.target.value)}
+                    />
+                  </label>
+                )}
+
+                {dateFilter === 'month' && (
+                  <label className="field">
+                    <span>Mes</span>
+                    <input
+                      type="month"
+                      value={selectedMonth}
+                      onChange={(event) => setSelectedMonth(event.target.value)}
+                    />
+                  </label>
+                )}
+
+                {dateFilter === 'range' && (
+                  <>
+                    <label className="field">
+                      <span>Fecha inicial</span>
+                      <input
+                        type="date"
+                        value={rangeStart}
+                        max={rangeEnd || undefined}
+                        onChange={(event) => setRangeStart(event.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Fecha final</span>
+                      <input
+                        type="date"
+                        value={rangeEnd}
+                        min={rangeStart || undefined}
+                        onChange={(event) => setRangeEnd(event.target.value)}
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
+
               {movements.length === 0 ? (
                 <div className="empty-state">
                   <span aria-hidden="true">$</span>
                   <p>Aún no existen movimientos registrados.</p>
+                </div>
+              ) : filteredMovements.length === 0 ? (
+                <div className="empty-state">
+                  <span aria-hidden="true">$</span>
+                  <p>No se encontraron movimientos para el filtro seleccionado.</p>
                 </div>
               ) : (
                 <div className="table-wrapper">
@@ -357,7 +477,7 @@ function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {movements.map((movement) => (
+                      {filteredMovements.map((movement) => (
                         <tr key={movement.id}>
                           <td>{movement.description}</td>
                           <td>{movement.category}</td>

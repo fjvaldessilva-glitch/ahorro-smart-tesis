@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import ahorroSmartLogo from './assets/ahorro-smart-logo.png'
 import './App.css'
@@ -44,6 +44,8 @@ const currencyFormatter = new Intl.NumberFormat('es-CL', {
   maximumFractionDigits: 0,
 })
 
+const movementsApiUrl = 'http://localhost:3001/api/movements'
+
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
@@ -52,6 +54,28 @@ function App() {
   const [type, setType] = useState<MovementType>('Ingreso')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState('')
+  const [communicationError, setCommunicationError] = useState('')
+
+  useEffect(() => {
+    const loadMovements = async () => {
+      try {
+        const response = await fetch(movementsApiUrl)
+
+        if (!response.ok) {
+          throw new Error('No fue posible consultar los movimientos.')
+        }
+
+        const apiMovements = await response.json() as Movement[]
+        setMovements(apiMovements)
+        setCommunicationError('')
+      } catch (error) {
+        console.error(error)
+        setCommunicationError('No fue posible conectar con el backend.')
+      }
+    }
+
+    void loadMovements()
+  }, [])
 
   const summary = useMemo(() => {
     const totalIncome = movements
@@ -103,7 +127,7 @@ function App() {
     setCategory('')
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const movementDescription = String(formData.get('description') ?? '').trim()
@@ -123,27 +147,58 @@ function App() {
       || !isCompatibleCategory
     ) return
 
-    setMovements((currentMovements) => [
-      ...currentMovements,
-      {
-        id: Date.now(),
-        description: movementDescription,
-        category: movementCategory,
-        type: movementType,
-        amount: numericAmount,
-        date: movementDate,
-      },
-    ])
+    try {
+      const response = await fetch(movementsApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: movementDescription,
+          category: movementCategory,
+          type: movementType,
+          amount: numericAmount,
+          date: movementDate,
+        }),
+      })
 
-    setDescription('')
-    setAmount('')
-    setDate('')
+      if (!response.ok) {
+        throw new Error('No fue posible registrar el movimiento.')
+      }
+
+      const createdMovement = await response.json() as Movement
+      setMovements((currentMovements) => [
+        ...currentMovements,
+        createdMovement,
+      ])
+      setCommunicationError('')
+      setDescription('')
+      setAmount('')
+      setDate('')
+    } catch (error) {
+      console.error(error)
+      setCommunicationError('No fue posible registrar el movimiento en el backend.')
+    }
   }
 
-  const removeMovement = (id: number) => {
-    setMovements((currentMovements) =>
-      currentMovements.filter((movement) => movement.id !== id),
-    )
+  const removeMovement = async (id: number) => {
+    try {
+      const response = await fetch(`${movementsApiUrl}/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('No fue posible eliminar el movimiento.')
+      }
+
+      setMovements((currentMovements) =>
+        currentMovements.filter((movement) => movement.id !== id),
+      )
+      setCommunicationError('')
+    } catch (error) {
+      console.error(error)
+      setCommunicationError('No fue posible eliminar el movimiento en el backend.')
+    }
   }
 
   return (
@@ -276,6 +331,12 @@ function App() {
                 <p>Historial temporal</p>
                 <h2 id="movements-title">Movimientos registrados</h2>
               </div>
+
+              {communicationError && (
+                <div className="analysis-message" role="alert">
+                  {communicationError}
+                </div>
+              )}
 
               {movements.length === 0 ? (
                 <div className="empty-state">

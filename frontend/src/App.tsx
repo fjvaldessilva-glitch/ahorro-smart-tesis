@@ -99,41 +99,6 @@ function App() {
     void loadMovements()
   }, [])
 
-  const summary = useMemo(() => {
-    const totalIncome = movements
-      .filter((movement) => movement.type === 'Ingreso')
-      .reduce((total, movement) => total + movement.amount, 0)
-    const totalExpenses = movements
-      .filter((movement) => movement.type === 'Gasto')
-      .reduce((total, movement) => total + movement.amount, 0)
-
-    return {
-      totalIncome,
-      totalExpenses,
-      balance: totalIncome - totalExpenses,
-      budgetUsed: totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0,
-    }
-  }, [movements])
-
-  const expensesByCategory = useMemo(() => {
-    const totals = movements
-      .filter((movement) => movement.type === 'Gasto')
-      .reduce<Record<string, number>>((result, movement) => {
-        result[movement.category] = (result[movement.category] ?? 0) + movement.amount
-        return result
-      }, {})
-
-    return Object.entries(totals)
-      .map(([name, total]) => ({
-        name,
-        total,
-        percentage: summary.totalExpenses > 0
-          ? (total / summary.totalExpenses) * 100
-          : 0,
-      }))
-      .sort((first, second) => second.total - first.total)
-  }, [movements, summary.totalExpenses])
-
   const filteredMovements = useMemo(() => {
     if (dateFilter === 'all') return movements
 
@@ -165,6 +130,41 @@ function App() {
       (movement) => movement.date >= rangeStart && movement.date <= rangeEnd,
     )
   }, [dateFilter, movements, rangeEnd, rangeStart, selectedDate, selectedMonth])
+
+  const summary = useMemo(() => {
+    const totalIncome = filteredMovements
+      .filter((movement) => movement.type === 'Ingreso')
+      .reduce((total, movement) => total + movement.amount, 0)
+    const totalExpenses = filteredMovements
+      .filter((movement) => movement.type === 'Gasto')
+      .reduce((total, movement) => total + movement.amount, 0)
+
+    return {
+      totalIncome,
+      totalExpenses,
+      balance: totalIncome - totalExpenses,
+      budgetUsed: totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0,
+    }
+  }, [filteredMovements])
+
+  const expensesByCategory = useMemo(() => {
+    const totals = filteredMovements
+      .filter((movement) => movement.type === 'Gasto')
+      .reduce<Record<string, number>>((result, movement) => {
+        result[movement.category] = (result[movement.category] ?? 0) + movement.amount
+        return result
+      }, {})
+
+    return Object.entries(totals)
+      .map(([name, total]) => ({
+        name,
+        total,
+        percentage: summary.totalExpenses > 0
+          ? (total / summary.totalExpenses) * 100
+          : 0,
+      }))
+      .sort((first, second) => second.total - first.total)
+  }, [filteredMovements, summary.totalExpenses])
 
   const comparisonMaximum = Math.max(summary.totalIncome, summary.totalExpenses)
   const incomeBarWidth = comparisonMaximum > 0
@@ -537,9 +537,11 @@ function App() {
               </article>
             </section>
 
-            {movements.length === 0 && (
+            {filteredMovements.length === 0 && (
               <div className="analysis-message">
-                Registra movimientos para visualizar el análisis financiero.
+                {movements.length === 0
+                  ? 'Registra movimientos para visualizar el análisis financiero.'
+                  : 'No existen movimientos para el período seleccionado.'}
               </div>
             )}
 

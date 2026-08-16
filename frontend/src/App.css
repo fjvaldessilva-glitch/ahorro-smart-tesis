@@ -289,6 +289,67 @@
   overflow-x: auto;
 }
 
+.history-table {
+  display: grid;
+  gap: 18px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.pagination-size,
+.pagination-navigation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-size span,
+.pagination-navigation span {
+  color: #49677b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pagination-size select,
+.pagination-navigation button {
+  min-height: 38px;
+  padding: 8px 12px;
+  color: #244b63;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #f8fcfc;
+  border: 1px solid #aee4e6;
+  border-radius: 8px;
+}
+
+.pagination-navigation button {
+  cursor: pointer;
+}
+
+.pagination-navigation button:hover:not(:disabled),
+.pagination-navigation button:focus-visible,
+.pagination-size select:focus {
+  border-color: #19beb9;
+}
+
+.pagination-navigation button:focus-visible,
+.pagination-size select:focus {
+  outline: 3px solid rgba(20, 196, 192, 0.16);
+}
+
+.pagination-navigation button:disabled {
+  color: #91a5b2;
+  background: #f1f5f5;
+  border-color: #d8e5e5;
+  cursor: not-allowed;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -760,6 +821,20 @@ td {
   .form-actions,
   .primary-button {
     width: 100%;
+  }
+
+  .pagination-controls,
+  .pagination-navigation {
+    width: 100%;
+  }
+
+  .pagination-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination-navigation {
+    justify-content: space-between;
   }
 
   .bar-row__label,

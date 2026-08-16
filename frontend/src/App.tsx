@@ -99,6 +99,8 @@ function App() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth)
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [movementsPerPage, setMovementsPerPage] = useState(10)
 
   useEffect(() => {
     const loadMovements = async () => {
@@ -152,6 +154,27 @@ function App() {
       (movement) => movement.date >= rangeStart && movement.date <= rangeEnd,
     )
   }, [dateFilter, movements, rangeEnd, rangeStart, selectedDate, selectedMonth])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredMovements.length / movementsPerPage),
+  )
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+  const paginatedMovements = useMemo(() => {
+    const firstMovementIndex = (safeCurrentPage - 1) * movementsPerPage
+    return filteredMovements.slice(
+      firstMovementIndex,
+      firstMovementIndex + movementsPerPage,
+    )
+  }, [filteredMovements, movementsPerPage, safeCurrentPage])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [dateFilter, rangeEnd, rangeStart, selectedDate, selectedMonth])
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages))
+  }, [totalPages])
 
   const summary = useMemo(() => {
     const totalIncome = filteredMovements
@@ -564,47 +587,84 @@ function App() {
                   <p>No se encontraron movimientos para el filtro seleccionado.</p>
                 </div>
               ) : (
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Descripción</th>
-                        <th>Categoría</th>
-                        <th>Tipo</th>
-                        <th>Monto</th>
-                        <th>Fecha</th>
-                        <th>Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredMovements.map((movement) => (
-                        <tr key={movement.id}>
-                          <td>{movement.description}</td>
-                          <td>{movement.category}</td>
-                          <td>
-                            <span className={`type-badge type-badge--${movement.type.toLowerCase()}`}>
-                              {movement.type}
-                            </span>
-                          </td>
-                          <td className={movement.type === 'Ingreso' ? 'amount--income' : 'amount--expense'}>
-                            {movement.type === 'Ingreso' ? '+' : '-'}
-                            {currencyFormatter.format(movement.amount)}
-                          </td>
-                          <td>{movement.date}</td>
-                          <td>
-                            <button
-                              className="delete-button"
-                              type="button"
-                              onClick={() => removeMovement(movement.id)}
-                              aria-label={`Eliminar movimiento ${movement.description}`}
-                            >
-                              Eliminar
-                            </button>
-                          </td>
+                <div className="history-table">
+                  <div className="table-wrapper">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Descripción</th>
+                          <th>Categoría</th>
+                          <th>Tipo</th>
+                          <th>Monto</th>
+                          <th>Fecha</th>
+                          <th>Acción</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {paginatedMovements.map((movement) => (
+                          <tr key={movement.id}>
+                            <td>{movement.description}</td>
+                            <td>{movement.category}</td>
+                            <td>
+                              <span className={`type-badge type-badge--${movement.type.toLowerCase()}`}>
+                                {movement.type}
+                              </span>
+                            </td>
+                            <td className={movement.type === 'Ingreso' ? 'amount--income' : 'amount--expense'}>
+                              {movement.type === 'Ingreso' ? '+' : '-'}
+                              {currencyFormatter.format(movement.amount)}
+                            </td>
+                            <td>{movement.date}</td>
+                            <td>
+                              <button
+                                className="delete-button"
+                                type="button"
+                                onClick={() => removeMovement(movement.id)}
+                                aria-label={`Eliminar movimiento ${movement.description}`}
+                              >
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="pagination-controls" aria-label="Paginación del historial">
+                    <label className="pagination-size">
+                      <span>Movimientos por página</span>
+                      <select
+                        value={movementsPerPage}
+                        onChange={(event) => {
+                          setMovementsPerPage(Number(event.target.value))
+                          setCurrentPage(1)
+                        }}
+                      >
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                      </select>
+                    </label>
+
+                    <div className="pagination-navigation">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                        disabled={safeCurrentPage === 1}
+                      >
+                        Anterior
+                      </button>
+                      <span>Página {safeCurrentPage} de {totalPages}</span>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                        disabled={safeCurrentPage === totalPages}
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </section>

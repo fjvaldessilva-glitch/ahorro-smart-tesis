@@ -357,6 +357,196 @@ td {
   font-size: 1.3rem;
 }
 
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.vertical-bar-chart {
+  min-height: 300px;
+  display: grid;
+  align-items: end;
+}
+
+.vertical-bar-chart__plot {
+  height: 270px;
+  padding: 16px 8px 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(34px, 8vw, 74px);
+  border-bottom: 2px solid #cce8e6;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 62px,
+    #edf6f5 63px,
+    #edf6f5 64px
+  );
+}
+
+.vertical-bar-item {
+  width: min(120px, 35%);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 8px;
+  text-align: center;
+}
+
+.vertical-bar-item strong {
+  color: #21435b;
+  font-size: 0.8rem;
+}
+
+.vertical-bar-item > span {
+  color: #47657a;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.vertical-bar-track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.vertical-bar {
+  width: 72px;
+  min-height: 0;
+  border-radius: 12px 12px 3px 3px;
+  transition: height 300ms ease;
+}
+
+.vertical-bar--income {
+  background: linear-gradient(180deg, #42df90, #12b995);
+  box-shadow: 0 8px 18px rgba(20, 191, 148, 0.2);
+}
+
+.vertical-bar--expense {
+  background: linear-gradient(180deg, #ff7d88, #e94b68);
+  box-shadow: 0 8px 18px rgba(233, 75, 104, 0.18);
+}
+
+.donut-chart-layout {
+  min-height: 300px;
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  align-items: center;
+  gap: 26px;
+}
+
+.donut-chart {
+  width: min(100%, 230px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  padding: 27px;
+  display: grid;
+  border-radius: 50%;
+  box-shadow: 0 10px 24px rgba(16, 88, 105, 0.14);
+}
+
+.donut-chart__center {
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  color: #547084;
+  background: #fff;
+  border-radius: 50%;
+  text-align: center;
+}
+
+.donut-chart__center span {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.donut-chart__center strong {
+  color: #123650;
+  font-size: 0.9rem;
+}
+
+.donut-legend {
+  display: grid;
+  gap: 12px;
+}
+
+.donut-legend__item {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  align-items: start;
+  gap: 9px;
+}
+
+.donut-legend__color {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 4px;
+}
+
+.donut-legend__item div {
+  display: grid;
+  gap: 2px;
+}
+
+.donut-legend__item span,
+.donut-legend__item strong {
+  color: #456176;
+  font-size: 0.76rem;
+}
+
+.donut-legend__item strong {
+  color: #173b55;
+}
+
+.trend-chart {
+  display: grid;
+  gap: 16px;
+}
+
+.trend-chart__scroll {
+  overflow-x: auto;
+}
+
+.trend-chart__svg {
+  width: 100%;
+  min-width: 680px;
+}
+
+.trend-chart__svg {
+  display: block;
+  background: linear-gradient(180deg, #fbfefe, #f5fbfa);
+  border: 1px solid #dceeed;
+  border-radius: 12px;
+}
+
+.trend-grid-line {
+  stroke: #dceeed;
+  stroke-width: 1;
+  stroke-dasharray: 5 7;
+}
+
+.trend-axis-value {
+  fill: #648093;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.trend-bar--expense { fill: #ef5870; }
+
+.trend-amount-label {
+  fill: #a92f49;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.trend-date-label {
+  fill: #648093;
+  font-size: 11px;
+  font-weight: 650;
+}
+
 .bar-chart,
 .category-chart {
   display: grid;
@@ -448,6 +638,10 @@ td {
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .dashboard-charts {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -502,4 +696,9 @@ td {
     flex-direction: column;
     gap: 3px;
   }
+
+  .donut-chart-layout {
+    grid-template-columns: 1fr;
+  }
+
 }

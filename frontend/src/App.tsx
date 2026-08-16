@@ -45,7 +45,15 @@ const currencyFormatter = new Intl.NumberFormat('es-CL', {
   maximumFractionDigits: 0,
 })
 
+const compactCurrencyFormatter = new Intl.NumberFormat('es-CL', {
+  style: 'currency',
+  currency: 'CLP',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+
 const movementsApiUrl = 'http://localhost:3001/api/movements'
+const categoryColors = ['#23cfa6', '#20bce8', '#67d94b', '#ffb547', '#ff7187', '#8b7cf6']
 
 const getWeekRange = (referenceDate: string) => {
   const [year, month, day] = referenceDate.split('-').map(Number)
@@ -63,6 +71,18 @@ const getWeekRange = (referenceDate: string) => {
   }
 }
 
+const formatMovementDate = (movementDate: string) => {
+  const [year, month, day] = movementDate.split('-')
+  return `${day}-${month}-${year}`
+}
+
+const getCurrentMonth = () => {
+  const currentDate = new Date()
+  const year = currentDate.getFullYear()
+  const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
@@ -72,9 +92,9 @@ function App() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState('')
   const [communicationError, setCommunicationError] = useState('')
-  const [dateFilter, setDateFilter] = useState<DateFilter>('all')
+  const [dateFilter, setDateFilter] = useState<DateFilter>('month')
   const [selectedDate, setSelectedDate] = useState('')
-  const [selectedMonth, setSelectedMonth] = useState('')
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth)
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
 
@@ -166,13 +186,60 @@ function App() {
       .sort((first, second) => second.total - first.total)
   }, [filteredMovements, summary.totalExpenses])
 
+  const expensesByDate = useMemo(() => {
+    const totalsByDate = filteredMovements
+      .filter((movement) => movement.type === 'Gasto')
+      .reduce<Record<string, { date: string; total: number }>>((result, movement) => {
+      const dateTotals = result[movement.date] ?? {
+        date: movement.date,
+        total: 0,
+      }
+
+      dateTotals.total += movement.amount
+      result[movement.date] = dateTotals
+      return result
+    }, {})
+
+    return Object.values(totalsByDate).sort(
+      (first, second) => first.date.localeCompare(second.date),
+    )
+  }, [filteredMovements])
+
   const comparisonMaximum = Math.max(summary.totalIncome, summary.totalExpenses)
-  const incomeBarWidth = comparisonMaximum > 0
+  const incomeBarHeight = comparisonMaximum > 0
     ? (summary.totalIncome / comparisonMaximum) * 100
     : 0
-  const expenseBarWidth = comparisonMaximum > 0
+  const expenseBarHeight = comparisonMaximum > 0
     ? (summary.totalExpenses / comparisonMaximum) * 100
     : 0
+
+  const expenseDonutGradient = useMemo(() => {
+    let accumulatedPercentage = 0
+    const segments = expensesByCategory.map((categoryItem, index) => {
+      const start = accumulatedPercentage
+      accumulatedPercentage += categoryItem.percentage
+      return `${categoryColors[index % categoryColors.length]} ${start}% ${accumulatedPercentage}%`
+    })
+
+    return `conic-gradient(${segments.join(', ')})`
+  }, [expensesByCategory])
+
+  const trendDataMaximum = Math.max(
+    ...expensesByDate.map((item) => item.total),
+    0,
+  )
+  const trendMaximum = trendDataMaximum > 0 ? trendDataMaximum : 1
+  const trendChartWidth = Math.max(720, 139 + expensesByDate.length * 90)
+  const trendChartHeight = 250
+  const trendChartLeftPadding = 105
+  const trendChartRightPadding = 34
+  const trendChartTopPadding = 28
+  const trendChartBottomPadding = 48
+  const trendScalePositions = [0, 0.25, 0.5, 0.75, 1]
+  const trendAvailableWidth = trendChartWidth - trendChartLeftPadding - trendChartRightPadding
+  const trendAvailableHeight = trendChartHeight - trendChartTopPadding - trendChartBottomPadding
+  const trendGroupWidth = trendAvailableWidth / Math.max(expensesByDate.length, 1)
+  const trendBarWidth = Math.min(42, trendGroupWidth * 0.48)
 
   const availableCategories = categoriesByType[type]
 
@@ -545,66 +612,166 @@ function App() {
               </div>
             )}
 
-            <section className="chart-panel" aria-labelledby="comparison-title">
-              <div className="chart-panel__heading">
-                <p>Vista comparativa</p>
-                <h3 id="comparison-title">Comparación de ingresos y gastos</h3>
-              </div>
-              <div className="bar-chart">
-                <div className="bar-row">
-                  <div className="bar-row__label">
-                    <span>Ingresos</span>
-                    <strong>{currencyFormatter.format(summary.totalIncome)}</strong>
-                  </div>
-                  <div className="bar-track" aria-hidden="true">
-                    <div
-                      className="bar-fill bar-fill--income"
-                      style={{ width: `${incomeBarWidth}%` }}
-                    />
-                  </div>
+            <div className="dashboard-charts">
+              <section className="chart-panel" aria-labelledby="comparison-title">
+                <div className="chart-panel__heading">
+                  <p>Vista comparativa</p>
+                  <h3 id="comparison-title">Comparación de ingresos y gastos</h3>
                 </div>
-                <div className="bar-row">
-                  <div className="bar-row__label">
-                    <span>Gastos</span>
-                    <strong>{currencyFormatter.format(summary.totalExpenses)}</strong>
-                  </div>
-                  <div className="bar-track" aria-hidden="true">
-                    <div
-                      className="bar-fill bar-fill--expense"
-                      style={{ width: `${expenseBarWidth}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="chart-panel" aria-labelledby="categories-title">
-              <div className="chart-panel__heading">
-                <p>Distribución</p>
-                <h3 id="categories-title">Gastos por categoría</h3>
-              </div>
-              {expensesByCategory.length === 0 ? (
-                <div className="analysis-message">
-                  Registra gastos para visualizar la distribución por categoría.
-                </div>
-              ) : (
-                <div className="category-chart">
-                  {expensesByCategory.map((categoryItem) => (
-                    <div className="category-row" key={categoryItem.name}>
-                      <div className="category-row__label">
-                        <span>{categoryItem.name}</span>
-                        <strong>
-                          {currencyFormatter.format(categoryItem.total)} · {categoryItem.percentage.toFixed(1)}%
-                        </strong>
-                      </div>
-                      <div className="bar-track" aria-hidden="true">
+                <div className="vertical-bar-chart" aria-label="Gráfico de ingresos y gastos">
+                  <div className="vertical-bar-chart__plot">
+                    <div className="vertical-bar-item">
+                      <strong>{currencyFormatter.format(summary.totalIncome)}</strong>
+                      <div className="vertical-bar-track">
                         <div
-                          className="bar-fill bar-fill--category"
-                          style={{ width: `${categoryItem.percentage}%` }}
+                          className="vertical-bar vertical-bar--income"
+                          style={{ height: `${incomeBarHeight}%` }}
                         />
                       </div>
+                      <span>Ingresos</span>
                     </div>
-                  ))}
+                    <div className="vertical-bar-item">
+                      <strong>{currencyFormatter.format(summary.totalExpenses)}</strong>
+                      <div className="vertical-bar-track">
+                        <div
+                          className="vertical-bar vertical-bar--expense"
+                          style={{ height: `${expenseBarHeight}%` }}
+                        />
+                      </div>
+                      <span>Gastos</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="chart-panel" aria-labelledby="categories-title">
+                <div className="chart-panel__heading">
+                  <p>Distribución</p>
+                  <h3 id="categories-title">Gastos por categoría</h3>
+                </div>
+                {expensesByCategory.length === 0 ? (
+                  <div className="analysis-message">
+                    No existen gastos para el período seleccionado.
+                  </div>
+                ) : (
+                  <div className="donut-chart-layout">
+                    <div
+                      className="donut-chart"
+                      style={{ background: expenseDonutGradient }}
+                      role="img"
+                      aria-label="Distribución porcentual de gastos por categoría"
+                    >
+                      <div className="donut-chart__center">
+                        <span>Total gastos</span>
+                        <strong>{currencyFormatter.format(summary.totalExpenses)}</strong>
+                      </div>
+                    </div>
+                    <div className="donut-legend">
+                      {expensesByCategory.map((categoryItem, index) => (
+                        <div className="donut-legend__item" key={categoryItem.name}>
+                          <span
+                            className="donut-legend__color"
+                            style={{ backgroundColor: categoryColors[index % categoryColors.length] }}
+                            aria-hidden="true"
+                          />
+                          <div>
+                            <span>{categoryItem.name}</span>
+                            <strong>
+                              {currencyFormatter.format(categoryItem.total)} · {categoryItem.percentage.toFixed(1)}%
+                            </strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+            </div>
+
+            <section className="chart-panel" aria-labelledby="trend-title">
+              <div className="chart-panel__heading">
+                <p>Evolución temporal</p>
+                <h3 id="trend-title">Evolución de gastos por fecha</h3>
+              </div>
+              {expensesByDate.length === 0 ? (
+                <div className="analysis-message">
+                  No existen gastos para visualizar en el período seleccionado.
+                </div>
+              ) : (
+                <div className="trend-chart">
+                  <div className="trend-chart__scroll">
+                    <svg
+                      className="trend-chart__svg"
+                      viewBox={`0 0 ${trendChartWidth} ${trendChartHeight}`}
+                      style={{ minWidth: `${trendChartWidth}px` }}
+                      role="img"
+                      aria-label="Gastos agrupados por fecha"
+                    >
+                      {trendScalePositions.map((position) => {
+                        const y = trendChartHeight
+                          - trendChartBottomPadding
+                          - position * trendAvailableHeight
+
+                        return (
+                          <g key={position}>
+                            <line
+                              className="trend-grid-line"
+                              x1={trendChartLeftPadding}
+                              x2={trendChartWidth - trendChartRightPadding}
+                              y1={y}
+                              y2={y}
+                            />
+                            <text
+                              className="trend-axis-value"
+                              x={trendChartLeftPadding - 12}
+                              y={y + 4}
+                              textAnchor="end"
+                            >
+                              {compactCurrencyFormatter.format(trendDataMaximum * position)}
+                            </text>
+                          </g>
+                        )
+                      })}
+                      {expensesByDate.map((item, index) => {
+                        const groupCenter = trendChartLeftPadding
+                          + trendGroupWidth * (index + 0.5)
+                        const expenseHeight = (item.total / trendMaximum) * trendAvailableHeight
+                        const chartBottom = trendChartHeight - trendChartBottomPadding
+                        const barTop = chartBottom - expenseHeight
+
+                        return (
+                          <g key={item.date}>
+                            <rect
+                              className="trend-bar--expense"
+                              x={groupCenter - trendBarWidth / 2}
+                              y={barTop}
+                              width={trendBarWidth}
+                              height={expenseHeight}
+                              rx="4"
+                            >
+                              <title>{`${formatMovementDate(item.date)}: gastos ${currencyFormatter.format(item.total)}`}</title>
+                            </rect>
+                            <text
+                              className="trend-amount-label"
+                              x={groupCenter}
+                              y={Math.max(trendChartTopPadding - 7, barTop - 7)}
+                              textAnchor="middle"
+                            >
+                              {compactCurrencyFormatter.format(item.total)}
+                            </text>
+                            <text
+                              className="trend-date-label"
+                              x={groupCenter}
+                              y={trendChartHeight - 16}
+                              textAnchor="middle"
+                            >
+                              {formatMovementDate(item.date)}
+                            </text>
+                          </g>
+                        )
+                      })}
+                    </svg>
+                  </div>
                 </div>
               )}
             </section>

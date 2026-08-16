@@ -218,6 +218,16 @@
   border-color: #19beb9;
 }
 
+.field input[aria-invalid="true"] {
+  border-color: #e85b70;
+}
+
+.field__error {
+  color: #c72e4b;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
 .form-actions {
   grid-column: 1 / -1;
   display: flex;

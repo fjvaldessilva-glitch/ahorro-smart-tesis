@@ -54,6 +54,7 @@ const compactCurrencyFormatter = new Intl.NumberFormat('es-CL', {
 
 const movementsApiUrl = 'http://localhost:3001/api/movements'
 const categoryColors = ['#23cfa6', '#20bce8', '#67d94b', '#ffb547', '#ff7187', '#8b7cf6']
+const descriptionLetterPattern = /\p{L}/u
 
 const getWeekRange = (referenceDate: string) => {
   const [year, month, day] = referenceDate.split('-').map(Number)
@@ -92,6 +93,7 @@ function App() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState('')
   const [communicationError, setCommunicationError] = useState('')
+  const [descriptionError, setDescriptionError] = useState('')
   const [dateFilter, setDateFilter] = useState<DateFilter>('month')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth)
@@ -261,9 +263,15 @@ function App() {
     const isCompatibleCategory = isKnownType
       && categoriesByType[movementType].includes(movementCategory)
 
+    if (!descriptionLetterPattern.test(movementDescription)) {
+      setDescriptionError('La descripción debe contener al menos una letra.')
+      return
+    }
+
+    setDescriptionError('')
+
     if (
-      !movementDescription
-      || !movementDate
+      !movementDate
       || numericAmount <= 0
       || !isCompatibleCategory
     ) return
@@ -398,10 +406,20 @@ function App() {
                     type="text"
                     name="description"
                     value={description}
-                    onChange={(event) => setDescription(event.target.value)}
+                    onChange={(event) => {
+                      setDescription(event.target.value)
+                      if (descriptionError) setDescriptionError('')
+                    }}
                     placeholder="Ej: Sueldo, supermercado..."
+                    aria-invalid={Boolean(descriptionError)}
+                    aria-describedby={descriptionError ? 'description-error' : undefined}
                     required
                   />
+                  {descriptionError && (
+                    <small className="field__error" id="description-error" role="alert">
+                      {descriptionError}
+                    </small>
+                  )}
                 </label>
 
                 <label className="field">

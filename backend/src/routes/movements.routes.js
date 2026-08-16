@@ -20,6 +20,7 @@ const categoriesByType = {
 
 const movements = []
 let nextMovementId = 1
+const descriptionLetterPattern = /\p{L}/u
 
 router.use(express.json())
 
@@ -30,21 +31,31 @@ const getValidatedMovementData = (body = {}) => {
   const amount = Number(body.amount)
   const date = String(body.date ?? '').trim()
 
+  if (!descriptionLetterPattern.test(description)) {
+    return {
+      error: 'La descripción debe contener al menos una letra.',
+    }
+  }
+
   const allowedCategories = categoriesByType[type]
-  const hasRequiredFields = description && category && type && date
+  const hasRequiredFields = category && type && date
   const hasValidAmount = Number.isFinite(amount) && amount > 0
   const hasCompatibleCategory = allowedCategories?.includes(category) ?? false
 
   if (!hasRequiredFields || !hasValidAmount || !hasCompatibleCategory) {
-    return null
+    return {
+      error: 'Datos de movimiento inválidos',
+    }
   }
 
   return {
-    description,
-    category,
-    type,
-    amount,
-    date,
+    movementData: {
+      description,
+      category,
+      type,
+      amount,
+      date,
+    },
   }
 }
 
@@ -53,12 +64,12 @@ router.get('/', (_request, response) => {
 })
 
 router.post('/', (request, response) => {
-  const movementData = getValidatedMovementData(request.body)
+  const { movementData, error } = getValidatedMovementData(request.body)
 
-  if (!movementData) {
+  if (error) {
     return response.status(400).json({
       status: 'error',
-      message: 'Datos de movimiento inválidos',
+      message: error,
     })
   }
 
@@ -86,12 +97,12 @@ router.put('/:id', (request, response) => {
     })
   }
 
-  const movementData = getValidatedMovementData(request.body)
+  const { movementData, error } = getValidatedMovementData(request.body)
 
-  if (!movementData) {
+  if (error) {
     return response.status(400).json({
       status: 'error',
-      message: 'Datos de movimiento inválidos',
+      message: error,
     })
   }
 

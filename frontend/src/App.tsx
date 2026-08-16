@@ -6,14 +6,30 @@ import './App.css'
 type Tab = 'movements' | 'analysis' | 'projection'
 type MovementType = 'Ingreso' | 'Gasto'
 type DateFilter = 'all' | 'day' | 'week' | 'month' | 'range'
+type AuthMode = 'login' | 'register'
 
 type Movement = {
-  id: number
+  id: string
   description: string
   category: string
   type: MovementType
   amount: number
   date: string
+}
+
+type AuthUser = {
+  id: string
+  nombre: string
+  email: string
+}
+
+type AuthSession = {
+  token: string
+  user: AuthUser
+}
+
+type ApiMessage = {
+  message?: string
 }
 
 const incomeCategories = [
@@ -53,8 +69,46 @@ const compactCurrencyFormatter = new Intl.NumberFormat('es-CL', {
 })
 
 const movementsApiUrl = 'http://localhost:3001/api/movements'
+const authApiUrl = 'http://localhost:3001/api/auth'
+const authStorageKey = 'ahorroSmart.authSession'
 const categoryColors = ['#23cfa6', '#20bce8', '#67d94b', '#ffb547', '#ff7187', '#8b7cf6']
 const descriptionLetterPattern = /\p{L}/u
+
+const getStoredAuthSession = (): AuthSession | null => {
+  try {
+    const storedSession = localStorage.getItem(authStorageKey)
+
+    if (!storedSession) return null
+
+    const parsedSession = JSON.parse(storedSession) as Partial<AuthSession>
+    const user = parsedSession.user
+
+    if (
+      typeof parsedSession.token !== 'string'
+      || !user
+      || typeof user.id !== 'string'
+      || typeof user.nombre !== 'string'
+      || typeof user.email !== 'string'
+    ) {
+      localStorage.removeItem(authStorageKey)
+      return null
+    }
+
+    return parsedSession as AuthSession
+  } catch {
+    localStorage.removeItem(authStorageKey)
+    return null
+  }
+}
+
+const getApiMessage = async (response: Response, fallback: string) => {
+  try {
+    const data = await response.json() as ApiMessage
+    return data.message || fallback
+  } catch {
+    return fallback
+  }
+}
 
 const getWeekRange = (referenceDate: string) => {
   const [year, month, day] = referenceDate.split('-').map(Number)
@@ -85,6 +139,14 @@ const getCurrentMonth = () => {
 }
 
 function App() {
+  const [authSession, setAuthSession] = useState<AuthSession | null>(getStoredAuthSession)
+  const [authMode, setAuthMode] = useState<AuthMode>('login')
+  const [authName, setAuthName] = useState('')
+  const [authEmail, setAuthEmail] = useState('')
+  const [authPassword, setAuthPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [authSuccess, setAuthSuccess] = useState('')
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
   const [description, setDescription] = useState('')
@@ -102,13 +164,36 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [movementsPerPage, setMovementsPerPage] = useState(10)
 
+  const clearAuthSession = (message = '') => {
+    localStorage.removeItem(authStorageKey)
+    setAuthSession(null)
+    setMovements([])
+    setCommunicationError('')
+    setAuthPassword('')
+    setAuthError(message)
+  }
+
   useEffect(() => {
+    if (!authSession) return
+
     const loadMovements = async () => {
       try {
-        const response = await fetch(movementsApiUrl)
+        const response = await fetch(movementsApiUrl, {
+          headers: {
+            Authorization: `Bearer ${authSession.token}`,
+          },
+        })
+
+        if (response.status === 401) {
+          clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+          return
+        }
 
         if (!response.ok) {
-          throw new Error('No fue posible consultar los movimientos.')
+          throw new Error(await getApiMessage(
+            response,
+            'No fue posible consultar los movimientos.',
+          ))
         }
 
         const apiMovements = await response.json() as Movement[]
@@ -121,7 +206,7 @@ function App() {
     }
 
     void loadMovements()
-  }, [])
+  }, [authSession])
 
   const filteredMovements = useMemo(() => {
     if (dateFilter === 'all') return movements
@@ -273,6 +358,81 @@ function App() {
     setCategory('')
   }
 
+  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setAuthError('')
+    setAuthSuccess('')
+    setIsAuthSubmitting(true)
+
+    try {
+      if (authMode === 'register') {
+        const response = await fetch(`${authApiUrl}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombre: authName.trim(),
+            email: authEmail.trim(),
+            password: authPassword,
+          }),
+        })
+
+        if (!response.ok) {
+          setAuthError(await getApiMessage(response, 'No fue posible crear la cuenta.'))
+          return
+        }
+
+        setAuthMode('login')
+        setAuthName('')
+        setAuthPassword('')
+        setAuthSuccess('Cuenta creada correctamente. Ya puedes iniciar sesión.')
+        return
+      }
+
+      const response = await fetch(`${authApiUrl}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: authEmail.trim(),
+          password: authPassword,
+        }),
+      })
+
+      if (!response.ok) {
+        setAuthError(await getApiMessage(response, 'No fue posible iniciar sesión.'))
+        return
+      }
+
+      const session = await response.json() as AuthSession & { status: string }
+      const nextSession = {
+        token: session.token,
+        user: session.user,
+      }
+
+      localStorage.setItem(authStorageKey, JSON.stringify(nextSession))
+      setAuthSession(nextSession)
+      setAuthPassword('')
+      setAuthError('')
+      setAuthSuccess('')
+      setActiveTab('movements')
+    } catch (error) {
+      console.error(error)
+      setAuthError('No fue posible conectar con el backend.')
+    } finally {
+      setIsAuthSubmitting(false)
+    }
+  }
+
+  const handleLogout = () => {
+    clearAuthSession()
+    setAuthEmail('')
+    setAuthSuccess('')
+    setActiveTab('movements')
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
@@ -304,6 +464,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${authSession?.token ?? ''}`,
         },
         body: JSON.stringify({
           description: movementDescription,
@@ -314,8 +475,16 @@ function App() {
         }),
       })
 
+      if (response.status === 401) {
+        clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+        return
+      }
+
       if (!response.ok) {
-        throw new Error('No fue posible registrar el movimiento.')
+        throw new Error(await getApiMessage(
+          response,
+          'No fue posible registrar el movimiento.',
+        ))
       }
 
       const createdMovement = await response.json() as Movement
@@ -333,14 +502,25 @@ function App() {
     }
   }
 
-  const removeMovement = async (id: number) => {
+  const removeMovement = async (id: string) => {
     try {
       const response = await fetch(`${movementsApiUrl}/${id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authSession?.token ?? ''}`,
+        },
       })
 
+      if (response.status === 401) {
+        clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+        return
+      }
+
       if (!response.ok) {
-        throw new Error('No fue posible eliminar el movimiento.')
+        throw new Error(await getApiMessage(
+          response,
+          'No fue posible eliminar el movimiento.',
+        ))
       }
 
       setMovements((currentMovements) =>
@@ -353,6 +533,126 @@ function App() {
     }
   }
 
+  if (!authSession) {
+    return (
+      <div className="app-shell auth-shell">
+        <header className="app-header">
+          <div className="app-header__content">
+            <img
+              className="app-header__logo"
+              src={ahorroSmartLogo}
+              alt="Logo de Ahorro Smart"
+            />
+            <p>Controla tus gastos y organiza tu presupuesto.</p>
+          </div>
+        </header>
+
+        <main className="auth-workspace">
+          <section className="auth-card" aria-labelledby="auth-title">
+            <div className="auth-card__heading">
+              <p>Acceso seguro</p>
+              <h1 id="auth-title">
+                {authMode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+              </h1>
+              <span>
+                {authMode === 'login'
+                  ? 'Ingresa para consultar tus movimientos financieros.'
+                  : 'Crea una cuenta para comenzar a organizar tus finanzas.'}
+              </span>
+            </div>
+
+            <div className="auth-mode" aria-label="Opciones de autenticación">
+              <button
+                className={authMode === 'login'
+                  ? 'auth-mode__button auth-mode__button--active'
+                  : 'auth-mode__button'}
+                type="button"
+                onClick={() => {
+                  setAuthMode('login')
+                  setAuthError('')
+                  setAuthSuccess('')
+                  setAuthPassword('')
+                }}
+              >
+                Iniciar sesión
+              </button>
+              <button
+                className={authMode === 'register'
+                  ? 'auth-mode__button auth-mode__button--active'
+                  : 'auth-mode__button'}
+                type="button"
+                onClick={() => {
+                  setAuthMode('register')
+                  setAuthError('')
+                  setAuthSuccess('')
+                  setAuthPassword('')
+                }}
+              >
+                Crear cuenta
+              </button>
+            </div>
+
+            {authError && (
+              <div className="auth-message auth-message--error" role="alert">
+                {authError}
+              </div>
+            )}
+
+            {authSuccess && (
+              <div className="auth-message auth-message--success" role="status">
+                {authSuccess}
+              </div>
+            )}
+
+            <form className="auth-form" onSubmit={handleAuthSubmit}>
+              {authMode === 'register' && (
+                <label className="field">
+                  <span>Nombre</span>
+                  <input
+                    type="text"
+                    value={authName}
+                    onChange={(event) => setAuthName(event.target.value)}
+                    autoComplete="name"
+                    required
+                  />
+                </label>
+              )}
+
+              <label className="field">
+                <span>Correo electrónico</span>
+                <input
+                  type="email"
+                  value={authEmail}
+                  onChange={(event) => setAuthEmail(event.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </label>
+
+              <label className="field">
+                <span>Contraseña</span>
+                <input
+                  type="password"
+                  value={authPassword}
+                  onChange={(event) => setAuthPassword(event.target.value)}
+                  autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                  minLength={8}
+                  required
+                />
+              </label>
+
+              <button className="primary-button auth-submit" type="submit" disabled={isAuthSubmitting}>
+                {isAuthSubmitting
+                  ? 'Procesando...'
+                  : authMode === 'login' ? 'Ingresar' : 'Crear cuenta'}
+              </button>
+            </form>
+          </section>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -363,6 +663,13 @@ function App() {
             alt="Logo de Ahorro Smart"
           />
           <p>Controla tus gastos y organiza tu presupuesto.</p>
+          <div className="session-summary">
+            <span>
+              Sesión de <strong>{authSession.user.nombre}</strong>
+              {' · '}{authSession.user.email}
+            </span>
+            <button type="button" onClick={handleLogout}>Cerrar sesión</button>
+          </div>
         </div>
       </header>
 

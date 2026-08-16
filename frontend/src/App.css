@@ -744,6 +744,15 @@ td {
   line-height: 1.7;
 }
 
+@media (min-width: 1280px) {
+  .app-header__content,
+  .main-nav__content,
+  .global-reminder,
+  .workspace {
+    width: min(1720px, 92%);
+  }
+}
+
 @media (max-width: 900px) {
   .app-header__logo {
     width: 240px;

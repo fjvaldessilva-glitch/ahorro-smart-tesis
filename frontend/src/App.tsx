@@ -367,6 +367,21 @@ function App() {
         </div>
       </nav>
 
+      <div className="global-reminder">
+        <aside className="daily-reminder" aria-label="Recordatorio diario">
+          <div className="daily-reminder__content">
+            <strong>Recordatorio diario</strong>
+            <p className="daily-reminder__message">
+              Revisa o registra tus movimientos financieros de hoy.
+            </p>
+            <p className="daily-reminder__explanation">
+              Mantener tus movimientos al día permite que los cálculos, gráficos
+              y futuras proyecciones se basen en información financiera actualizada.
+            </p>
+          </div>
+        </aside>
+      </div>
+
       <main className="workspace">
         {activeTab === 'movements' && (
           <div className="tab-panel" role="tabpanel">

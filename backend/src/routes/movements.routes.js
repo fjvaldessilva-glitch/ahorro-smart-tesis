@@ -1,4 +1,7 @@
 const express = require('express')
+const mongoose = require('mongoose')
+const authenticateToken = require('../middleware/auth.middleware')
+const Movement = require('../models/Movement')
 
 const router = express.Router()
 
@@ -18,11 +21,10 @@ const categoriesByType = {
   ],
 }
 
-const movements = []
-let nextMovementId = 1
 const descriptionLetterPattern = /\p{L}/u
 
 router.use(express.json())
+router.use(authenticateToken)
 
 const getValidatedMovementData = (body = {}) => {
   const description = String(body.description ?? '').trim()
@@ -50,20 +52,43 @@ const getValidatedMovementData = (body = {}) => {
 
   return {
     movementData: {
-      description,
-      category,
-      type,
-      amount,
-      date,
+      descripcion: description,
+      categoria: category,
+      tipo: type,
+      monto: amount,
+      fecha: date,
     },
   }
 }
 
-router.get('/', (_request, response) => {
-  response.json(movements)
+const getPublicMovement = (movement) => ({
+  id: movement._id.toString(),
+  description: movement.descripcion,
+  category: movement.categoria,
+  type: movement.tipo,
+  amount: movement.monto,
+  date: movement.fecha,
 })
 
-router.post('/', (request, response) => {
+const isValidMovementId = (id) => mongoose.isObjectIdOrHexString(id)
+
+router.get('/', async (request, response) => {
+  try {
+    const movements = await Movement.find({
+      user: request.authenticatedUserId,
+    }).sort({ createdAt: 1 })
+
+    return response.json(movements.map(getPublicMovement))
+  } catch (error) {
+    console.error(`Error al consultar movimientos: ${error.message}`)
+    return response.status(500).json({
+      status: 'error',
+      message: 'No fue posible consultar los movimientos.',
+    })
+  }
+})
+
+router.post('/', async (request, response) => {
   const { movementData, error } = getValidatedMovementData(request.body)
 
   if (error) {
@@ -73,24 +98,24 @@ router.post('/', (request, response) => {
     })
   }
 
-  const movement = {
-    id: nextMovementId,
-    ...movementData,
+  try {
+    const movement = await Movement.create({
+      user: request.authenticatedUserId,
+      ...movementData,
+    })
+
+    return response.status(201).json(getPublicMovement(movement))
+  } catch (creationError) {
+    console.error(`Error al crear movimiento: ${creationError.message}`)
+    return response.status(500).json({
+      status: 'error',
+      message: 'No fue posible crear el movimiento.',
+    })
   }
-
-  nextMovementId += 1
-  movements.push(movement)
-
-  return response.status(201).json(movement)
 })
 
-router.put('/:id', (request, response) => {
-  const movementId = Number(request.params.id)
-  const movementIndex = movements.findIndex(
-    (movement) => movement.id === movementId,
-  )
-
-  if (movementIndex === -1) {
+router.put('/:id', async (request, response) => {
+  if (!isValidMovementId(request.params.id)) {
     return response.status(404).json({
       status: 'error',
       message: 'Movimiento no encontrado',
@@ -106,36 +131,66 @@ router.put('/:id', (request, response) => {
     })
   }
 
-  const updatedMovement = {
-    id: movementId,
-    ...movementData,
+  try {
+    const movement = await Movement.findOneAndUpdate(
+      {
+        _id: request.params.id,
+        user: request.authenticatedUserId,
+      },
+      { $set: movementData },
+      { returnDocument: 'after', runValidators: true },
+    )
+
+    if (!movement) {
+      return response.status(404).json({
+        status: 'error',
+        message: 'Movimiento no encontrado',
+      })
+    }
+
+    return response.json(getPublicMovement(movement))
+  } catch (updateError) {
+    console.error(`Error al editar movimiento: ${updateError.message}`)
+    return response.status(500).json({
+      status: 'error',
+      message: 'No fue posible editar el movimiento.',
+    })
   }
-
-  movements[movementIndex] = updatedMovement
-
-  return response.json(updatedMovement)
 })
 
-router.delete('/:id', (request, response) => {
-  const movementId = Number(request.params.id)
-  const movementIndex = movements.findIndex(
-    (movement) => movement.id === movementId,
-  )
-
-  if (movementIndex === -1) {
+router.delete('/:id', async (request, response) => {
+  if (!isValidMovementId(request.params.id)) {
     return response.status(404).json({
       status: 'error',
       message: 'Movimiento no encontrado',
     })
   }
 
-  const [deletedMovement] = movements.splice(movementIndex, 1)
+  try {
+    const movement = await Movement.findOneAndDelete({
+      _id: request.params.id,
+      user: request.authenticatedUserId,
+    })
 
-  return response.json({
-    status: 'ok',
-    message: 'Movimiento eliminado',
-    id: deletedMovement.id,
-  })
+    if (!movement) {
+      return response.status(404).json({
+        status: 'error',
+        message: 'Movimiento no encontrado',
+      })
+    }
+
+    return response.json({
+      status: 'ok',
+      message: 'Movimiento eliminado',
+      id: movement._id.toString(),
+    })
+  } catch (deletionError) {
+    console.error(`Error al eliminar movimiento: ${deletionError.message}`)
+    return response.status(500).json({
+      status: 'error',
+      message: 'No fue posible eliminar el movimiento.',
+    })
+  }
 })
 
 module.exports = router

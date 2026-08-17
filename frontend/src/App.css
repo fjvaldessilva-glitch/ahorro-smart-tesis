@@ -60,6 +60,11 @@
   color: #69e3bc;
 }
 
+.session-summary span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .session-summary button {
   padding: 6px 10px;
   color: #d6f5f2;
@@ -200,8 +205,8 @@
   padding: 14px 0;
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 10px;
-  overflow-x: auto;
 }
 
 .tab {
@@ -1047,10 +1052,6 @@ td {
 
   .app-header p {
     font-size: 0.84rem;
-  }
-
-  .main-nav__content {
-    justify-content: flex-start;
   }
 
   .workspace {

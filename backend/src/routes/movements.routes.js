@@ -2,24 +2,9 @@ const express = require('express')
 const mongoose = require('mongoose')
 const authenticateToken = require('../middleware/auth.middleware')
 const Movement = require('../models/Movement')
+const { categoriesByType } = require('../constants/movement-categories')
 
 const router = express.Router()
-
-const categoriesByType = {
-  Ingreso: ['Sueldo', 'Otros ingresos'],
-  Gasto: [
-    'Alimentación',
-    'Transporte',
-    'Vivienda',
-    'Servicios básicos',
-    'Salud',
-    'Educación',
-    'Pago de deudas y créditos',
-    'Entretenimiento',
-    'Mascotas',
-    'Otros gastos',
-  ],
-}
 
 const descriptionLetterPattern = /\p{L}/u
 

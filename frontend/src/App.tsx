@@ -355,7 +355,7 @@ function App() {
 
   const handleTypeChange = (newType: MovementType) => {
     setType(newType)
-    setCategory('')
+    setCategory(categoriesByType[newType][0])
   }
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {

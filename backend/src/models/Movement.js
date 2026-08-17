@@ -1,18 +1,9 @@
 const mongoose = require('mongoose')
-
-const incomeCategories = ['Sueldo', 'Otros ingresos']
-const expenseCategories = [
-  'Alimentación',
-  'Transporte',
-  'Vivienda',
-  'Servicios básicos',
-  'Salud',
-  'Educación',
-  'Pago de deudas y créditos',
-  'Entretenimiento',
-  'Mascotas',
-  'Otros gastos',
-]
+const {
+  categoriesByType,
+  movementCategories,
+  movementTypes,
+} = require('../constants/movement-categories')
 
 const movementSchema = new mongoose.Schema({
   user: {
@@ -29,12 +20,23 @@ const movementSchema = new mongoose.Schema({
   categoria: {
     type: String,
     required: true,
-    enum: [...incomeCategories, ...expenseCategories],
+    enum: movementCategories,
+    validate: {
+      validator(category) {
+        const update = typeof this.getUpdate === 'function'
+          ? this.getUpdate()?.$set
+          : null
+        const movementType = this.tipo ?? update?.tipo
+
+        return categoriesByType[movementType]?.includes(category) ?? false
+      },
+      message: 'La categoría no corresponde al tipo de movimiento.',
+    },
   },
   tipo: {
     type: String,
     required: true,
-    enum: ['Ingreso', 'Gasto'],
+    enum: movementTypes,
   },
   monto: {
     type: Number,

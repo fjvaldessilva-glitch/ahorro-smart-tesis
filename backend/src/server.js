@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const connectDatabase = require('./config/database')
 const authRouter = require('./routes/auth.routes')
+const budgetRouter = require('./routes/budget.routes')
 const movementsRouter = require('./routes/movements.routes')
 
 const app = express()
@@ -19,6 +20,7 @@ app.get('/api/health', (_request, response) => {
 })
 
 app.use('/api/auth', authRouter)
+app.use('/api/budget', budgetRouter)
 app.use('/api/movements', movementsRouter)
 
 const startServer = async () => {

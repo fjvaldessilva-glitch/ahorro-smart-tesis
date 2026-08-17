@@ -32,6 +32,13 @@ type ApiMessage = {
   message?: string
 }
 
+type BudgetResponse = {
+  budget: {
+    id: string
+    amount: number
+  } | null
+}
+
 const incomeCategories = [
   'Sueldo',
   'Otros ingresos',
@@ -69,6 +76,7 @@ const compactCurrencyFormatter = new Intl.NumberFormat('es-CL', {
 })
 
 const movementsApiUrl = 'http://localhost:3001/api/movements'
+const budgetApiUrl = 'http://localhost:3001/api/budget'
 const authApiUrl = 'http://localhost:3001/api/auth'
 const authStorageKey = 'ahorroSmart.authSession'
 const categoryColors = ['#23cfa6', '#20bce8', '#67d94b', '#ffb547', '#ff7187', '#8b7cf6']
@@ -149,6 +157,11 @@ function App() {
   const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
+  const [budget, setBudget] = useState<number | null>(null)
+  const [budgetInput, setBudgetInput] = useState('')
+  const [budgetError, setBudgetError] = useState('')
+  const [budgetSuccess, setBudgetSuccess] = useState('')
+  const [isBudgetSaving, setIsBudgetSaving] = useState(false)
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState(incomeCategories[0])
   const [type, setType] = useState<MovementType>('Ingreso')
@@ -168,6 +181,10 @@ function App() {
     localStorage.removeItem(authStorageKey)
     setAuthSession(null)
     setMovements([])
+    setBudget(null)
+    setBudgetInput('')
+    setBudgetError('')
+    setBudgetSuccess('')
     setCommunicationError('')
     setAuthPassword('')
     setAuthError(message)
@@ -206,6 +223,44 @@ function App() {
     }
 
     void loadMovements()
+  }, [authSession])
+
+  useEffect(() => {
+    if (!authSession) return
+
+    const loadBudget = async () => {
+      try {
+        const response = await fetch(budgetApiUrl, {
+          headers: {
+            Authorization: `Bearer ${authSession.token}`,
+          },
+        })
+
+        if (response.status === 401) {
+          clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+          return
+        }
+
+        if (!response.ok) {
+          throw new Error(await getApiMessage(
+            response,
+            'No fue posible consultar el presupuesto.',
+          ))
+        }
+
+        const data = await response.json() as BudgetResponse
+        const currentBudget = data.budget?.amount ?? null
+
+        setBudget(currentBudget)
+        setBudgetInput(currentBudget ? String(currentBudget) : '')
+        setBudgetError('')
+      } catch (error) {
+        console.error(error)
+        setBudgetError('No fue posible consultar el presupuesto.')
+      }
+    }
+
+    void loadBudget()
   }, [authSession])
 
   const filteredMovements = useMemo(() => {
@@ -276,6 +331,10 @@ function App() {
       budgetUsed: totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0,
     }
   }, [filteredMovements])
+
+  const budgetExecution = budget && budget > 0
+    ? (summary.totalExpenses / budget) * 100
+    : null
 
   const expensesByCategory = useMemo(() => {
     const totals = filteredMovements
@@ -356,6 +415,57 @@ function App() {
   const handleTypeChange = (newType: MovementType) => {
     setType(newType)
     setCategory(categoriesByType[newType][0])
+  }
+
+  const handleBudgetSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const numericBudget = Number(budgetInput)
+
+    if (!budgetInput.trim() || !Number.isFinite(numericBudget) || numericBudget <= 0) {
+      setBudgetError('Ingresa un presupuesto mayor que cero.')
+      setBudgetSuccess('')
+      return
+    }
+
+    setIsBudgetSaving(true)
+    setBudgetError('')
+    setBudgetSuccess('')
+
+    try {
+      const response = await fetch(budgetApiUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authSession?.token ?? ''}`,
+        },
+        body: JSON.stringify({ amount: numericBudget }),
+      })
+
+      if (response.status === 401) {
+        clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+        return
+      }
+
+      if (!response.ok) {
+        setBudgetError(await getApiMessage(
+          response,
+          'No fue posible guardar el presupuesto.',
+        ))
+        return
+      }
+
+      const data = await response.json() as BudgetResponse
+      const savedBudget = data.budget?.amount ?? null
+
+      setBudget(savedBudget)
+      setBudgetInput(savedBudget ? String(savedBudget) : '')
+      setBudgetSuccess('Presupuesto guardado correctamente.')
+    } catch (error) {
+      console.error(error)
+      setBudgetError('No fue posible conectar con el backend.')
+    } finally {
+      setIsBudgetSaving(false)
+    }
   }
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -810,6 +920,58 @@ function App() {
               </form>
             </section>
 
+            <section className="budget-panel" aria-labelledby="budget-edit-title">
+              <div className="budget-panel__heading">
+                <div>
+                  <p>Planificación personal</p>
+                  <h2 id="budget-edit-title">Presupuesto personal</h2>
+                  <span className="budget-panel__description">
+                    Define cuánto deseas destinar como máximo a tus gastos.
+                  </span>
+                </div>
+                {budget !== null && (
+                  <strong>{currencyFormatter.format(budget)}</strong>
+                )}
+              </div>
+
+              <form className="budget-form" onSubmit={handleBudgetSubmit}>
+                <label className="field">
+                  <span>Monto planificado para gastos</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={budgetInput}
+                    onChange={(event) => setBudgetInput(event.target.value)}
+                    placeholder="Ej: 500000"
+                    required
+                  />
+                </label>
+                <button
+                  className="primary-button"
+                  type="submit"
+                  disabled={isBudgetSaving}
+                >
+                  {isBudgetSaving
+                    ? 'Guardando...'
+                    : budget === null
+                      ? 'Guardar presupuesto'
+                      : 'Actualizar presupuesto'}
+                </button>
+              </form>
+
+              {budgetError && (
+                <div className="budget-message budget-message--error" role="alert">
+                  {budgetError}
+                </div>
+              )}
+              {budgetSuccess && (
+                <div className="budget-message budget-message--success" role="status">
+                  {budgetSuccess}
+                </div>
+              )}
+            </section>
+
             <section className="panel movements-panel" aria-labelledby="movements-title">
               <div className="panel__heading">
                 <p>Historial temporal</p>
@@ -983,6 +1145,39 @@ function App() {
             <section className="view-heading">
               <p>Estado financiero</p>
               <h2>Análisis</h2>
+            </section>
+
+            <section className="budget-panel" aria-labelledby="budget-title">
+              <div className="budget-panel__heading">
+                <div>
+                  <p>Planificación personal</p>
+                  <h3 id="budget-title">Presupuesto personal</h3>
+                </div>
+                {budget !== null && (
+                  <strong>{currencyFormatter.format(budget)}</strong>
+                )}
+              </div>
+
+              {budget === null ? (
+                <p className="budget-empty">
+                  Aún no has definido un presupuesto personal.
+                </p>
+              ) : (
+                <div className="budget-metrics" aria-label="Seguimiento del presupuesto">
+                  <article>
+                    <span>Presupuesto</span>
+                    <strong>{currencyFormatter.format(budget)}</strong>
+                  </article>
+                  <article>
+                    <span>Gastos del período</span>
+                    <strong>{currencyFormatter.format(summary.totalExpenses)}</strong>
+                  </article>
+                  <article>
+                    <span>Ejecución del presupuesto</span>
+                    <strong>{budgetExecution?.toFixed(1)}%</strong>
+                  </article>
+                </div>
+              )}
             </section>
 
             <section className="summary-grid" aria-label="Indicadores financieros">

@@ -167,7 +167,9 @@ function App() {
   const [type, setType] = useState<MovementType>('Ingreso')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState('')
+  const [editingMovementId, setEditingMovementId] = useState<string | null>(null)
   const [communicationError, setCommunicationError] = useState('')
+  const [movementSuccess, setMovementSuccess] = useState('')
   const [descriptionError, setDescriptionError] = useState('')
   const [dateFilter, setDateFilter] = useState<DateFilter>('month')
   const [selectedDate, setSelectedDate] = useState('')
@@ -177,6 +179,16 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [movementsPerPage, setMovementsPerPage] = useState(10)
 
+  const resetMovementForm = () => {
+    setEditingMovementId(null)
+    setDescription('')
+    setCategory(incomeCategories[0])
+    setType('Ingreso')
+    setAmount('')
+    setDate('')
+    setDescriptionError('')
+  }
+
   const clearAuthSession = (message = '') => {
     localStorage.removeItem(authStorageKey)
     setAuthSession(null)
@@ -185,7 +197,9 @@ function App() {
     setBudgetInput('')
     setBudgetError('')
     setBudgetSuccess('')
+    resetMovementForm()
     setCommunicationError('')
+    setMovementSuccess('')
     setAuthPassword('')
     setAuthError(message)
   }
@@ -417,6 +431,24 @@ function App() {
     setCategory(categoriesByType[newType][0])
   }
 
+  const startEditingMovement = (movement: Movement) => {
+    setEditingMovementId(movement.id)
+    setDescription(movement.description)
+    setCategory(movement.category)
+    setType(movement.type)
+    setAmount(String(movement.amount))
+    setDate(movement.date)
+    setDescriptionError('')
+    setCommunicationError('')
+    setMovementSuccess('')
+  }
+
+  const cancelEditingMovement = () => {
+    resetMovementForm()
+    setCommunicationError('')
+    setMovementSuccess('')
+  }
+
   const handleBudgetSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const numericBudget = Number(budgetInput)
@@ -570,20 +602,24 @@ function App() {
     ) return
 
     try {
-      const response = await fetch(movementsApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authSession?.token ?? ''}`,
+      const isEditing = editingMovementId !== null
+      const response = await fetch(
+        isEditing ? `${movementsApiUrl}/${editingMovementId}` : movementsApiUrl,
+        {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authSession?.token ?? ''}`,
+          },
+          body: JSON.stringify({
+            description: movementDescription,
+            category: movementCategory,
+            type: movementType,
+            amount: numericAmount,
+            date: movementDate,
+          }),
         },
-        body: JSON.stringify({
-          description: movementDescription,
-          category: movementCategory,
-          type: movementType,
-          amount: numericAmount,
-          date: movementDate,
-        }),
-      })
+      )
 
       if (response.status === 401) {
         clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
@@ -593,22 +629,32 @@ function App() {
       if (!response.ok) {
         throw new Error(await getApiMessage(
           response,
-          'No fue posible registrar el movimiento.',
+          isEditing
+            ? 'No fue posible actualizar el movimiento.'
+            : 'No fue posible registrar el movimiento.',
         ))
       }
 
-      const createdMovement = await response.json() as Movement
-      setMovements((currentMovements) => [
-        ...currentMovements,
-        createdMovement,
-      ])
+      const savedMovement = await response.json() as Movement
+      setMovements((currentMovements) => isEditing
+        ? currentMovements.map((movement) =>
+          movement.id === savedMovement.id ? savedMovement : movement)
+        : [...currentMovements, savedMovement])
       setCommunicationError('')
-      setDescription('')
-      setAmount('')
-      setDate('')
+      setMovementSuccess(
+        isEditing
+          ? 'Movimiento actualizado correctamente.'
+          : '',
+      )
+      resetMovementForm()
     } catch (error) {
       console.error(error)
-      setCommunicationError('No fue posible registrar el movimiento en el backend.')
+      setMovementSuccess('')
+      setCommunicationError(
+        editingMovementId
+          ? 'No fue posible actualizar el movimiento en el backend.'
+          : 'No fue posible registrar el movimiento en el backend.',
+      )
     }
   }
 
@@ -636,7 +682,9 @@ function App() {
       setMovements((currentMovements) =>
         currentMovements.filter((movement) => movement.id !== id),
       )
+      if (editingMovementId === id) resetMovementForm()
       setCommunicationError('')
+      setMovementSuccess('')
     } catch (error) {
       console.error(error)
       setCommunicationError('No fue posible eliminar el movimiento en el backend.')
@@ -835,8 +883,10 @@ function App() {
           <div className="tab-panel" role="tabpanel">
             <section className="panel" aria-labelledby="register-title">
               <div className="panel__heading">
-                <p>Nuevo registro</p>
-                <h2 id="register-title">Registrar movimiento</h2>
+                <p>{editingMovementId ? 'Edición de registro' : 'Nuevo registro'}</p>
+                <h2 id="register-title">
+                  {editingMovementId ? 'Editar movimiento' : 'Registrar movimiento'}
+                </h2>
               </div>
 
               <form className="movement-form" onSubmit={handleSubmit}>
@@ -915,9 +965,26 @@ function App() {
                 </label>
 
                 <div className="form-actions">
-                  <button className="primary-button" type="submit">Agregar</button>
+                  {editingMovementId && (
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={cancelEditingMovement}
+                    >
+                      Cancelar edición
+                    </button>
+                  )}
+                  <button className="primary-button" type="submit">
+                    {editingMovementId ? 'Guardar cambios' : 'Agregar'}
+                  </button>
                 </div>
               </form>
+
+              {movementSuccess && (
+                <div className="movement-message movement-message--success" role="status">
+                  {movementSuccess}
+                </div>
+              )}
             </section>
 
             <section className="budget-panel" aria-labelledby="budget-edit-title">
@@ -1085,14 +1152,24 @@ function App() {
                             </td>
                             <td>{movement.date}</td>
                             <td>
-                              <button
-                                className="delete-button"
-                                type="button"
-                                onClick={() => removeMovement(movement.id)}
-                                aria-label={`Eliminar movimiento ${movement.description}`}
-                              >
-                                Eliminar
-                              </button>
+                              <div className="row-actions">
+                                <button
+                                  className="edit-button"
+                                  type="button"
+                                  onClick={() => startEditingMovement(movement)}
+                                  aria-label={`Editar movimiento ${movement.description}`}
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  className="delete-button"
+                                  type="button"
+                                  onClick={() => removeMovement(movement.id)}
+                                  aria-label={`Eliminar movimiento ${movement.description}`}
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}

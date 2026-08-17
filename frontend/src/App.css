@@ -229,6 +229,8 @@
 
 .tab:focus-visible,
 .primary-button:focus-visible,
+.secondary-button:focus-visible,
+.edit-button:focus-visible,
 .delete-button:focus-visible {
   outline: 3px solid rgba(20, 191, 190, 0.3);
   outline-offset: 2px;
@@ -382,6 +384,8 @@
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .primary-button {
@@ -394,6 +398,31 @@
   border-radius: 9px;
   box-shadow: 0 8px 18px rgba(25, 194, 184, 0.23);
   cursor: pointer;
+}
+
+.secondary-button {
+  padding: 10px 18px;
+  color: #31566d;
+  font: inherit;
+  font-weight: 750;
+  background: #f5fbfa;
+  border: 1px solid #9edbd7;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.movement-message {
+  margin-top: 18px;
+  padding: 12px 14px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  border-radius: 9px;
+}
+
+.movement-message--success {
+  color: #08704e;
+  background: #e9faf2;
+  border: 1px solid #a9e5ca;
 }
 
 .empty-state,
@@ -546,16 +575,32 @@ td {
 .amount--income { color: #079b64; font-weight: 750; }
 .amount--expense { color: #e23f59; font-weight: 750; }
 
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.edit-button,
 .delete-button {
   padding: 6px 9px;
-  color: #cf3550;
   font: inherit;
   font-size: 0.76rem;
   font-weight: 700;
-  background: #fff1f3;
-  border: 1px solid #ffc5cd;
   border-radius: 7px;
   cursor: pointer;
+}
+
+.edit-button {
+  color: #08756d;
+  background: #e9faf7;
+  border: 1px solid #a9e3da;
+}
+
+.delete-button {
+  color: #cf3550;
+  background: #fff1f3;
+  border: 1px solid #ffc5cd;
 }
 
 .budget-panel {
@@ -1113,6 +1158,10 @@ td {
 
   .form-actions,
   .primary-button {
+    width: 100%;
+  }
+
+  .form-actions .secondary-button {
     width: 100%;
   }
 

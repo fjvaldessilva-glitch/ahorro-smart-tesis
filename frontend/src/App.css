@@ -652,7 +652,7 @@ td {
 
 .budget-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1fr) auto;
   align-items: end;
   gap: 16px;
 }

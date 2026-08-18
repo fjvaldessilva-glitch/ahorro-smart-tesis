@@ -9,13 +9,44 @@ router.use(authenticateToken)
 
 const getPublicBudget = (budget) => ({
   id: budget._id.toString(),
+  year: budget.year,
+  month: budget.month,
   amount: budget.amount,
 })
 
+const getValidatedPeriod = (yearValue, monthValue) => {
+  const year = Number(yearValue)
+  const month = Number(monthValue)
+
+  if (!Number.isInteger(year) || year <= 0) {
+    return { error: 'El año del presupuesto no es válido.' }
+  }
+
+  if (!Number.isInteger(month) || month < 1 || month > 12) {
+    return { error: 'El mes del presupuesto debe estar entre 1 y 12.' }
+  }
+
+  return { year, month }
+}
+
 router.get('/', async (request, response) => {
+  const { year, month, error } = getValidatedPeriod(
+    request.query.year,
+    request.query.month,
+  )
+
+  if (error) {
+    return response.status(400).json({
+      status: 'error',
+      message: error,
+    })
+  }
+
   try {
     const budget = await Budget.findOne({
       user: request.authenticatedUserId,
+      year,
+      month,
     })
 
     return response.json({
@@ -31,7 +62,18 @@ router.get('/', async (request, response) => {
 })
 
 router.put('/', async (request, response) => {
+  const { year, month, error } = getValidatedPeriod(
+    request.body?.year,
+    request.body?.month,
+  )
   const amount = Number(request.body?.amount)
+
+  if (error) {
+    return response.status(400).json({
+      status: 'error',
+      message: error,
+    })
+  }
 
   if (!Number.isFinite(amount) || amount <= 0) {
     return response.status(400).json({
@@ -42,10 +84,18 @@ router.put('/', async (request, response) => {
 
   try {
     const budget = await Budget.findOneAndUpdate(
-      { user: request.authenticatedUserId },
+      {
+        user: request.authenticatedUserId,
+        year,
+        month,
+      },
       {
         $set: { amount },
-        $setOnInsert: { user: request.authenticatedUserId },
+        $setOnInsert: {
+          user: request.authenticatedUserId,
+          year,
+          month,
+        },
       },
       {
         upsert: true,

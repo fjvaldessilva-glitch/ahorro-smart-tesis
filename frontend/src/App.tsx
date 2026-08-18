@@ -35,6 +35,8 @@ type ApiMessage = {
 type BudgetResponse = {
   budget: {
     id: string
+    year: number
+    month: number
     amount: number
   } | null
 }
@@ -146,6 +148,11 @@ const getCurrentMonth = () => {
   return `${year}-${month}`
 }
 
+const getBudgetPeriod = (period: string) => {
+  const [year, month] = period.split('-').map(Number)
+  return { year, month }
+}
+
 function App() {
   const [authSession, setAuthSession] = useState<AuthSession | null>(getStoredAuthSession)
   const [authMode, setAuthMode] = useState<AuthMode>('login')
@@ -158,9 +165,12 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
   const [budget, setBudget] = useState<number | null>(null)
+  const [budgetMonth, setBudgetMonth] = useState(getCurrentMonth)
   const [budgetInput, setBudgetInput] = useState('')
   const [budgetError, setBudgetError] = useState('')
   const [budgetSuccess, setBudgetSuccess] = useState('')
+  const [analysisBudget, setAnalysisBudget] = useState<number | null>(null)
+  const [analysisBudgetError, setAnalysisBudgetError] = useState('')
   const [isBudgetSaving, setIsBudgetSaving] = useState(false)
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState(incomeCategories[0])
@@ -194,12 +204,16 @@ function App() {
     setAuthSession(null)
     setMovements([])
     setBudget(null)
+    setBudgetMonth(getCurrentMonth())
     setBudgetInput('')
     setBudgetError('')
     setBudgetSuccess('')
+    setAnalysisBudget(null)
+    setAnalysisBudgetError('')
     resetMovementForm()
     setCommunicationError('')
     setMovementSuccess('')
+    setSelectedMonth(getCurrentMonth())
     setAuthPassword('')
     setAuthError(message)
   }
@@ -242,9 +256,26 @@ function App() {
   useEffect(() => {
     if (!authSession) return
 
+    if (!budgetMonth) {
+      setBudget(null)
+      setBudgetInput('')
+      setBudgetError('')
+      setBudgetSuccess('')
+      return
+    }
+
+    let isCurrentRequest = true
+
     const loadBudget = async () => {
+      const { year, month } = getBudgetPeriod(budgetMonth)
+
+      setBudget(null)
+      setBudgetInput('')
+      setBudgetError('')
+      setBudgetSuccess('')
+
       try {
-        const response = await fetch(budgetApiUrl, {
+        const response = await fetch(`${budgetApiUrl}?year=${year}&month=${month}`, {
           headers: {
             Authorization: `Bearer ${authSession.token}`,
           },
@@ -265,17 +296,80 @@ function App() {
         const data = await response.json() as BudgetResponse
         const currentBudget = data.budget?.amount ?? null
 
-        setBudget(currentBudget)
-        setBudgetInput(currentBudget ? String(currentBudget) : '')
-        setBudgetError('')
+        if (isCurrentRequest) {
+          setBudget(currentBudget)
+          setBudgetInput(currentBudget ? String(currentBudget) : '')
+          setBudgetError('')
+        }
       } catch (error) {
         console.error(error)
-        setBudgetError('No fue posible consultar el presupuesto.')
+        if (isCurrentRequest) {
+          setBudgetError('No fue posible consultar el presupuesto mensual.')
+        }
       }
     }
 
     void loadBudget()
-  }, [authSession])
+
+    return () => {
+      isCurrentRequest = false
+    }
+  }, [authSession, budgetMonth])
+
+  useEffect(() => {
+    if (!authSession || dateFilter !== 'month' || !selectedMonth) {
+      setAnalysisBudget(null)
+      setAnalysisBudgetError('')
+      return
+    }
+
+    let isCurrentRequest = true
+    const { year, month } = getBudgetPeriod(selectedMonth)
+
+    setAnalysisBudget(null)
+    setAnalysisBudgetError('')
+
+    const loadAnalysisBudget = async () => {
+      try {
+        const response = await fetch(`${budgetApiUrl}?year=${year}&month=${month}`, {
+          headers: {
+            Authorization: `Bearer ${authSession.token}`,
+          },
+        })
+
+        if (response.status === 401) {
+          clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+          return
+        }
+
+        if (!response.ok) {
+          throw new Error(await getApiMessage(
+            response,
+            'No fue posible consultar el presupuesto mensual.',
+          ))
+        }
+
+        const data = await response.json() as BudgetResponse
+
+        if (isCurrentRequest) {
+          setAnalysisBudget(data.budget?.amount ?? null)
+          setAnalysisBudgetError('')
+        }
+      } catch (error) {
+        console.error(error)
+        if (isCurrentRequest) {
+          setAnalysisBudget(null)
+          setAnalysisBudgetError('No fue posible consultar el presupuesto mensual.')
+        }
+      }
+    }
+
+    void loadAnalysisBudget()
+
+    return () => {
+      isCurrentRequest = false
+    }
+  }, [authSession, dateFilter, selectedMonth])
 
   const filteredMovements = useMemo(() => {
     if (dateFilter === 'all') return movements
@@ -327,6 +421,12 @@ function App() {
   }, [dateFilter, rangeEnd, rangeStart, selectedDate, selectedMonth])
 
   useEffect(() => {
+    if (dateFilter === 'month' && budgetMonth !== selectedMonth) {
+      setBudgetMonth(selectedMonth)
+    }
+  }, [budgetMonth, dateFilter, selectedMonth])
+
+  useEffect(() => {
     setCurrentPage((page) => Math.min(page, totalPages))
   }, [totalPages])
 
@@ -346,8 +446,8 @@ function App() {
     }
   }, [filteredMovements])
 
-  const budgetExecution = budget && budget > 0
-    ? (summary.totalExpenses / budget) * 100
+  const budgetExecution = analysisBudget && analysisBudget > 0
+    ? (summary.totalExpenses / analysisBudget) * 100
     : null
 
   const expensesByCategory = useMemo(() => {
@@ -452,6 +552,18 @@ function App() {
   const handleBudgetSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const numericBudget = Number(budgetInput)
+    const { year, month } = getBudgetPeriod(budgetMonth)
+
+    if (
+      !Number.isInteger(year)
+      || !Number.isInteger(month)
+      || month < 1
+      || month > 12
+    ) {
+      setBudgetError('Selecciona un mes válido para el presupuesto.')
+      setBudgetSuccess('')
+      return
+    }
 
     if (!budgetInput.trim() || !Number.isFinite(numericBudget) || numericBudget <= 0) {
       setBudgetError('Ingresa un presupuesto mayor que cero.')
@@ -470,7 +582,7 @@ function App() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authSession?.token ?? ''}`,
         },
-        body: JSON.stringify({ amount: numericBudget }),
+        body: JSON.stringify({ year, month, amount: numericBudget }),
       })
 
       if (response.status === 401) {
@@ -492,6 +604,11 @@ function App() {
       setBudget(savedBudget)
       setBudgetInput(savedBudget ? String(savedBudget) : '')
       setBudgetSuccess('Presupuesto guardado correctamente.')
+
+      if (dateFilter === 'month' && budgetMonth === selectedMonth) {
+        setAnalysisBudget(savedBudget)
+        setAnalysisBudgetError('')
+      }
     } catch (error) {
       console.error(error)
       setBudgetError('No fue posible conectar con el backend.')
@@ -991,9 +1108,9 @@ function App() {
               <div className="budget-panel__heading">
                 <div>
                   <p>Planificación personal</p>
-                  <h2 id="budget-edit-title">Presupuesto personal</h2>
+                  <h2 id="budget-edit-title">Presupuesto mensual de gastos</h2>
                   <span className="budget-panel__description">
-                    Define cuánto deseas destinar como máximo a tus gastos.
+                    Define cuánto deseas destinar como máximo a tus gastos durante el mes.
                   </span>
                 </div>
                 {budget !== null && (
@@ -1002,6 +1119,19 @@ function App() {
               </div>
 
               <form className="budget-form" onSubmit={handleBudgetSubmit}>
+                <label className="field">
+                  <span>Mes del presupuesto</span>
+                  <input
+                    type="month"
+                    value={budgetMonth}
+                    onChange={(event) => {
+                      const nextMonth = event.target.value
+                      setBudgetMonth(nextMonth)
+                      if (dateFilter === 'month') setSelectedMonth(nextMonth)
+                    }}
+                    required
+                  />
+                </label>
                 <label className="field">
                   <span>Monto planificado para gastos</span>
                   <input
@@ -1026,6 +1156,10 @@ function App() {
                       : 'Actualizar presupuesto'}
                 </button>
               </form>
+
+              {budget === null && !budgetError && (
+                <p className="budget-empty">Presupuesto mensual no definido.</p>
+              )}
 
               {budgetError && (
                 <div className="budget-message budget-message--error" role="alert">
@@ -1083,7 +1217,11 @@ function App() {
                     <input
                       type="month"
                       value={selectedMonth}
-                      onChange={(event) => setSelectedMonth(event.target.value)}
+                      onChange={(event) => {
+                        const nextMonth = event.target.value
+                        setSelectedMonth(nextMonth)
+                        setBudgetMonth(nextMonth)
+                      }}
                     />
                   </label>
                 )}
@@ -1228,22 +1366,30 @@ function App() {
               <div className="budget-panel__heading">
                 <div>
                   <p>Planificación personal</p>
-                  <h3 id="budget-title">Presupuesto personal</h3>
+                  <h3 id="budget-title">Presupuesto mensual de gastos</h3>
                 </div>
-                {budget !== null && (
-                  <strong>{currencyFormatter.format(budget)}</strong>
+                {dateFilter === 'month' && analysisBudget !== null && (
+                  <strong>{currencyFormatter.format(analysisBudget)}</strong>
                 )}
               </div>
 
-              {budget === null ? (
+              {dateFilter !== 'month' ? (
                 <p className="budget-empty">
-                  Aún no has definido un presupuesto personal.
+                  Selecciona el filtro Mes para revisar la ejecución del presupuesto mensual.
+                </p>
+              ) : analysisBudgetError ? (
+                <div className="budget-message budget-message--error" role="alert">
+                  {analysisBudgetError}
+                </div>
+              ) : analysisBudget === null ? (
+                <p className="budget-empty">
+                  Presupuesto mensual no definido.
                 </p>
               ) : (
                 <div className="budget-metrics" aria-label="Seguimiento del presupuesto">
                   <article>
                     <span>Presupuesto</span>
-                    <strong>{currencyFormatter.format(budget)}</strong>
+                    <strong>{currencyFormatter.format(analysisBudget)}</strong>
                   </article>
                   <article>
                     <span>Gastos del período</span>

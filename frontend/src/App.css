@@ -1026,16 +1026,13 @@ td {
 }
 
 .projection-panel {
-  max-width: 780px;
-  margin: 28px auto;
-  padding: 48px;
-  text-align: center;
+  display: grid;
+  gap: 24px;
 }
 
 .projection-panel__badge {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 22px;
+  width: 68px;
+  height: 68px;
   display: grid;
   place-items: center;
   color: #073746;
@@ -1045,11 +1042,188 @@ td {
   border-radius: 21px;
 }
 
-.projection-panel__description {
-  max-width: 640px;
-  margin: 15px auto 0;
+.projection-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.projection-heading > div:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.projection-heading p,
+.projection-heading h2,
+.projection-heading span {
+  margin: 0;
+}
+
+.projection-heading p {
+  color: #079d8d;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.projection-heading span {
   color: #526d81;
-  line-height: 1.7;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.projection-controls {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.45fr) auto;
+  align-items: end;
+  justify-content: start;
+  gap: 16px;
+  background: #f3fbf9;
+  border: 1px solid #d4ece9;
+  border-radius: 12px;
+}
+
+.projection-action {
+  min-width: 190px;
+}
+
+.projection-action:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.projection-message {
+  margin: 0;
+  padding: 16px 18px;
+  color: #456176;
+  line-height: 1.5;
+  background: #f3fbf9;
+  border: 1px dashed #9bd9d4;
+  border-radius: 10px;
+}
+
+.projection-message--error {
+  color: #a52842;
+  background: #fff0f2;
+  border: 1px solid #ffc5ce;
+}
+
+.projection-results {
+  display: grid;
+  gap: 20px;
+}
+
+.projection-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.projection-summary > div {
+  padding: 22px;
+  display: grid;
+  gap: 9px;
+  background: #f4fbfa;
+  border: 1px solid #d4ece9;
+  border-radius: 13px;
+}
+
+.projection-summary span,
+.projection-trend span {
+  color: #587185;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.projection-summary strong {
+  color: #0b2b48;
+  font-size: clamp(1.25rem, 2.5vw, 1.7rem);
+}
+
+.projection-summary__total {
+  border-top: 4px solid #20c9ba !important;
+  background: linear-gradient(120deg, #ecfbf4, #eefafd) !important;
+}
+
+.projection-summary__total strong {
+  color: #087d6d;
+  font-size: clamp(1.55rem, 3.5vw, 2.15rem);
+}
+
+.projection-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  color: #587185;
+  font-size: 0.8rem;
+}
+
+.projection-metadata strong {
+  color: #244b63;
+}
+
+.projection-trend {
+  padding: 17px 19px;
+  background: #f8fcfc;
+  border: 1px solid #d8ebeb;
+  border-radius: 11px;
+}
+
+.projection-trend > div {
+  display: grid;
+  gap: 7px;
+}
+
+.projection-trend strong {
+  font-size: 1.05rem;
+}
+
+.projection-trend small {
+  color: #587185;
+  line-height: 1.45;
+}
+
+.projection-trend--up { color: #d34a5e; }
+.projection-trend--down { color: #078663; }
+.projection-trend--stable { color: #087f91; }
+
+.projection-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.projection-categories article {
+  min-width: 0;
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #d8ebeb;
+  border-left: 4px solid #20c9ba;
+  border-radius: 10px;
+}
+
+.projection-categories span {
+  color: #587185;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.projection-categories strong {
+  color: #123650;
+  font-size: 1rem;
+}
+
+.projection-disclaimer {
+  margin: 0;
+  color: #698194;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
 }
 
 @media (min-width: 1280px) {
@@ -1073,6 +1247,10 @@ td {
 
   .dashboard-charts {
     grid-template-columns: 1fr;
+  }
+
+  .projection-categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1143,8 +1321,31 @@ td {
   .history-filters,
   .budget-form,
   .budget-metrics,
-  .summary-grid {
+  .summary-grid,
+  .projection-controls,
+  .projection-summary,
+  .projection-categories {
     grid-template-columns: 1fr;
+  }
+
+  .projection-heading {
+    align-items: flex-start;
+  }
+
+  .projection-panel__badge {
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    font-size: 1.15rem;
+  }
+
+  .projection-controls {
+    padding: 16px;
+  }
+
+  .projection-action {
+    width: 100%;
+    min-width: 0;
   }
 
   .budget-panel {

@@ -41,6 +41,28 @@ type BudgetResponse = {
   } | null
 }
 
+type ProjectionCategory = {
+  category: string
+  projectedAmount: number
+  rawPrediction: number
+  nonnegativeAdjustment: boolean
+}
+
+type Projection = {
+  id: string
+  targetPeriod: string
+  modelName: string
+  categories: ProjectionCategory[]
+  totalProjectedAmount: number
+  historicalMonthsUsed: number
+  generatedAt: string
+}
+
+type ProjectionResponse = {
+  status: string
+  projection: Projection
+}
+
 const incomeCategories = [
   'Sueldo',
   'Otros ingresos',
@@ -77,9 +99,11 @@ const compactCurrencyFormatter = new Intl.NumberFormat('es-CL', {
   maximumFractionDigits: 1,
 })
 
-const movementsApiUrl = 'http://localhost:3001/api/movements'
-const budgetApiUrl = 'http://localhost:3001/api/budget'
-const authApiUrl = 'http://localhost:3001/api/auth'
+const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL ?? 'http://localhost:3001/api'
+const movementsApiUrl = `${backendApiUrl}/movements`
+const budgetApiUrl = `${backendApiUrl}/budget`
+const authApiUrl = `${backendApiUrl}/auth`
+const projectionsApiUrl = `${backendApiUrl}/projections`
 const authStorageKey = 'ahorroSmart.authSession'
 const categoryColors = ['#23cfa6', '#20bce8', '#67d94b', '#ffb547', '#ff7187', '#8b7cf6']
 const descriptionLetterPattern = /\p{L}/u
@@ -148,6 +172,50 @@ const getCurrentMonth = () => {
   return `${year}-${month}`
 }
 
+const shiftMonth = (period: string, offset: number) => {
+  const [year, month] = period.split('-').map(Number)
+  const shiftedDate = new Date(year, month - 1 + offset, 1)
+  return `${shiftedDate.getFullYear()}-${String(shiftedDate.getMonth() + 1).padStart(2, '0')}`
+}
+
+const getNextMonth = () => shiftMonth(getCurrentMonth(), 1)
+
+const formatPeriod = (period: string) => {
+  const [year, month] = period.split('-').map(Number)
+  const formattedPeriod = new Intl.DateTimeFormat('es-CL', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(year, month - 1, 1)))
+  return formattedPeriod.charAt(0).toUpperCase() + formattedPeriod.slice(1)
+}
+
+const generatedAtFormatter = new Intl.DateTimeFormat('es-CL', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+})
+
+const getProjection = (token: string, targetPeriod: string) => fetch(
+  `${projectionsApiUrl}?targetPeriod=${encodeURIComponent(targetPeriod)}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  },
+)
+
+const generateProjection = (token: string, targetPeriod: string) => fetch(
+  `${projectionsApiUrl}/generate`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ targetPeriod }),
+  },
+)
+
 const getBudgetPeriod = (period: string) => {
   const [year, month] = period.split('-').map(Number)
   return { year, month }
@@ -164,6 +232,7 @@ function App() {
   const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('movements')
   const [movements, setMovements] = useState<Movement[]>([])
+  const [areMovementsLoaded, setAreMovementsLoaded] = useState(false)
   const [budget, setBudget] = useState<number | null>(null)
   const [budgetMonth, setBudgetMonth] = useState(getCurrentMonth)
   const [budgetInput, setBudgetInput] = useState('')
@@ -188,6 +257,12 @@ function App() {
   const [rangeEnd, setRangeEnd] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [movementsPerPage, setMovementsPerPage] = useState(10)
+  const [projectionTargetPeriod, setProjectionTargetPeriod] = useState(getNextMonth)
+  const [projection, setProjection] = useState<Projection | null>(null)
+  const [isProjectionLoading, setIsProjectionLoading] = useState(false)
+  const [isProjectionGenerating, setIsProjectionGenerating] = useState(false)
+  const [projectionError, setProjectionError] = useState('')
+  const [projectionNotFound, setProjectionNotFound] = useState(false)
 
   const resetMovementForm = () => {
     setEditingMovementId(null)
@@ -203,6 +278,7 @@ function App() {
     localStorage.removeItem(authStorageKey)
     setAuthSession(null)
     setMovements([])
+    setAreMovementsLoaded(false)
     setBudget(null)
     setBudgetMonth(getCurrentMonth())
     setBudgetInput('')
@@ -214,6 +290,12 @@ function App() {
     setCommunicationError('')
     setMovementSuccess('')
     setSelectedMonth(getCurrentMonth())
+    setProjectionTargetPeriod(getNextMonth())
+    setProjection(null)
+    setIsProjectionLoading(false)
+    setIsProjectionGenerating(false)
+    setProjectionError('')
+    setProjectionNotFound(false)
     setAuthPassword('')
     setAuthError(message)
   }
@@ -222,6 +304,7 @@ function App() {
     if (!authSession) return
 
     const loadMovements = async () => {
+      setAreMovementsLoaded(false)
       try {
         const response = await fetch(movementsApiUrl, {
           headers: {
@@ -243,9 +326,11 @@ function App() {
 
         const apiMovements = await response.json() as Movement[]
         setMovements(apiMovements)
+        setAreMovementsLoaded(true)
         setCommunicationError('')
       } catch (error) {
         console.error(error)
+        setAreMovementsLoaded(false)
         setCommunicationError('No fue posible conectar con el backend.')
       }
     }
@@ -371,6 +456,57 @@ function App() {
     }
   }, [authSession, dateFilter, selectedMonth])
 
+  useEffect(() => {
+    if (!authSession || activeTab !== 'projection' || !projectionTargetPeriod) return
+
+    let isCurrentRequest = true
+    const loadProjection = async () => {
+      setIsProjectionLoading(true)
+      setProjection(null)
+      setProjectionError('')
+      setProjectionNotFound(false)
+
+      try {
+        const response = await getProjection(authSession.token, projectionTargetPeriod)
+
+        if (response.status === 401) {
+          clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+          return
+        }
+
+        if (response.status === 404) {
+          if (isCurrentRequest) setProjectionNotFound(true)
+          return
+        }
+
+        if (!response.ok) {
+          throw new Error(await getApiMessage(
+            response,
+            'No fue posible consultar la proyección.',
+          ))
+        }
+
+        const data = await response.json() as ProjectionResponse
+        if (isCurrentRequest) {
+          setProjection(data.projection)
+          setProjectionNotFound(false)
+        }
+      } catch (error) {
+        console.error(error)
+        if (isCurrentRequest) {
+          setProjectionError('No fue posible consultar la proyección guardada.')
+        }
+      } finally {
+        if (isCurrentRequest) setIsProjectionLoading(false)
+      }
+    }
+
+    void loadProjection()
+    return () => {
+      isCurrentRequest = false
+    }
+  }, [activeTab, authSession, projectionTargetPeriod])
+
   const filteredMovements = useMemo(() => {
     if (dateFilter === 'all') return movements
 
@@ -488,6 +624,35 @@ function App() {
     )
   }, [filteredMovements])
 
+  const projectionTrend = useMemo(() => {
+    if (!projection || !areMovementsLoaded) return null
+
+    const previousPeriod = shiftMonth(projection.targetPeriod, -1)
+    const previousExpenses = movements
+      .filter((movement) => (
+        movement.type === 'Gasto'
+          && movement.date.startsWith(previousPeriod)
+      ))
+      .reduce((total, movement) => total + movement.amount, 0)
+
+    if (previousExpenses <= 0) return null
+
+    const variation = (
+      (projection.totalProjectedAmount - previousExpenses)
+      / previousExpenses
+    ) * 100
+    const direction = variation > 2
+      ? 'Al alza'
+      : variation < -2 ? 'A la baja' : 'Estable'
+
+    return {
+      previousPeriod,
+      previousExpenses,
+      variation,
+      direction,
+    }
+  }, [areMovementsLoaded, movements, projection])
+
   const comparisonMaximum = Math.max(summary.totalIncome, summary.totalExpenses)
   const incomeBarHeight = comparisonMaximum > 0
     ? (summary.totalIncome / comparisonMaximum) * 100
@@ -547,6 +712,47 @@ function App() {
     resetMovementForm()
     setCommunicationError('')
     setMovementSuccess('')
+  }
+
+  const handleGenerateProjection = async () => {
+    if (!authSession || !projectionTargetPeriod || isProjectionGenerating) return
+
+    setIsProjectionGenerating(true)
+    setProjectionError('')
+
+    try {
+      const response = await generateProjection(authSession.token, projectionTargetPeriod)
+
+      if (response.status === 401) {
+        clearAuthSession('Tu sesión expiró o no es válida. Inicia sesión nuevamente.')
+        return
+      }
+
+      if (!response.ok) {
+        const apiMessage = await getApiMessage(response, 'No fue posible generar la proyección.')
+
+        if (response.status === 422 || /historial/i.test(apiMessage)) {
+          setProjectionError(
+            'No existe historial suficiente para generar una proyección. '
+            + 'Ahorro Smart necesita al menos tres meses previos de gastos.',
+          )
+        } else if (response.status === 502) {
+          setProjectionError('El servicio de proyección no está disponible en este momento.')
+        } else {
+          setProjectionError(apiMessage)
+        }
+        return
+      }
+
+      const data = await response.json() as ProjectionResponse
+      setProjection(data.projection)
+      setProjectionNotFound(false)
+    } catch (error) {
+      console.error(error)
+      setProjectionError('No fue posible conectar con el backend para generar la proyección.')
+    } finally {
+      setIsProjectionGenerating(false)
+    }
   }
 
   const handleBudgetSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -1598,15 +1804,124 @@ function App() {
 
         {activeTab === 'projection' && (
           <div className="tab-panel" role="tabpanel">
-            <section className="projection-panel">
-              <div className="projection-panel__badge">IA</div>
-              <p>Módulo en preparación</p>
-              <h2>Proyección IA</h2>
-              <p className="projection-panel__description">
-                La proyección IA permitirá estimar gasto futuro, balance esperado
-                y riesgo de superar el presupuesto a partir del historial financiero
-                del usuario.
-              </p>
+            <section className="projection-panel" aria-labelledby="projection-title">
+              <div className="projection-heading">
+                <div className="projection-panel__badge" aria-hidden="true">IA</div>
+                <div>
+                  <p>Proyección de gastos</p>
+                  <h2 id="projection-title">Proyección IA</h2>
+                  <span>
+                    Estimación informativa basada en tu historial de gastos registrado.
+                  </span>
+                </div>
+              </div>
+
+              <div className="projection-controls">
+                <label className="field">
+                  <span>Mes a proyectar</span>
+                  <input
+                    type="month"
+                    min={getNextMonth()}
+                    value={projectionTargetPeriod}
+                    onChange={(event) => setProjectionTargetPeriod(event.target.value)}
+                  />
+                </label>
+                <button
+                  className="primary-button projection-action"
+                  type="button"
+                  disabled={isProjectionLoading || isProjectionGenerating || !projectionTargetPeriod}
+                  onClick={() => void handleGenerateProjection()}
+                >
+                  {isProjectionGenerating
+                    ? 'Generando...'
+                    : projection ? 'Actualizar proyección' : 'Generar proyección'}
+                </button>
+              </div>
+
+              {isProjectionLoading && (
+                <p className="projection-message" role="status">
+                  Consultando proyección guardada...
+                </p>
+              )}
+
+              {!isProjectionLoading && projectionNotFound && !projectionError && (
+                <p className="projection-message">
+                  Aún no existe una proyección para {formatPeriod(projectionTargetPeriod)}.
+                  Puedes generarla cuando lo decidas.
+                </p>
+              )}
+
+              {projectionError && (
+                <p className="projection-message projection-message--error" role="alert">
+                  {projectionError}
+                </p>
+              )}
+
+              {!isProjectionLoading && projection && (
+                <div className="projection-results">
+                  <div className="projection-summary">
+                    <div>
+                      <span>Período proyectado</span>
+                      <strong>{formatPeriod(projection.targetPeriod)}</strong>
+                    </div>
+                    <div className="projection-summary__total">
+                      <span>Total mensual proyectado</span>
+                      <strong>{currencyFormatter.format(projection.totalProjectedAmount)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="projection-metadata" aria-label="Información de la proyección">
+                    <span>Modelo: <strong>{projection.modelName}</strong></span>
+                    <span>Historial utilizado: <strong>{projection.historicalMonthsUsed} meses</strong></span>
+                    <span>
+                      Generada: <strong>{generatedAtFormatter.format(new Date(projection.generatedAt))}</strong>
+                    </span>
+                  </div>
+
+                  <section className="projection-trend" aria-labelledby="projection-trend-title">
+                    <div>
+                      <span id="projection-trend-title">Tendencia frente al mes anterior</span>
+                      {projectionTrend ? (
+                        <>
+                          <strong className={
+                            projectionTrend.variation > 2
+                              ? 'projection-trend--up'
+                              : projectionTrend.variation < -2
+                                ? 'projection-trend--down'
+                                : 'projection-trend--stable'
+                          }>
+                            {projectionTrend.direction}{' · '}
+                            {projectionTrend.variation > 0 ? '+' : ''}
+                            {projectionTrend.variation.toFixed(1)} %
+                          </strong>
+                          <small>
+                            Comparación con {formatPeriod(projectionTrend.previousPeriod)}:
+                            {' '}{currencyFormatter.format(projectionTrend.previousExpenses)} en gastos registrados.
+                          </small>
+                        </>
+                      ) : (
+                        <small>
+                          Tendencia no disponible: no existen gastos completos registrados
+                          para el mes inmediatamente anterior.
+                        </small>
+                      )}
+                    </div>
+                  </section>
+
+                  <div className="projection-categories" aria-label="Proyección por categoría">
+                    {projection.categories.map((categoryProjection) => (
+                      <article key={categoryProjection.category}>
+                        <span>{categoryProjection.category}</span>
+                        <strong>{currencyFormatter.format(categoryProjection.projectedAmount)}</strong>
+                      </article>
+                    ))}
+                  </div>
+
+                  <p className="projection-disclaimer">
+                    Esta proyección es informativa y no constituye asesoría financiera profesional.
+                  </p>
+                </div>
+              )}
             </section>
           </div>
         )}

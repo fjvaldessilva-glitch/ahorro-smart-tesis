@@ -23,7 +23,7 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 | 16 | Preparación de datos e identificación de patrones | Completado |
 | 17 | Selección y entrenamiento del modelo | Completado |
 | 18 | Generación e integración de proyecciones | Completado |
-| 19 | Presentación de las proyecciones | Pendiente |
+| 19 | Presentación de las proyecciones | Completado |
 | 21 | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 | 22 | Evaluación del margen de error | Pendiente |
 | 23 | Integración general y corrección de errores | Pendiente |
@@ -235,6 +235,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T40 | Seleccionar y entrenar el modelo predictivo | Completada | Tres técnicas evaluadas; GradientBoostingRegressor seleccionado, reentrenado y guardado. |
 | T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio independiente operativo con carga del modelo y endpoints `/health` y `/predict`. |
 | T42 | Integrar Node/Express con FastAPI y persistir proyecciones | Completada | Flujo autenticado MongoDB → Express → FastAPI → Express → MongoDB operativo. |
+| T43 | Integrar las proyecciones reales en el frontend | Completada | Consulta, generación y presentación responsiva de proyecciones reales integradas mediante JWT. |
 
 ### T38 - Preparar y validar datos simulados
 
@@ -293,6 +294,20 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - Los usuarios y movimientos aislados de prueba fueron eliminados al finalizar; los conteos previos de users, movements y budgets se mantuvieron intactos.
 - T42 queda **Completada** y el Ítem 18 queda **Completado** al estar operativas la generación, integración entre servicios, persistencia y recuperación. Los Ítems 19 y 22 permanecen **Pendientes**.
 
+### T43 - Integrar las proyecciones reales en el frontend
+
+- Se reemplazó el contenido placeholder de la pestaña Proyección IA por una vista funcional integrada con los endpoints reales de T42.
+- El frontend consulta mediante `GET /api/projections?targetPeriod=YYYY-MM` y genera o actualiza mediante `POST /api/projections/generate`, utilizando el JWT de la sesión y sin enviar `userId`.
+- El período objetivo se selecciona con un control mensual y comienza dinámicamente en el mes calendario siguiente.
+- Un 404 se presenta como ausencia natural de proyección y no genera automáticamente una nueva; la generación siempre requiere una acción del usuario.
+- La vista presenta período, total mensual en CLP, modelo, meses históricos, fecha de generación y las diez categorías proyectadas, sin exponer identificadores ni predicciones técnicas internas.
+- Se incorporaron estados controlados de consulta, generación, ausencia de proyección, historial insuficiente y servicio predictivo no disponible, además del bloqueo del botón durante una solicitud.
+- La tendencia compara el total proyectado con todos los gastos persistidos del mes inmediatamente anterior disponibles en la carga completa de movimientos: más de `+2 %` indica alza, menos de `-2 %` indica baja y el intervalo restante se considera estable. Si no hay gasto anterior confiable, la interfaz no inventa una tendencia.
+- La prueba integral aislada generó y recuperó una proyección para septiembre de 2026 con `$382.250` de total, diez categorías y tres meses históricos. La comparación utilizó `$60.000` de gastos completos de agosto y mostró una variación al alza de `537,1 %`.
+- El build de Vite y la comprobación técnica en 1440, 820 y 390 píxeles finalizaron sin errores ni desbordamiento horizontal. Esta validación responsive es específica de T43 y no completa la validación formal del Ítem 21.
+- Los datos aislados utilizados para la prueba fueron eliminados al finalizar y no se modificaron datos de presentación.
+- T43 queda **Completada**. El Ítem 19 queda **Completado** al presentar período, monto y tendencia confiable. Los Ítems 21 y 22 permanecen **Pendientes**.
+
 ## Pruebas
 
 Las pruebas se documentarán durante las microtareas correspondientes y deberán consolidarse después de integrar el componente predictivo.
@@ -304,7 +319,8 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 | Modelo predictivo | Comparación temporal de tres técnicas, entrenamiento, carga y resultado controlado | Completada en T40 |
 | Servicio predictivo | Carga del modelo, endpoints, validaciones y proyección controlada | Completada en T41 |
 | Integración | Comunicación Node.js/Express ↔ FastAPI | Completada en T42 |
-| Proyecciones | Generación y persistencia | Completada en T42; presentación pendiente en Ítem 19 |
+| Proyecciones | Generación, persistencia y presentación frontend | Completada en T42 y T43 |
+| Presentación responsive T43 | Consulta, generación, estados, total, categorías y tendencia en 1440/820/390 px | Completada en T43; no sustituye las pruebas formales del Ítem 21 |
 | Margen de error | Comparación con valores esperados | Pendiente |
 | Sistema completo | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 

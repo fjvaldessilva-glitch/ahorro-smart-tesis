@@ -22,7 +22,7 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 | --- | --- | --- |
 | 16 | Preparación de datos e identificación de patrones | Completado |
 | 17 | Selección y entrenamiento del modelo | Completado |
-| 18 | Generación e integración de proyecciones | Pendiente |
+| 18 | Generación e integración de proyecciones | En desarrollo |
 | 19 | Presentación de las proyecciones | Pendiente |
 | 21 | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 | 22 | Evaluación del margen de error | Pendiente |
@@ -233,6 +233,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T38 | Preparar y validar datos simulados | Completada | Dataset sintético reproducible generado, validado y agregado mensualmente. |
 | T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
 | T40 | Seleccionar y entrenar el modelo predictivo | Completada | Tres técnicas evaluadas; GradientBoostingRegressor seleccionado, reentrenado y guardado. |
+| T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio independiente operativo con carga del modelo y endpoints `/health` y `/predict`. |
 
 ### T38 - Preparar y validar datos simulados
 
@@ -267,6 +268,17 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - Se generaron `model_evaluation.json`, `model_selection_report.md`, `model_metadata.json` y `expense_forecast_model.joblib` de forma reproducible.
 - Al cumplirse la evaluación de tres técnicas, selección justificada, entrenamiento, almacenamiento, carga y prueba del modelo, el Ítem 17 queda **Completado**. Los Ítems 18 y 22 no se iniciaron ni completaron.
 
+### T41 - Crear el servicio predictivo con FastAPI
+
+- Se instalaron FastAPI y Uvicorn, y se creó un servicio predictivo independiente que reutiliza el modelo de T40 sin reentrenarlo.
+- El servicio carga una sola vez el pipeline Joblib y sus metadatos, e informa su disponibilidad mediante `GET /health`.
+- `POST /predict` recibe gastos históricos, rechaza información del período objetivo o posterior, agrega por mes y categoría y replica las variables temporales de T40 sin fuga de información futura.
+- Se generan diez proyecciones por categoría y un total mensual; cualquier valor negativo se conserva como predicción original y se ajusta explícitamente a cero solo en la salida funcional.
+- Se validaron historial vacío o insuficiente, categorías, fechas, montos y períodos inválidos, además de predicciones finitas y disponibilidad del modelo.
+- La prueba controlada para julio de 2026 utilizó 30 meses históricos, produjo un total proyectado de `$1.346.211,81` y no requirió ajustes por valores negativos.
+- Las pruebas automáticas y las comprobaciones manuales de `/health`, `/docs` y `/predict` finalizaron correctamente.
+- T41 queda **Completada**. El Ítem 18 pasa a **En desarrollo** porque todavía faltan la integración con Node.js/Express, la persistencia y el flujo completo. Los Ítems 19 y 22 permanecen **Pendientes**.
+
 ## Pruebas
 
 Las pruebas se documentarán durante las microtareas correspondientes y deberán consolidarse después de integrar el componente predictivo.
@@ -276,6 +288,7 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 | Datos simulados | Generación reproducible, validación estricta y agregación mensual | Completada en T38 |
 | Análisis de patrones | Métricas descriptivas, selección respaldada y reproducibilidad | Completada en T39 |
 | Modelo predictivo | Comparación temporal de tres técnicas, entrenamiento, carga y resultado controlado | Completada en T40 |
+| Servicio predictivo | Carga del modelo, endpoints, validaciones y proyección controlada | Completada en T41 |
 | Integración | Comunicación Node.js/Express ↔ FastAPI | Pendiente |
 | Proyecciones | Generación, persistencia y presentación | Pendiente |
 | Margen de error | Comparación con valores esperados | Pendiente |

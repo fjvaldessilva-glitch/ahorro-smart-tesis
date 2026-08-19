@@ -1,0 +1,85 @@
+{
+  "model_name": "GradientBoostingRegressor",
+  "model_library": "scikit-learn",
+  "sklearn_version": "1.9.0",
+  "random_seed": 2026,
+  "target": "monthly_amount",
+  "input_features": [
+    "category",
+    "month",
+    "trend_index",
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "rolling_mean_3",
+    "month_sin",
+    "month_cos"
+  ],
+  "source_variables": {
+    "VE-01": "Monto: origina monthly_amount, lag_1, lag_2, lag_3 y rolling_mean_3.",
+    "VE-02": "Fecha: origina month, trend_index, month_sin y month_cos.",
+    "VE-03": "Categoría: utilizada directamente como variable categórica.",
+    "VS-01": "Gasto proyectado: monthly_amount estimado para un período mensual futuro."
+  },
+  "training_period": "2024-04 a 2025-12",
+  "evaluation_period": "2026-01 a 2026-06",
+  "final_training_period": "2024-04 a 2026-06",
+  "candidate_metrics": {
+    "LinearRegression": {
+      "mae": 30204.398,
+      "rmse": 41416.2289,
+      "wape_percentage": 21.6617,
+      "mape_positive_targets_percentage": 29.3406,
+      "positive_target_rows_for_mape": 49,
+      "negative_predictions": 2
+    },
+    "RandomForestRegressor": {
+      "mae": 29789.9538,
+      "rmse": 39860.6669,
+      "wape_percentage": 21.3645,
+      "mape_positive_targets_percentage": 24.8029,
+      "positive_target_rows_for_mape": 49,
+      "negative_predictions": 0
+    },
+    "GradientBoostingRegressor": {
+      "mae": 28065.3463,
+      "rmse": 40147.3019,
+      "wape_percentage": 20.1277,
+      "mape_positive_targets_percentage": 22.8749,
+      "positive_target_rows_for_mape": 49,
+      "negative_predictions": 0
+    }
+  },
+  "selection_metric": "Menor WAPE; MAE y RMSE como respaldo.",
+  "selection_reason": "GradientBoostingRegressor obtuvo el menor WAPE (20.1277 %) sobre el mismo conjunto de prueba cronológico. MAE y RMSE respaldan la comparación. La alternativa representa relaciones no lineales, mantiene una complejidad razonable para el panel reducido, es reproducible y puede mantenerse dentro de un pipeline único; su capacidad descriptiva se limita al escenario sintético evaluado.",
+  "training_rows": 210,
+  "test_rows": 60,
+  "final_training_rows": 270,
+  "categories": [
+    "Alimentación",
+    "Transporte",
+    "Vivienda",
+    "Servicios básicos",
+    "Salud",
+    "Educación",
+    "Pago de deudas y créditos",
+    "Entretenimiento",
+    "Mascotas",
+    "Otros gastos"
+  ],
+  "created_for": "T40 de Ahorro Smart: entrenamiento académico con datos 100 % simulados.",
+  "reload_test_prediction": {
+    "period": "2026-07",
+    "category": "Alimentación",
+    "predicted_monthly_amount": 351528.0409,
+    "is_finite": true,
+    "is_negative": false
+  },
+  "limitations": [
+    "Datos completamente simulados y período controlado de 30 meses.",
+    "Evaluación temporal inicial limitada a seis meses.",
+    "El desempeño con usuarios reales puede diferir.",
+    "El criterio formal de margen de error se evaluará en el Ítem 22.",
+    "Las proyecciones no constituyen asesoría financiera."
+  ]
+}

@@ -21,7 +21,7 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 | Ítem | Descripción | Estado inicial |
 | --- | --- | --- |
 | 16 | Preparación de datos e identificación de patrones | Completado |
-| 17 | Selección y entrenamiento del modelo | Pendiente |
+| 17 | Selección y entrenamiento del modelo | Completado |
 | 18 | Generación e integración de proyecciones | Pendiente |
 | 19 | Presentación de las proyecciones | Pendiente |
 | 21 | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
@@ -232,6 +232,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T37 | Iniciar documentalmente el Sprint 05 | Completada | Alcance, objetivo, backlog y estructura documental inicial registrados. |
 | T38 | Preparar y validar datos simulados | Completada | Dataset sintético reproducible generado, validado y agregado mensualmente. |
 | T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
+| T40 | Seleccionar y entrenar el modelo predictivo | Completada | Tres técnicas evaluadas; GradientBoostingRegressor seleccionado, reentrenado y guardado. |
 
 ### T38 - Preparar y validar datos simulados
 
@@ -252,7 +253,19 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - Se identificaron y documentaron tres patrones respaldados: participación monetaria dominante de Vivienda, alta frecuencia de Alimentación y recurrencia con estabilidad relativa de Pago de deudas y créditos.
 - Se generaron `patterns_summary.json` y `patterns_report.md`; la repetición del análisis sobre los mismos datos produce resultados idénticos.
 - T38 cubrió la generación, limpieza, transformación, estructuración y validación; T39 cubrió el análisis y la identificación formal de al menos tres patrones.
-- Con ambos resultados, el Ítem 16 queda **Completado**. El Ítem 17 permanece pendiente y todavía no se ha seleccionado ni entrenado un algoritmo.
+- Con ambos resultados, el Ítem 16 quedó **Completado**. Al finalizar T39, el Ítem 17 todavía permanecía pendiente y no se había seleccionado ni entrenado un algoritmo.
+
+### T40 - Seleccionar y entrenar el modelo predictivo
+
+- Se construyó internamente un panel mensual completo con las 10 categorías oficiales y montos cero cuando no existían movimientos, sin modificar los datasets de T38.
+- Se generaron características sin fuga futura: categoría, mes, índice temporal, tres rezagos, promedio móvil de los tres meses anteriores y representación cíclica del mes.
+- Se utilizó una división cronológica: 210 filas de entrenamiento entre 2024-04 y 2025-12, y 60 filas de prueba entre 2026-01 y 2026-06.
+- Se evaluaron LinearRegression, RandomForestRegressor y GradientBoostingRegressor con idénticos datos, variables y preprocesamiento.
+- GradientBoostingRegressor fue seleccionado por obtener el menor WAPE (`20,1277 %`), respaldado por MAE y RMSE, y posteriormente se reentrenó con las 270 filas supervisadas disponibles hasta 2026-06.
+- El pipeline final fue guardado, cargado nuevamente y produjo una predicción técnica finita para julio de 2026.
+- Las métricas de T40 constituyen una evaluación inicial para seleccionar el modelo. El resultado no cumple por sí solo el objetivo de error menor o igual al 20 % y el Ítem 22 permanece **Pendiente** para su evaluación formal.
+- Se generaron `model_evaluation.json`, `model_selection_report.md`, `model_metadata.json` y `expense_forecast_model.joblib` de forma reproducible.
+- Al cumplirse la evaluación de tres técnicas, selección justificada, entrenamiento, almacenamiento, carga y prueba del modelo, el Ítem 17 queda **Completado**. Los Ítems 18 y 22 no se iniciaron ni completaron.
 
 ## Pruebas
 
@@ -262,7 +275,7 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 | --- | --- | --- |
 | Datos simulados | Generación reproducible, validación estricta y agregación mensual | Completada en T38 |
 | Análisis de patrones | Métricas descriptivas, selección respaldada y reproducibilidad | Completada en T39 |
-| Modelo predictivo | Entrenamiento y resultados controlados | Pendiente |
+| Modelo predictivo | Comparación temporal de tres técnicas, entrenamiento, carga y resultado controlado | Completada en T40 |
 | Integración | Comunicación Node.js/Express ↔ FastAPI | Pendiente |
 | Proyecciones | Generación, persistencia y presentación | Pendiente |
 | Margen de error | Comparación con valores esperados | Pendiente |

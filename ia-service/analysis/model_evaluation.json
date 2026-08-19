@@ -1,0 +1,35 @@
+{
+  "training_period": "2024-04 a 2025-12",
+  "evaluation_period": "2026-01 a 2026-06",
+  "training_rows": 210,
+  "test_rows": 60,
+  "positive_test_targets": 49,
+  "candidate_metrics": {
+    "LinearRegression": {
+      "mae": 30204.398,
+      "rmse": 41416.2289,
+      "wape_percentage": 21.6617,
+      "mape_positive_targets_percentage": 29.3406,
+      "positive_target_rows_for_mape": 49,
+      "negative_predictions": 2
+    },
+    "RandomForestRegressor": {
+      "mae": 29789.9538,
+      "rmse": 39860.6669,
+      "wape_percentage": 21.3645,
+      "mape_positive_targets_percentage": 24.8029,
+      "positive_target_rows_for_mape": 49,
+      "negative_predictions": 0
+    },
+    "GradientBoostingRegressor": {
+      "mae": 28065.3463,
+      "rmse": 40147.3019,
+      "wape_percentage": 20.1277,
+      "mape_positive_targets_percentage": 22.8749,
+      "positive_target_rows_for_mape": 49,
+      "negative_predictions": 0
+    }
+  },
+  "selection_metric": "wape_percentage",
+  "selected_model": "GradientBoostingRegressor"
+}

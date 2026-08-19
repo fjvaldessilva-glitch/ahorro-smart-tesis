@@ -1,0 +1,26 @@
+{
+  "simulation_seed": 2026,
+  "start_date": "2024-01-01",
+  "end_date": "2026-06-30",
+  "total_transactions": 787,
+  "total_categories": 10,
+  "categories": [
+    "Alimentación",
+    "Transporte",
+    "Vivienda",
+    "Servicios básicos",
+    "Salud",
+    "Educación",
+    "Pago de deudas y créditos",
+    "Entretenimiento",
+    "Mascotas",
+    "Otros gastos"
+  ],
+  "total_amount": 40360354.0,
+  "invalid_dates": 0,
+  "invalid_categories": 0,
+  "invalid_amounts": 0,
+  "empty_values": 0,
+  "raw_rows": 787,
+  "processed_rows": 250
+}

@@ -20,7 +20,7 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 
 | Ítem | Descripción | Estado inicial |
 | --- | --- | --- |
-| 16 | Preparación de datos e identificación de patrones | Pendiente |
+| 16 | Preparación de datos e identificación de patrones | En desarrollo |
 | 17 | Selección y entrenamiento del modelo | Pendiente |
 | 18 | Generación e integración de proyecciones | Pendiente |
 | 19 | Presentación de las proyecciones | Pendiente |
@@ -229,7 +229,19 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 
 | ID | Microtarea | Estado | Resultado principal |
 | --- | --- | --- | --- |
-| Por registrar | Pendiente de definición | Pendiente | Sin implementación al inicio del sprint. |
+| T37 | Iniciar documentalmente el Sprint 05 | Completada | Alcance, objetivo, backlog y estructura documental inicial registrados. |
+| T38 | Preparar y validar datos simulados | Completada | Dataset sintético reproducible generado, validado y agregado mensualmente. |
+
+### T38 - Preparar y validar datos simulados
+
+- Se generó un historial de gastos completamente sintético para el período 2024-01-01 a 2026-06-30 mediante la semilla fija `2026`.
+- Los datos originales utilizan `date`, `category` y `amount`, manteniendo trazabilidad con VE-02, VE-03 y VE-01, respectivamente.
+- Se validaron fechas, categorías, montos positivos y finitos, y ausencia de campos vacíos antes del procesamiento.
+- Se derivaron `year`, `month` y `period`, y se calcularon `monthly_amount` y `transaction_count` mediante agrupación mensual por categoría.
+- El resumen de validación registra cero fechas, categorías, montos y valores vacíos inválidos.
+- Los datos no contienen información personal o financiera real y se destinan exclusivamente al desarrollo y evaluación académica controlada.
+- En T38 no se identificaron formalmente patrones de consumo, no se seleccionó un algoritmo y no se entrenó un modelo.
+- El Ítem 16 continúa **En desarrollo** hasta completar la identificación y documentación formal de patrones en T39.
 
 ## Pruebas
 
@@ -237,7 +249,8 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 
 | Área | Prueba prevista | Estado |
 | --- | --- | --- |
-| Modelo predictivo | Preparación, entrenamiento y resultados controlados | Pendiente |
+| Datos simulados | Generación reproducible, validación estricta y agregación mensual | Completada en T38 |
+| Modelo predictivo | Entrenamiento y resultados controlados | Pendiente |
 | Integración | Comunicación Node.js/Express ↔ FastAPI | Pendiente |
 | Proyecciones | Generación, persistencia y presentación | Pendiente |
 | Margen de error | Comparación con valores esperados | Pendiente |

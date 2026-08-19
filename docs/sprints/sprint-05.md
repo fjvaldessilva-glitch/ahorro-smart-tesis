@@ -20,7 +20,7 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 
 | Ítem | Descripción | Estado inicial |
 | --- | --- | --- |
-| 16 | Preparación de datos e identificación de patrones | En desarrollo |
+| 16 | Preparación de datos e identificación de patrones | Completado |
 | 17 | Selección y entrenamiento del modelo | Pendiente |
 | 18 | Generación e integración de proyecciones | Pendiente |
 | 19 | Presentación de las proyecciones | Pendiente |
@@ -231,6 +231,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | --- | --- | --- | --- |
 | T37 | Iniciar documentalmente el Sprint 05 | Completada | Alcance, objetivo, backlog y estructura documental inicial registrados. |
 | T38 | Preparar y validar datos simulados | Completada | Dataset sintético reproducible generado, validado y agregado mensualmente. |
+| T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
 
 ### T38 - Preparar y validar datos simulados
 
@@ -241,7 +242,17 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - El resumen de validación registra cero fechas, categorías, montos y valores vacíos inválidos.
 - Los datos no contienen información personal o financiera real y se destinan exclusivamente al desarrollo y evaluación académica controlada.
 - En T38 no se identificaron formalmente patrones de consumo, no se seleccionó un algoritmo y no se entrenó un modelo.
-- El Ítem 16 continúa **En desarrollo** hasta completar la identificación y documentación formal de patrones en T39.
+- El Ítem 16 continuó **En desarrollo** al finalizar T38, a la espera de la identificación y documentación formal de patrones en T39.
+
+### T39 - Analizar datos e identificar patrones habituales de consumo
+
+- Se analizaron los 787 movimientos simulados y las 250 filas mensuales procesadas de T38, correspondientes a 30 meses y 10 categorías oficiales.
+- Por categoría se calcularon monto y transacciones totales, presencia mensual, cobertura, promedio, mediana, desviación estándar, coeficiente de variación, frecuencia media y participación en el gasto total.
+- El análisis temporal incluyó evolución mensual, promedios por mes calendario y tendencia descriptiva mediante regresión lineal simple.
+- Se identificaron y documentaron tres patrones respaldados: participación monetaria dominante de Vivienda, alta frecuencia de Alimentación y recurrencia con estabilidad relativa de Pago de deudas y créditos.
+- Se generaron `patterns_summary.json` y `patterns_report.md`; la repetición del análisis sobre los mismos datos produce resultados idénticos.
+- T38 cubrió la generación, limpieza, transformación, estructuración y validación; T39 cubrió el análisis y la identificación formal de al menos tres patrones.
+- Con ambos resultados, el Ítem 16 queda **Completado**. El Ítem 17 permanece pendiente y todavía no se ha seleccionado ni entrenado un algoritmo.
 
 ## Pruebas
 
@@ -250,6 +261,7 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 | Área | Prueba prevista | Estado |
 | --- | --- | --- |
 | Datos simulados | Generación reproducible, validación estricta y agregación mensual | Completada en T38 |
+| Análisis de patrones | Métricas descriptivas, selección respaldada y reproducibilidad | Completada en T39 |
 | Modelo predictivo | Entrenamiento y resultados controlados | Pendiente |
 | Integración | Comunicación Node.js/Express ↔ FastAPI | Pendiente |
 | Proyecciones | Generación, persistencia y presentación | Pendiente |

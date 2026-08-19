@@ -1,0 +1,344 @@
+{
+  "analysis_period": "2024-01-01 a 2026-06-30",
+  "total_months": 30,
+  "total_transactions": 787,
+  "total_amount": 40360354.0,
+  "category_metrics": [
+    {
+      "category": "Alimentación",
+      "total_amount": 10158614.0,
+      "total_transactions": 323,
+      "months_present": 30,
+      "coverage_percentage": 100.0,
+      "average_monthly_amount": 338620.47,
+      "median_monthly_amount": 334562.5,
+      "standard_deviation_monthly_amount": 70546.27,
+      "coefficient_of_variation": 0.2083,
+      "average_transactions_per_month": 10.77,
+      "percentage_of_total_spending": 25.1698
+    },
+    {
+      "category": "Educación",
+      "total_amount": 1159419.0,
+      "total_transactions": 14,
+      "months_present": 14,
+      "coverage_percentage": 46.67,
+      "average_monthly_amount": 82815.64,
+      "median_monthly_amount": 86243.0,
+      "standard_deviation_monthly_amount": 24853.11,
+      "coefficient_of_variation": 0.3001,
+      "average_transactions_per_month": 0.47,
+      "percentage_of_total_spending": 2.8727
+    },
+    {
+      "category": "Entretenimiento",
+      "total_amount": 3078896.0,
+      "total_transactions": 83,
+      "months_present": 30,
+      "coverage_percentage": 100.0,
+      "average_monthly_amount": 102629.87,
+      "median_monthly_amount": 110209.0,
+      "standard_deviation_monthly_amount": 45410.15,
+      "coefficient_of_variation": 0.4425,
+      "average_transactions_per_month": 2.77,
+      "percentage_of_total_spending": 7.6285
+    },
+    {
+      "category": "Mascotas",
+      "total_amount": 661947.0,
+      "total_transactions": 23,
+      "months_present": 23,
+      "coverage_percentage": 76.67,
+      "average_monthly_amount": 28780.3,
+      "median_monthly_amount": 29128.0,
+      "standard_deviation_monthly_amount": 10051.45,
+      "coefficient_of_variation": 0.3492,
+      "average_transactions_per_month": 0.77,
+      "percentage_of_total_spending": 1.6401
+    },
+    {
+      "category": "Otros gastos",
+      "total_amount": 815894.0,
+      "total_transactions": 21,
+      "months_present": 19,
+      "coverage_percentage": 63.33,
+      "average_monthly_amount": 42941.79,
+      "median_monthly_amount": 38220.0,
+      "standard_deviation_monthly_amount": 18253.86,
+      "coefficient_of_variation": 0.4251,
+      "average_transactions_per_month": 0.7,
+      "percentage_of_total_spending": 2.0215
+    },
+    {
+      "category": "Pago de deudas y créditos",
+      "total_amount": 3940192.0,
+      "total_transactions": 30,
+      "months_present": 30,
+      "coverage_percentage": 100.0,
+      "average_monthly_amount": 131339.73,
+      "median_monthly_amount": 132435.0,
+      "standard_deviation_monthly_amount": 10198.41,
+      "coefficient_of_variation": 0.0776,
+      "average_transactions_per_month": 1.0,
+      "percentage_of_total_spending": 9.7625
+    },
+    {
+      "category": "Salud",
+      "total_amount": 830479.0,
+      "total_transactions": 14,
+      "months_present": 14,
+      "coverage_percentage": 46.67,
+      "average_monthly_amount": 59319.93,
+      "median_monthly_amount": 60548.0,
+      "standard_deviation_monthly_amount": 20692.98,
+      "coefficient_of_variation": 0.3488,
+      "average_transactions_per_month": 0.47,
+      "percentage_of_total_spending": 2.0577
+    },
+    {
+      "category": "Servicios básicos",
+      "total_amount": 2702426.0,
+      "total_transactions": 30,
+      "months_present": 30,
+      "coverage_percentage": 100.0,
+      "average_monthly_amount": 90080.87,
+      "median_monthly_amount": 90553.5,
+      "standard_deviation_monthly_amount": 12777.49,
+      "coefficient_of_variation": 0.1418,
+      "average_transactions_per_month": 1.0,
+      "percentage_of_total_spending": 6.6957
+    },
+    {
+      "category": "Transporte",
+      "total_amount": 4283787.0,
+      "total_transactions": 219,
+      "months_present": 30,
+      "coverage_percentage": 100.0,
+      "average_monthly_amount": 142792.9,
+      "median_monthly_amount": 137372.5,
+      "standard_deviation_monthly_amount": 29823.58,
+      "coefficient_of_variation": 0.2089,
+      "average_transactions_per_month": 7.3,
+      "percentage_of_total_spending": 10.6138
+    },
+    {
+      "category": "Vivienda",
+      "total_amount": 12728700.0,
+      "total_transactions": 30,
+      "months_present": 30,
+      "coverage_percentage": 100.0,
+      "average_monthly_amount": 424290.0,
+      "median_monthly_amount": 423748.5,
+      "standard_deviation_monthly_amount": 12417.79,
+      "coefficient_of_variation": 0.0293,
+      "average_transactions_per_month": 1.0,
+      "percentage_of_total_spending": 31.5376
+    }
+  ],
+  "monthly_total_metrics": {
+    "evolution": [
+      {
+        "period": "2024-01",
+        "total_amount": 1316868.0
+      },
+      {
+        "period": "2024-02",
+        "total_amount": 1006327.0
+      },
+      {
+        "period": "2024-03",
+        "total_amount": 1532167.0
+      },
+      {
+        "period": "2024-04",
+        "total_amount": 1435030.0
+      },
+      {
+        "period": "2024-05",
+        "total_amount": 1390995.0
+      },
+      {
+        "period": "2024-06",
+        "total_amount": 1369057.0
+      },
+      {
+        "period": "2024-07",
+        "total_amount": 1223449.0
+      },
+      {
+        "period": "2024-08",
+        "total_amount": 1356085.0
+      },
+      {
+        "period": "2024-09",
+        "total_amount": 1456695.0
+      },
+      {
+        "period": "2024-10",
+        "total_amount": 1357848.0
+      },
+      {
+        "period": "2024-11",
+        "total_amount": 1279098.0
+      },
+      {
+        "period": "2024-12",
+        "total_amount": 1357662.0
+      },
+      {
+        "period": "2025-01",
+        "total_amount": 1297645.0
+      },
+      {
+        "period": "2025-02",
+        "total_amount": 1419157.0
+      },
+      {
+        "period": "2025-03",
+        "total_amount": 1247051.0
+      },
+      {
+        "period": "2025-04",
+        "total_amount": 1378639.0
+      },
+      {
+        "period": "2025-05",
+        "total_amount": 1385264.0
+      },
+      {
+        "period": "2025-06",
+        "total_amount": 1258843.0
+      },
+      {
+        "period": "2025-07",
+        "total_amount": 1336811.0
+      },
+      {
+        "period": "2025-08",
+        "total_amount": 1300185.0
+      },
+      {
+        "period": "2025-09",
+        "total_amount": 1324939.0
+      },
+      {
+        "period": "2025-10",
+        "total_amount": 1398781.0
+      },
+      {
+        "period": "2025-11",
+        "total_amount": 1362303.0
+      },
+      {
+        "period": "2025-12",
+        "total_amount": 1203254.0
+      },
+      {
+        "period": "2026-01",
+        "total_amount": 1733632.0
+      },
+      {
+        "period": "2026-02",
+        "total_amount": 1376375.0
+      },
+      {
+        "period": "2026-03",
+        "total_amount": 1330032.0
+      },
+      {
+        "period": "2026-04",
+        "total_amount": 1231737.0
+      },
+      {
+        "period": "2026-05",
+        "total_amount": 1312648.0
+      },
+      {
+        "period": "2026-06",
+        "total_amount": 1381777.0
+      }
+    ],
+    "average_total_monthly_amount": 1345345.13,
+    "median_total_monthly_amount": 1356873.5,
+    "standard_deviation_total_monthly_amount": 117488.2,
+    "calendar_month_average": {
+      "01": 1449381.67,
+      "02": 1267286.33,
+      "03": 1369750.0,
+      "04": 1348468.67,
+      "05": 1362969.0,
+      "06": 1336559.0,
+      "07": 1280130.0,
+      "08": 1328135.0,
+      "09": 1390817.0,
+      "10": 1378314.5,
+      "11": 1320700.5,
+      "12": 1280458.0
+    },
+    "trend": {
+      "slope_per_month": 1192.89,
+      "direction": "estable"
+    },
+    "highest_frequency_category": "Alimentación",
+    "highest_spending_share_category": "Vivienda",
+    "recurrent_categories": [
+      "Alimentación",
+      "Entretenimiento",
+      "Pago de deudas y créditos",
+      "Servicios básicos",
+      "Transporte",
+      "Vivienda"
+    ]
+  },
+  "selected_patterns": [
+    {
+      "id": "P01",
+      "name": "Participación monetaria dominante de Vivienda",
+      "description": "Categoría con la mayor proporción del gasto total del escenario simulado.",
+      "categories": [
+        "Vivienda"
+      ],
+      "period": "2024-01-01 a 2026-06-30",
+      "evidence": {
+        "percentage_of_total_spending": 31.5376,
+        "total_amount": 12728700.0,
+        "coverage_percentage": 100.0
+      },
+      "technical_interpretation": "La categoría concentra la mayor participación monetaria observada; se describe una asociación cuantitativa, no una causa.",
+      "predictive_relevance": "Su peso relativo justifica considerar categoría, período y monto al evaluar posteriormente técnicas predictivas."
+    },
+    {
+      "id": "P02",
+      "name": "Alta frecuencia de transacciones en Alimentación",
+      "description": "Categoría con la mayor cantidad de movimientos durante el período analizado.",
+      "categories": [
+        "Alimentación"
+      ],
+      "period": "2024-01-01 a 2026-06-30",
+      "evidence": {
+        "total_transactions": 323,
+        "average_transactions_per_month": 10.77,
+        "coverage_percentage": 100.0
+      },
+      "technical_interpretation": "La recurrencia transaccional es superior a la de las demás categorías del dataset simulado.",
+      "predictive_relevance": "La frecuencia aporta observaciones repetidas para estudiar la evolución temporal futura de los gastos."
+    },
+    {
+      "id": "P03",
+      "name": "Recurrencia y estabilidad relativa en Pago de deudas y créditos",
+      "description": "Categoría recurrente con la menor variabilidad relativa entre las alternativas de alta cobertura no seleccionadas como dominantes.",
+      "categories": [
+        "Pago de deudas y créditos"
+      ],
+      "period": "2024-01-01 a 2026-06-30",
+      "evidence": {
+        "coverage_percentage": 100.0,
+        "average_monthly_amount": 131339.73,
+        "standard_deviation_monthly_amount": 10198.41,
+        "coefficient_of_variation": 0.0776
+      },
+      "technical_interpretation": "La presencia mensual elevada y la dispersión relativa reducida muestran un comportamiento comparativamente estable.",
+      "predictive_relevance": "La regularidad puede servir como referencia al comparar posteriormente técnicas para estimar gastos futuros."
+    }
+  ]
+}

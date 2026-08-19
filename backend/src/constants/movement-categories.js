@@ -29,6 +29,7 @@ const movementCategories = Object.freeze([
 
 module.exports = {
   categoriesByType,
+  expenseCategories,
   movementCategories,
   movementTypes,
 }

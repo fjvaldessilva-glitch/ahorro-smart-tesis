@@ -22,7 +22,7 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 | --- | --- | --- |
 | 16 | Preparación de datos e identificación de patrones | Completado |
 | 17 | Selección y entrenamiento del modelo | Completado |
-| 18 | Generación e integración de proyecciones | En desarrollo |
+| 18 | Generación e integración de proyecciones | Completado |
 | 19 | Presentación de las proyecciones | Pendiente |
 | 21 | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 | 22 | Evaluación del margen de error | Pendiente |
@@ -234,6 +234,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
 | T40 | Seleccionar y entrenar el modelo predictivo | Completada | Tres técnicas evaluadas; GradientBoostingRegressor seleccionado, reentrenado y guardado. |
 | T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio independiente operativo con carga del modelo y endpoints `/health` y `/predict`. |
+| T42 | Integrar Node/Express con FastAPI y persistir proyecciones | Completada | Flujo autenticado MongoDB → Express → FastAPI → Express → MongoDB operativo. |
 
 ### T38 - Preparar y validar datos simulados
 
@@ -279,6 +280,19 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - Las pruebas automáticas y las comprobaciones manuales de `/health`, `/docs` y `/predict` finalizaron correctamente.
 - T41 queda **Completada**. El Ítem 18 pasa a **En desarrollo** porque todavía faltan la integración con Node.js/Express, la persistencia y el flujo completo. Los Ítems 19 y 22 permanecen **Pendientes**.
 
+### T42 - Integrar Node/Express con FastAPI y persistir proyecciones
+
+- Se creó el modelo Mongoose `Projection` con usuario, período objetivo, modelo, diez resultados por categoría, total proyectado, meses históricos y fecha de generación.
+- Se incorporó un índice único compuesto por `user + targetPeriod` y persistencia mediante upsert para actualizar una proyección sin generar duplicados.
+- El backend utiliza `IA_SERVICE_URL` y `fetch` nativo con timeout para comunicarse con FastAPI, sin agregar dependencias Node.js.
+- `POST /api/projections/generate` obtiene exclusivamente movimientos `Gasto` del usuario autenticado anteriores al período objetivo, llama a FastAPI, valida su respuesta y persiste el resultado.
+- `GET /api/projections?targetPeriod=YYYY-MM` recupera únicamente la proyección del usuario autenticado y devuelve 404 ante otro usuario o un período inexistente.
+- Las rutas utilizan el middleware JWT existente y nunca aceptan un identificador de usuario desde el body como autoridad.
+- Las pruebas aisladas verificaron autenticación, validación del período, FastAPI no disponible, generación real, persistencia, recuperación, upsert, índice único y aislamiento entre usuarios.
+- La prueba integral para septiembre de 2026 envió tres gastos históricos desde MongoDB, excluyó un ingreso, persistió diez categorías y un total proyectado de `$382.250,18`.
+- Los usuarios y movimientos aislados de prueba fueron eliminados al finalizar; los conteos previos de users, movements y budgets se mantuvieron intactos.
+- T42 queda **Completada** y el Ítem 18 queda **Completado** al estar operativas la generación, integración entre servicios, persistencia y recuperación. Los Ítems 19 y 22 permanecen **Pendientes**.
+
 ## Pruebas
 
 Las pruebas se documentarán durante las microtareas correspondientes y deberán consolidarse después de integrar el componente predictivo.
@@ -289,8 +303,8 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 | Análisis de patrones | Métricas descriptivas, selección respaldada y reproducibilidad | Completada en T39 |
 | Modelo predictivo | Comparación temporal de tres técnicas, entrenamiento, carga y resultado controlado | Completada en T40 |
 | Servicio predictivo | Carga del modelo, endpoints, validaciones y proyección controlada | Completada en T41 |
-| Integración | Comunicación Node.js/Express ↔ FastAPI | Pendiente |
-| Proyecciones | Generación, persistencia y presentación | Pendiente |
+| Integración | Comunicación Node.js/Express ↔ FastAPI | Completada en T42 |
+| Proyecciones | Generación y persistencia | Completada en T42; presentación pendiente en Ítem 19 |
 | Margen de error | Comparación con valores esperados | Pendiente |
 | Sistema completo | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 

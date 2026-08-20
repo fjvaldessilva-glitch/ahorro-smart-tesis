@@ -234,8 +234,8 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
 | T40 | Seleccionar y entrenar el modelo predictivo de cierre mensual | Completada | LinearRegression seleccionado mediante escenarios parciales del mes y guardado como artefacto reproducible. |
 | T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio de cierre mensual operativo con LinearRegression y endpoints `/health` y `/predict`. |
-| T42 | Integrar Node/Express con FastAPI y persistir proyecciones | Completada | Flujo autenticado MongoDB → Express → FastAPI → Express → MongoDB operativo. |
-| T43 | Integrar las proyecciones reales en el frontend | Completada | Consulta, generación y presentación responsiva de proyecciones reales integradas mediante JWT. |
+| T42 | Integrar el backend con el servicio predictivo y persistir proyecciones de cierre mensual | Completada | Flujo autenticado MongoDB → Express → FastAPI → Express → MongoDB operativo para el cierre del mes en curso. |
+| T43 | Presentar las proyecciones de cierre mensual en el frontend | Pendiente | Integración visual del gasto acumulado, presupuesto mensual y proyección de cierre mediante los endpoints definitivos de T42. |
 
 ### T38 - Preparar y validar datos simulados
 
@@ -289,32 +289,32 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - La prueba sin historial anterior utilizó dos gastos de agosto por `$40.000`; la prueba con historial añadió `$150.000` de julio. Ambas generaron una proyección finita para el cierre de agosto de 2026.
 - T41 queda **Completada**. El Ítem 18 permanece **En desarrollo**, pendiente de adaptar Node.js/Express y MongoDB al contrato de cierre mensual. El Ítem 19 permanece **En desarrollo** y los Ítems 21 y 22 continúan **Pendientes**.
 
-### T42 - Integrar Node/Express con FastAPI y persistir proyecciones
+### T42 - Integrar el backend con el servicio predictivo y persistir proyecciones de cierre mensual
 
-- Se creó el modelo Mongoose `Projection` con usuario, período objetivo, modelo, diez resultados por categoría, total proyectado, meses históricos y fecha de generación.
-- Se incorporó un índice único compuesto por `user + targetPeriod` y persistencia mediante upsert para actualizar una proyección sin generar duplicados.
-- El backend utiliza `IA_SERVICE_URL` y `fetch` nativo con timeout para comunicarse con FastAPI, sin agregar dependencias Node.js.
-- `POST /api/projections/generate` obtiene exclusivamente movimientos `Gasto` del usuario autenticado anteriores al período objetivo, llama a FastAPI, valida su respuesta y persiste el resultado.
-- `GET /api/projections?targetPeriod=YYYY-MM` recupera únicamente la proyección del usuario autenticado y devuelve 404 ante otro usuario o un período inexistente.
-- Las rutas utilizan el middleware JWT existente y nunca aceptan un identificador de usuario desde el body como autoridad.
-- Las pruebas aisladas verificaron autenticación, validación del período, FastAPI no disponible, generación real, persistencia, recuperación, upsert, índice único y aislamiento entre usuarios.
-- La prueba integral para septiembre de 2026 envió tres gastos históricos desde MongoDB, excluyó un ingreso, persistió diez categorías y un total proyectado de `$382.250,18`.
-- Los usuarios y movimientos aislados de prueba fueron eliminados al finalizar; los conteos previos de users, movements y budgets se mantuvieron intactos.
-- T42 queda **Completada**. El Ítem 18 permanece **En desarrollo**, pendiente de completar la integración con el modelo de cierre mensual. Los Ítems 19 y 22 permanecen **Pendientes**.
+- `POST /api/projections/generate` recibe `cutoffDate`, obtiene desde MongoDB únicamente gastos del usuario autenticado correspondientes al mes del corte y al mes inmediatamente anterior, y excluye ingresos y movimientos posteriores.
+- Express envía a FastAPI exclusivamente `cutoff_date` y `expenses`. La proyección resultante corresponde al cierre del mismo mes de la fecha de corte.
+- La actividad del mes actual es la fuente principal y basta un gasto válido para generar la proyección. El mes anterior es una señal opcional y no se exige una cantidad mínima de meses históricos.
+- El servicio valida la respuesta de FastAPI, incluidas las diez categorías, montos finitos, total, gasto acumulado, historial anterior y número de movimientos actuales utilizados.
+- El modelo Mongoose `Projection` persiste `cutoffDate`, modelo, objetivo, categorías, `spentToDate`, total proyectado, total anterior, disponibilidad del historial, cantidad de gastos y fecha de generación.
+- Se mantiene internamente `targetPeriod` y el índice único `user + targetPeriod`; su valor corresponde a `projected_period` retornado por FastAPI. La API pública utiliza `projectedPeriod`.
+- El upsert por usuario y período evita duplicados y actualiza la proyección cuando vuelve a generarse para el mismo mes.
+- `GET /api/projections?projectedPeriod=YYYY-MM` exige JWT, limita la consulta al usuario autenticado y devuelve 404 cuando no existe una proyección propia.
+- El presupuesto no se envía ni se almacena como parte predictiva. Los movimientos de tipo Ingreso tampoco participan en el flujo.
+- Las pruebas aisladas verificaron generación con y sin historial anterior, exclusión de ingresos y gastos posteriores, validación del cutoff, persistencia, upsert, consulta, aislamiento, índice único y fallas controladas del servicio predictivo.
+- Los usuarios y movimientos técnicos utilizados en la prueba se eliminan al finalizar y se verifican los conteos originales de las colecciones.
+- T42 queda **Completada** y el Ítem 18 queda **Completado**. El Ítem 19 permanece **En desarrollo** y los Ítems 21 y 22 permanecen **Pendientes**.
 
-### T43 - Integrar las proyecciones reales en el frontend
+### T43 - Presentar las proyecciones de cierre mensual en el frontend
 
-- Se reemplazó el contenido placeholder de la pestaña Proyección IA por una vista funcional integrada con los endpoints reales de T42.
-- El frontend consulta mediante `GET /api/projections?targetPeriod=YYYY-MM` y genera o actualiza mediante `POST /api/projections/generate`, utilizando el JWT de la sesión y sin enviar `userId`.
-- El período objetivo se selecciona con un control mensual y comienza dinámicamente en el mes calendario siguiente.
-- Un 404 se presenta como ausencia natural de proyección y no genera automáticamente una nueva; la generación siempre requiere una acción del usuario.
-- La vista presenta período, total mensual en CLP, modelo, meses históricos, fecha de generación y las diez categorías proyectadas, sin exponer identificadores ni predicciones técnicas internas.
-- Se incorporaron estados controlados de consulta, generación, ausencia de proyección, historial insuficiente y servicio predictivo no disponible, además del bloqueo del botón durante una solicitud.
-- La tendencia compara el total proyectado con todos los gastos persistidos del mes inmediatamente anterior disponibles en la carga completa de movimientos: más de `+2 %` indica alza, menos de `-2 %` indica baja y el intervalo restante se considera estable. Si no hay gasto anterior confiable, la interfaz no inventa una tendencia.
-- La prueba integral aislada generó y recuperó una proyección para septiembre de 2026 con `$382.250` de total, diez categorías y tres meses históricos. La comparación utilizó `$60.000` de gastos completos de agosto y mostró una variación al alza de `537,1 %`.
-- El build de Vite y la comprobación técnica en 1440, 820 y 390 píxeles finalizaron sin errores ni desbordamiento horizontal. Esta validación responsive es específica de T43 y no completa la validación formal del Ítem 21.
-- Los datos aislados utilizados para la prueba fueron eliminados al finalizar y no se modificaron datos de presentación.
-- T43 queda **Completada**. El Ítem 19 permanece **En desarrollo**, pendiente de completar la presentación integrada del modelo de cierre mensual. Los Ítems 21 y 22 permanecen **Pendientes**.
+- Estado: **Pendiente**.
+- Esta microtarea integrará en React los endpoints definitivos implementados en T42 para consultar y generar la proyección correspondiente al mes en curso.
+- La vista deberá presentar el gasto acumulado hasta la fecha de corte, el presupuesto mensual configurado, la proyección de cierre generada por inteligencia artificial y la desviación presupuestaria esperada.
+- El frontend utilizará `projectedPeriod` para consultar la proyección y `cutoffDate` para solicitar su generación.
+- La comparación con el presupuesto se realizará después de recibir la predicción; el presupuesto no será una variable de entrada del modelo predictivo.
+- La interfaz deberá permitir operar desde el primer mes cuando exista al menos un gasto válido registrado.
+- El historial del mes anterior será información complementaria y no un requisito para utilizar la proyección.
+- La implementación, pruebas y evidencias de esta microtarea se realizarán posteriormente.
+- El Ítem 19 permanece **En desarrollo**. Los Ítems 21 y 22 permanecen **Pendientes**.
 
 ## Pruebas
 

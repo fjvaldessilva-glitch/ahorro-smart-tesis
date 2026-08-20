@@ -37,7 +37,17 @@ const projectionSchema = new mongoose.Schema({
     required: true,
     match: /^\d{4}-(0[1-9]|1[0-2])$/,
   },
+  cutoffDate: {
+    type: String,
+    required: true,
+    match: /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/,
+  },
   modelName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  predictionObjective: {
     type: String,
     required: true,
     trim: true,
@@ -61,10 +71,26 @@ const projectionSchema = new mongoose.Schema({
     min: 0,
     validate: Number.isFinite,
   },
-  historicalMonthsUsed: {
+  spentToDate: {
     type: Number,
     required: true,
-    min: 3,
+    min: 0,
+    validate: Number.isFinite,
+  },
+  previousMonthTotal: {
+    type: Number,
+    required: true,
+    min: 0,
+    validate: Number.isFinite,
+  },
+  hasPreviousMonthData: {
+    type: Boolean,
+    required: true,
+  },
+  currentMonthExpensesUsed: {
+    type: Number,
+    required: true,
+    min: 1,
     validate: Number.isInteger,
   },
   generatedAt: {

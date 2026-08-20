@@ -3,47 +3,62 @@ const Projection = require('../models/Projection')
 const { expenseCategories } = require('../constants/movement-categories')
 const { AiServiceError, requestPrediction } = require('../services/aiService')
 
-const targetPeriodPattern = /^\d{4}-(0[1-9]|1[0-2])$/
+const periodPattern = /^\d{4}-(0[1-9]|1[0-2])$/
 const isoDatePattern = /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/
 
-const validateTargetPeriod = (value) => {
-  const targetPeriod = String(value ?? '').trim()
-  return targetPeriodPattern.test(targetPeriod) ? targetPeriod : null
-}
-
 const isValidIsoDate = (value) => {
-  if (!isoDatePattern.test(value)) {
-    return false
-  }
+  if (!isoDatePattern.test(value)) return false
   const parsed = new Date(`${value}T00:00:00.000Z`)
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
 }
 
+const validateCutoffDate = (value) => {
+  const cutoffDate = String(value ?? '').trim()
+  return isValidIsoDate(cutoffDate) ? cutoffDate : null
+}
+
+const validateProjectedPeriod = (value) => {
+  const projectedPeriod = String(value ?? '').trim()
+  return periodPattern.test(projectedPeriod) ? projectedPeriod : null
+}
+
+const shiftPeriod = (period, offset) => {
+  const [year, month] = period.split('-').map(Number)
+  const absoluteMonth = year * 12 + month - 1 + offset
+  return `${Math.floor(absoluteMonth / 12).toString().padStart(4, '0')}-${String((absoluteMonth % 12) + 1).padStart(2, '0')}`
+}
+
 const getPublicProjection = (projection) => ({
   id: projection._id.toString(),
-  targetPeriod: projection.targetPeriod,
+  cutoffDate: projection.cutoffDate,
+  projectedPeriod: projection.targetPeriod,
   modelName: projection.modelName,
+  predictionObjective: projection.predictionObjective,
   categories: projection.categories.map((item) => ({
     category: item.category,
     projectedAmount: item.projectedAmount,
     rawPrediction: item.rawPrediction,
     nonnegativeAdjustment: item.nonnegativeAdjustment,
   })),
+  spentToDate: projection.spentToDate,
   totalProjectedAmount: projection.totalProjectedAmount,
-  historicalMonthsUsed: projection.historicalMonthsUsed,
+  previousMonthTotal: projection.previousMonthTotal,
+  hasPreviousMonthData: projection.hasPreviousMonthData,
+  currentMonthExpensesUsed: projection.currentMonthExpensesUsed,
   generatedAt: projection.generatedAt,
 })
 
-const getHistoricalExpenses = async (userId, targetPeriod) => {
+const getPredictionExpenses = async (userId, cutoffDate) => {
+  const projectedPeriod = cutoffDate.slice(0, 7)
+  const previousPeriod = shiftPeriod(projectedPeriod, -1)
   const movements = await Movement.find({
     user: userId,
     tipo: 'Gasto',
-    fecha: { $lt: `${targetPeriod}-01` },
+    fecha: {
+      $gte: `${previousPeriod}-01`,
+      $lte: cutoffDate,
+    },
   }).select('categoria monto fecha').sort({ fecha: 1 })
-
-  if (movements.length === 0) {
-    return { error: 'El usuario no posee gastos históricos para generar una proyección.' }
-  }
 
   const hasInvalidMovement = movements.some((movement) => (
     !expenseCategories.includes(movement.categoria)
@@ -52,7 +67,16 @@ const getHistoricalExpenses = async (userId, targetPeriod) => {
       || !isValidIsoDate(movement.fecha)
   ))
   if (hasInvalidMovement) {
-    return { error: 'El historial contiene movimientos de gasto inválidos.' }
+    return { error: 'Los movimientos de gasto disponibles contienen datos inválidos.' }
+  }
+
+  const currentMonthExpenses = movements.filter((movement) => (
+    movement.fecha.startsWith(projectedPeriod)
+  ))
+  if (currentMonthExpenses.length === 0) {
+    return {
+      error: 'No existen gastos registrados en el mes en curso para generar una proyección.',
+    }
   }
 
   return {
@@ -65,45 +89,48 @@ const getHistoricalExpenses = async (userId, targetPeriod) => {
 }
 
 const generateProjection = async (request, response) => {
-  const targetPeriod = validateTargetPeriod(request.body?.targetPeriod)
-  if (!targetPeriod) {
+  const cutoffDate = validateCutoffDate(request.body?.cutoffDate)
+  if (!cutoffDate) {
     return response.status(400).json({
       status: 'error',
-      message: 'El período objetivo debe utilizar el formato YYYY-MM.',
+      message: 'La fecha de corte debe utilizar el formato YYYY-MM-DD y ser válida.',
     })
   }
 
   try {
-    const { expenses, error } = await getHistoricalExpenses(
+    const { expenses, error } = await getPredictionExpenses(
       request.authenticatedUserId,
-      targetPeriod,
+      cutoffDate,
     )
     if (error) {
       return response.status(422).json({ status: 'error', message: error })
     }
 
     const prediction = await requestPrediction({
-      target_period: targetPeriod,
+      cutoff_date: cutoffDate,
       expenses,
     })
+    const targetPeriod = prediction.projected_period
     const generatedAt = new Date()
     const projectionData = {
+      cutoffDate: prediction.cutoff_date,
       modelName: prediction.model_name,
+      predictionObjective: prediction.prediction_objective,
       categories: prediction.categories.map((item) => ({
         category: item.category,
         projectedAmount: item.projected_amount,
         rawPrediction: item.raw_prediction,
         nonnegativeAdjustment: item.nonnegative_adjustment,
       })),
+      spentToDate: prediction.spent_to_date,
       totalProjectedAmount: prediction.total_projected_amount,
-      historicalMonthsUsed: prediction.historical_months_used,
+      previousMonthTotal: prediction.previous_month_total,
+      hasPreviousMonthData: prediction.has_previous_month_data,
+      currentMonthExpensesUsed: prediction.current_month_expenses_used,
       generatedAt,
     }
     const projection = await Projection.findOneAndUpdate(
-      {
-        user: request.authenticatedUserId,
-        targetPeriod,
-      },
+      { user: request.authenticatedUserId, targetPeriod },
       {
         $set: projectionData,
         $setOnInsert: {
@@ -138,18 +165,18 @@ const generateProjection = async (request, response) => {
 }
 
 const getProjection = async (request, response) => {
-  const targetPeriod = validateTargetPeriod(request.query.targetPeriod)
-  if (!targetPeriod) {
+  const projectedPeriod = validateProjectedPeriod(request.query.projectedPeriod)
+  if (!projectedPeriod) {
     return response.status(400).json({
       status: 'error',
-      message: 'El período objetivo debe utilizar el formato YYYY-MM.',
+      message: 'El período proyectado debe utilizar el formato YYYY-MM.',
     })
   }
 
   try {
     const projection = await Projection.findOne({
       user: request.authenticatedUserId,
-      targetPeriod,
+      targetPeriod: projectedPeriod,
     })
     if (!projection) {
       return response.status(404).json({

@@ -19,15 +19,15 @@ const getPredictUrl = () => {
 const getErrorMessage = (status, body) => {
   if (status === 400 || status === 422) {
     const detail = typeof body?.detail === 'string' ? body.detail : ''
-    if (/tres meses|historial/i.test(detail)) {
-      return 'No existe historial suficiente para generar la proyección.'
+    if (detail) {
+      return detail
     }
-    return 'El historial financiero no permite generar la proyección solicitada.'
+    return 'Los gastos disponibles no permiten generar la proyección solicitada.'
   }
   return 'El servicio predictivo no pudo generar la proyección.'
 }
 
-const validatePredictionResponse = (prediction, targetPeriod) => {
+const validatePredictionResponse = (prediction, cutoffDate) => {
   const categories = prediction?.categories
   const receivedCategories = Array.isArray(categories)
     ? categories.map(({ category }) => category)
@@ -43,15 +43,23 @@ const validatePredictionResponse = (prediction, targetPeriod) => {
   ))
 
   if (
-    prediction?.target_period !== targetPeriod
+    prediction?.cutoff_date !== cutoffDate
+    || prediction?.projected_period !== cutoffDate.slice(0, 7)
     || typeof prediction?.model_name !== 'string'
     || !prediction.model_name.trim()
+    || typeof prediction?.prediction_objective !== 'string'
+    || !prediction.prediction_objective.trim()
     || !hasOfficialCategories
     || !hasValidAmounts
+    || !Number.isFinite(prediction?.spent_to_date)
+    || prediction.spent_to_date < 0
     || !Number.isFinite(prediction?.total_projected_amount)
     || prediction.total_projected_amount < 0
-    || !Number.isInteger(prediction?.historical_months_used)
-    || prediction.historical_months_used < 3
+    || !Number.isFinite(prediction?.previous_month_total)
+    || prediction.previous_month_total < 0
+    || typeof prediction?.has_previous_month_data !== 'boolean'
+    || !Number.isInteger(prediction?.current_month_expenses_used)
+    || prediction.current_month_expenses_used < 1
   ) {
     throw new AiServiceError('El servicio predictivo devolvió una respuesta inválida.')
   }
@@ -84,7 +92,7 @@ const requestPrediction = async (payload) => {
       throw new AiServiceError(getErrorMessage(response.status, body), statusCode)
     }
 
-    return validatePredictionResponse(body, payload.target_period)
+    return validatePredictionResponse(body, payload.cutoff_date)
   } catch (error) {
     if (error instanceof AiServiceError) {
       throw error

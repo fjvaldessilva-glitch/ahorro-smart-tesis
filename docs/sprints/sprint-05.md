@@ -22,8 +22,8 @@ Este sprint corresponde a la etapa de desarrollo del componente predictivo, su i
 | --- | --- | --- |
 | 16 | Preparación de datos e identificación de patrones | Completado |
 | 17 | Selección y entrenamiento del modelo | Completado |
-| 18 | Generación e integración de proyecciones | Completado |
-| 19 | Presentación de las proyecciones | Completado |
+| 18 | Generación e integración de proyecciones | En desarrollo |
+| 19 | Presentación de las proyecciones | En desarrollo |
 | 21 | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 | 22 | Evaluación del margen de error | Pendiente |
 | 23 | Integración general y corrección de errores | Pendiente |
@@ -232,7 +232,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T37 | Iniciar documentalmente el Sprint 05 | Completada | Alcance, objetivo, backlog y estructura documental inicial registrados. |
 | T38 | Preparar y validar datos simulados | Completada | Dataset sintético reproducible generado, validado y agregado mensualmente. |
 | T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
-| T40 | Seleccionar y entrenar el modelo predictivo | Completada | Tres técnicas evaluadas; GradientBoostingRegressor seleccionado, reentrenado y guardado. |
+| T40 | Seleccionar y entrenar el modelo predictivo de cierre mensual | Completada | LinearRegression seleccionado mediante escenarios parciales del mes y guardado como artefacto reproducible. |
 | T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio independiente operativo con carga del modelo y endpoints `/health` y `/predict`. |
 | T42 | Integrar Node/Express con FastAPI y persistir proyecciones | Completada | Flujo autenticado MongoDB → Express → FastAPI → Express → MongoDB operativo. |
 | T43 | Integrar las proyecciones reales en el frontend | Completada | Consulta, generación y presentación responsiva de proyecciones reales integradas mediante JWT. |
@@ -258,17 +258,22 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - T38 cubrió la generación, limpieza, transformación, estructuración y validación; T39 cubrió el análisis y la identificación formal de al menos tres patrones.
 - Con ambos resultados, el Ítem 16 quedó **Completado**. Al finalizar T39, el Ítem 17 todavía permanecía pendiente y no se había seleccionado ni entrenado un algoritmo.
 
-### T40 - Seleccionar y entrenar el modelo predictivo
+### T40 - Seleccionar y entrenar el modelo predictivo de cierre mensual
 
-- Se construyó internamente un panel mensual completo con las 10 categorías oficiales y montos cero cuando no existían movimientos, sin modificar los datasets de T38.
-- Se generaron características sin fuga futura: categoría, mes, índice temporal, tres rezagos, promedio móvil de los tres meses anteriores y representación cíclica del mes.
-- Se utilizó una división cronológica: 210 filas de entrenamiento entre 2024-04 y 2025-12, y 60 filas de prueba entre 2026-01 y 2026-06.
-- Se evaluaron LinearRegression, RandomForestRegressor y GradientBoostingRegressor con idénticos datos, variables y preprocesamiento.
-- GradientBoostingRegressor fue seleccionado por obtener el menor WAPE (`20,1277 %`), respaldado por MAE y RMSE, y posteriormente se reentrenó con las 270 filas supervisadas disponibles hasta 2026-06.
-- El pipeline final fue guardado, cargado nuevamente y produjo una predicción técnica finita para julio de 2026.
-- Las métricas de T40 constituyen una evaluación inicial para seleccionar el modelo. El resultado no cumple por sí solo el objetivo de error menor o igual al 20 % y el Ítem 22 permanece **Pendiente** para su evaluación formal.
-- Se generaron `model_evaluation.json`, `model_selection_report.md`, `model_metadata.json` y `expense_forecast_model.joblib` de forma reproducible.
-- Al cumplirse la evaluación de tres técnicas, selección justificada, entrenamiento, almacenamiento, carga y prueba del modelo, el Ítem 17 queda **Completado**. Los Ítems 18 y 22 no se iniciaron ni completaron.
+- Ahorro Smart utiliza un modelo predictivo para estimar el gasto total esperado al cierre del mes en curso a partir de la actividad registrada hasta una fecha de corte dentro del mismo período.
+- A partir de las transacciones individuales simuladas se construyeron 177 escenarios históricos parciales y 1.770 filas supervisadas: cortes en los días 5, 10, 15, 20 y 25, más el primer día con movimientos cuando aportaba un corte diferente.
+- Cada escenario utiliza solamente los movimientos observados hasta la fecha de corte; la actividad posterior se utiliza exclusivamente como objetivo histórico al cierre, evitando fuga de información.
+- Las variables representan categoría, mes, día de corte, duración y progreso del mes, montos y transacciones acumuladas, promedios hasta la fecha, estacionalidad y señales opcionales del mes anterior.
+- El modelo produce resultados para las diez categorías oficiales de gasto y su suma forma el total proyectado de cierre mensual. No se utilizaron ingresos ni presupuesto como variables predictivas.
+- El modelo puede operar desde el primer mes cuando existe al menos un gasto válido. El historial anterior es complementario y opcional; `has_previous_month_data` distingue su ausencia de un valor real igual a cero.
+- Se compararon LinearRegression, RandomForestRegressor y GradientBoostingRegressor con idénticos datos y variables, además de una baseline de extrapolación por ritmo de gasto.
+- La selección utilizó principalmente el WAPE del total mensual en la validación 2025-07 a 2025-12. LinearRegression obtuvo el menor WAPE total (`4,1554 %`), frente a GradientBoostingRegressor (`4,8302 %`), RandomForestRegressor (`8,3634 %`) y la baseline (`55,0917 %`).
+- El entrenamiento para selección utilizó 1.060 filas de 2024-01 a 2025-06; la validación utilizó 360 filas. El artefacto final se entrenó con 1.420 filas hasta 2025-12.
+- Las 350 filas de 2026-01 a 2026-06 quedaron completamente reservadas para la evaluación independiente del Ítem 22 y no participaron en entrenamiento, selección, ajuste ni métricas de T40.
+- Las predicciones negativas se conservan como valor bruto de evaluación y se ajustan mediante `max(0, raw_prediction)` en la salida funcional. LinearRegression requirió ocho ajustes en validación.
+- Dos ejecuciones consecutivas seleccionaron el mismo modelo y produjeron artefacto, métricas, informe y metadatos idénticos. Las pruebas técnicas generaron diez resultados finitos tanto sin historial anterior como con él.
+- Se generaron `month_end_model_evaluation.json`, `month_end_model_selection_report.md`, `month_end_model_metadata.json` y `month_end_forecast_model.joblib`. Los artefactos preexistentes se mantienen temporalmente porque FastAPI todavía depende de ellos.
+- T40 queda **Completada** y el Ítem 17 queda **Completado**. Los Ítems 18 y 19 permanecen **En desarrollo**, pendientes de completar su integración con el modelo de cierre mensual. Los Ítems 21 y 22 permanecen **Pendientes**.
 
 ### T41 - Crear el servicio predictivo con FastAPI
 
@@ -292,7 +297,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - Las pruebas aisladas verificaron autenticación, validación del período, FastAPI no disponible, generación real, persistencia, recuperación, upsert, índice único y aislamiento entre usuarios.
 - La prueba integral para septiembre de 2026 envió tres gastos históricos desde MongoDB, excluyó un ingreso, persistió diez categorías y un total proyectado de `$382.250,18`.
 - Los usuarios y movimientos aislados de prueba fueron eliminados al finalizar; los conteos previos de users, movements y budgets se mantuvieron intactos.
-- T42 queda **Completada** y el Ítem 18 queda **Completado** al estar operativas la generación, integración entre servicios, persistencia y recuperación. Los Ítems 19 y 22 permanecen **Pendientes**.
+- T42 queda **Completada**. El Ítem 18 permanece **En desarrollo**, pendiente de completar la integración con el modelo de cierre mensual. Los Ítems 19 y 22 permanecen **Pendientes**.
 
 ### T43 - Integrar las proyecciones reales en el frontend
 
@@ -306,7 +311,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - La prueba integral aislada generó y recuperó una proyección para septiembre de 2026 con `$382.250` de total, diez categorías y tres meses históricos. La comparación utilizó `$60.000` de gastos completos de agosto y mostró una variación al alza de `537,1 %`.
 - El build de Vite y la comprobación técnica en 1440, 820 y 390 píxeles finalizaron sin errores ni desbordamiento horizontal. Esta validación responsive es específica de T43 y no completa la validación formal del Ítem 21.
 - Los datos aislados utilizados para la prueba fueron eliminados al finalizar y no se modificaron datos de presentación.
-- T43 queda **Completada**. El Ítem 19 queda **Completado** al presentar período, monto y tendencia confiable. Los Ítems 21 y 22 permanecen **Pendientes**.
+- T43 queda **Completada**. El Ítem 19 permanece **En desarrollo**, pendiente de completar la presentación integrada del modelo de cierre mensual. Los Ítems 21 y 22 permanecen **Pendientes**.
 
 ## Pruebas
 
@@ -321,6 +326,7 @@ Las pruebas se documentarán durante las microtareas correspondientes y deberán
 | Integración | Comunicación Node.js/Express ↔ FastAPI | Completada en T42 |
 | Proyecciones | Generación, persistencia y presentación frontend | Completada en T42 y T43 |
 | Presentación responsive T43 | Consulta, generación, estados, total, categorías y tendencia en 1440/820/390 px | Completada en T43; no sustituye las pruebas formales del Ítem 21 |
+| Modelo de cierre mensual | Escenarios parciales, comparación de tres candidatos, baseline y pruebas con/sin historial | Completada en T40; período 2026 reservado para Ítem 22 |
 | Margen de error | Comparación con valores esperados | Pendiente |
 | Sistema completo | Pruebas funcionales, responsivas y de usabilidad | Pendiente |
 

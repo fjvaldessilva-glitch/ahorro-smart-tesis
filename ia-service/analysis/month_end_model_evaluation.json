@@ -1,0 +1,94 @@
+{
+  "prediction_objective": "Estimación del gasto al cierre del mes en curso",
+  "training_period": "2024-01 a 2025-06",
+  "validation_period": "2025-07 a 2025-12",
+  "reserved_evaluation_period": "2026-01 a 2026-06",
+  "training_rows": 1060,
+  "validation_rows": 360,
+  "reserved_rows_not_evaluated": 350,
+  "candidate_metrics": {
+    "LinearRegression": {
+      "mae_total": 54894.3302,
+      "rmse_total": 67676.842,
+      "wape_total_percentage": 4.1554,
+      "negative_raw_predictions": 8,
+      "nonnegative_adjustments": 8,
+      "evaluated_scenarios": 36,
+      "wape_by_category_percentage": {
+        "Alimentación": 23.4052,
+        "Transporte": 32.3167,
+        "Vivienda": 6.4619,
+        "Servicios básicos": 14.5566,
+        "Salud": 141.3322,
+        "Educación": 112.1973,
+        "Pago de deudas y créditos": 11.6212,
+        "Entretenimiento": 51.6977,
+        "Mascotas": 60.6442,
+        "Otros gastos": 114.1244
+      }
+    },
+    "RandomForestRegressor": {
+      "mae_total": 110484.1978,
+      "rmse_total": 130701.8034,
+      "wape_total_percentage": 8.3634,
+      "negative_raw_predictions": 0,
+      "nonnegative_adjustments": 0,
+      "evaluated_scenarios": 36,
+      "wape_by_category_percentage": {
+        "Alimentación": 18.363,
+        "Transporte": 49.3922,
+        "Vivienda": 1.834,
+        "Servicios básicos": 7.8719,
+        "Salud": 153.8304,
+        "Educación": 123.6775,
+        "Pago de deudas y créditos": 8.9586,
+        "Entretenimiento": 30.1695,
+        "Mascotas": 35.1368,
+        "Otros gastos": 72.7378
+      }
+    },
+    "GradientBoostingRegressor": {
+      "mae_total": 63809.6382,
+      "rmse_total": 78832.2399,
+      "wape_total_percentage": 4.8302,
+      "negative_raw_predictions": 0,
+      "nonnegative_adjustments": 0,
+      "evaluated_scenarios": 36,
+      "wape_by_category_percentage": {
+        "Alimentación": 20.0177,
+        "Transporte": 43.8472,
+        "Vivienda": 2.9888,
+        "Servicios básicos": 21.2355,
+        "Salud": 150.9281,
+        "Educación": 111.6199,
+        "Pago de deudas y créditos": 7.744,
+        "Entretenimiento": 30.8594,
+        "Mascotas": 36.9366,
+        "Otros gastos": 62.0462
+      }
+    }
+  },
+  "baseline_metrics": {
+    "mae_total": 727786.6042,
+    "rmse_total": 970399.3407,
+    "wape_total_percentage": 55.0917,
+    "negative_raw_predictions": 0,
+    "nonnegative_adjustments": 0,
+    "evaluated_scenarios": 36,
+    "wape_by_category_percentage": {
+      "Alimentación": 54.3835,
+      "Transporte": 57.5398,
+      "Vivienda": 166.7695,
+      "Servicios básicos": 97.9172,
+      "Salud": 94.5897,
+      "Educación": 114.7753,
+      "Pago de deudas y créditos": 80.124,
+      "Entretenimiento": 101.463,
+      "Mascotas": 122.5361,
+      "Otros gastos": 84.7364
+    }
+  },
+  "selection_metric": "wape_total_percentage",
+  "selected_model": "LinearRegression",
+  "reserved_period_used_for_selection": false
+}

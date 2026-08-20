@@ -1,0 +1,177 @@
+{
+  "model_name": "LinearRegression",
+  "model_library": "scikit-learn",
+  "sklearn_version": "1.9.0",
+  "random_seed": 2026,
+  "prediction_objective": "Estimación del gasto al cierre del mes en curso",
+  "target": "category_month_end_total",
+  "aggregate_target": "total_month_end_projection",
+  "input_features": [
+    "category",
+    "month",
+    "day_of_month",
+    "days_in_month",
+    "month_progress",
+    "category_spend_to_date",
+    "category_transactions_to_date",
+    "total_spend_to_date",
+    "total_transactions_to_date",
+    "category_average_transaction_to_date",
+    "overall_average_transaction_to_date",
+    "month_sin",
+    "month_cos",
+    "previous_month_category_total",
+    "previous_month_total",
+    "has_previous_month_data"
+  ],
+  "source_variables": {
+    "VE-01": "Monto: origina acumulados, conteos, promedios y totales históricos opcionales.",
+    "VE-02": "Fecha: origina month, day_of_month, days_in_month, month_progress, month_sin y month_cos.",
+    "VE-03": "Categoría: utilizada directamente como variable categórica.",
+    "VS-01": "Gasto proyectado: gasto estimado al cierre del mismo mes en curso."
+  },
+  "training_period": "2024-01 a 2025-06",
+  "validation_period": "2025-07 a 2025-12",
+  "reserved_evaluation_period": "2026-01 a 2026-06",
+  "final_training_period": "2024-01 a 2025-12",
+  "candidate_metrics": {
+    "LinearRegression": {
+      "mae_total": 54894.3302,
+      "rmse_total": 67676.842,
+      "wape_total_percentage": 4.1554,
+      "negative_raw_predictions": 8,
+      "nonnegative_adjustments": 8,
+      "evaluated_scenarios": 36,
+      "wape_by_category_percentage": {
+        "Alimentación": 23.4052,
+        "Transporte": 32.3167,
+        "Vivienda": 6.4619,
+        "Servicios básicos": 14.5566,
+        "Salud": 141.3322,
+        "Educación": 112.1973,
+        "Pago de deudas y créditos": 11.6212,
+        "Entretenimiento": 51.6977,
+        "Mascotas": 60.6442,
+        "Otros gastos": 114.1244
+      }
+    },
+    "RandomForestRegressor": {
+      "mae_total": 110484.1978,
+      "rmse_total": 130701.8034,
+      "wape_total_percentage": 8.3634,
+      "negative_raw_predictions": 0,
+      "nonnegative_adjustments": 0,
+      "evaluated_scenarios": 36,
+      "wape_by_category_percentage": {
+        "Alimentación": 18.363,
+        "Transporte": 49.3922,
+        "Vivienda": 1.834,
+        "Servicios básicos": 7.8719,
+        "Salud": 153.8304,
+        "Educación": 123.6775,
+        "Pago de deudas y créditos": 8.9586,
+        "Entretenimiento": 30.1695,
+        "Mascotas": 35.1368,
+        "Otros gastos": 72.7378
+      }
+    },
+    "GradientBoostingRegressor": {
+      "mae_total": 63809.6382,
+      "rmse_total": 78832.2399,
+      "wape_total_percentage": 4.8302,
+      "negative_raw_predictions": 0,
+      "nonnegative_adjustments": 0,
+      "evaluated_scenarios": 36,
+      "wape_by_category_percentage": {
+        "Alimentación": 20.0177,
+        "Transporte": 43.8472,
+        "Vivienda": 2.9888,
+        "Servicios básicos": 21.2355,
+        "Salud": 150.9281,
+        "Educación": 111.6199,
+        "Pago de deudas y créditos": 7.744,
+        "Entretenimiento": 30.8594,
+        "Mascotas": 36.9366,
+        "Otros gastos": 62.0462
+      }
+    }
+  },
+  "baseline_metrics": {
+    "mae_total": 727786.6042,
+    "rmse_total": 970399.3407,
+    "wape_total_percentage": 55.0917,
+    "negative_raw_predictions": 0,
+    "nonnegative_adjustments": 0,
+    "evaluated_scenarios": 36,
+    "wape_by_category_percentage": {
+      "Alimentación": 54.3835,
+      "Transporte": 57.5398,
+      "Vivienda": 166.7695,
+      "Servicios básicos": 97.9172,
+      "Salud": 94.5897,
+      "Educación": 114.7753,
+      "Pago de deudas y créditos": 80.124,
+      "Entretenimiento": 101.463,
+      "Mascotas": 122.5361,
+      "Otros gastos": 84.7364
+    }
+  },
+  "selection_metric": "Menor WAPE del total mensual; MAE y RMSE totales como respaldo.",
+  "selection_reason": "LinearRegression alcanzó el menor WAPE total (4.1554 %) sobre los mismos escenarios de validación; MAE y RMSE totales respaldan la selección.",
+  "source_transactions": 787,
+  "supervised_scenarios": 177,
+  "supervised_rows": 1770,
+  "training_rows": 1060,
+  "validation_rows": 360,
+  "reserved_rows": 350,
+  "final_training_rows": 1420,
+  "cutoff_strategy": [
+    "primer día con movimientos",
+    "día 5",
+    "día 10",
+    "día 15",
+    "día 20",
+    "día 25"
+  ],
+  "categories": [
+    "Alimentación",
+    "Transporte",
+    "Vivienda",
+    "Servicios básicos",
+    "Salud",
+    "Educación",
+    "Pago de deudas y créditos",
+    "Entretenimiento",
+    "Mascotas",
+    "Otros gastos"
+  ],
+  "requires_previous_month_history": false,
+  "minimum_current_month_expenses": 1,
+  "uses_budget": false,
+  "negative_adjustment_rule": "projected_amount = max(0, raw_prediction)",
+  "selected_model_negative_adjustments": 8,
+  "created_for": "T40 de Ahorro Smart: selección y entrenamiento del modelo predictivo de cierre mensual.",
+  "technical_tests": {
+    "without_previous_history": {
+      "scenario_id": "2024-01-01",
+      "has_previous_month_data": 0,
+      "category_predictions": 10,
+      "total_projected_amount": 1363131.1008,
+      "is_finite": true
+    },
+    "with_previous_history": {
+      "scenario_id": "2024-02-05",
+      "has_previous_month_data": 1,
+      "category_predictions": 10,
+      "total_projected_amount": 1270508.7848,
+      "is_finite": true
+    }
+  },
+  "limitations": [
+    "Datos simulados; el desempeño con datos reales puede diferir.",
+    "Los cortes no representan todos los días posibles del mes.",
+    "Una predicción con una sola transacción presenta mayor incertidumbre.",
+    "Los meses 2026-01 a 2026-06 quedan reservados para el Ítem 22.",
+    "La proyección no constituye asesoría financiera."
+  ]
+}

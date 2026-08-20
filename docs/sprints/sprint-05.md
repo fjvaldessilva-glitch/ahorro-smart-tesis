@@ -233,7 +233,7 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 | T38 | Preparar y validar datos simulados | Completada | Dataset sintético reproducible generado, validado y agregado mensualmente. |
 | T39 | Analizar datos e identificar patrones habituales de consumo | Completada | Tres patrones cuantificables identificados y documentados de forma reproducible. |
 | T40 | Seleccionar y entrenar el modelo predictivo de cierre mensual | Completada | LinearRegression seleccionado mediante escenarios parciales del mes y guardado como artefacto reproducible. |
-| T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio independiente operativo con carga del modelo y endpoints `/health` y `/predict`. |
+| T41 | Crear el servicio predictivo con FastAPI | Completada | Servicio de cierre mensual operativo con LinearRegression y endpoints `/health` y `/predict`. |
 | T42 | Integrar Node/Express con FastAPI y persistir proyecciones | Completada | Flujo autenticado MongoDB → Express → FastAPI → Express → MongoDB operativo. |
 | T43 | Integrar las proyecciones reales en el frontend | Completada | Consulta, generación y presentación responsiva de proyecciones reales integradas mediante JWT. |
 
@@ -272,19 +272,22 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 - Las 350 filas de 2026-01 a 2026-06 quedaron completamente reservadas para la evaluación independiente del Ítem 22 y no participaron en entrenamiento, selección, ajuste ni métricas de T40.
 - Las predicciones negativas se conservan como valor bruto de evaluación y se ajustan mediante `max(0, raw_prediction)` en la salida funcional. LinearRegression requirió ocho ajustes en validación.
 - Dos ejecuciones consecutivas seleccionaron el mismo modelo y produjeron artefacto, métricas, informe y metadatos idénticos. Las pruebas técnicas generaron diez resultados finitos tanto sin historial anterior como con él.
-- Se generaron `month_end_model_evaluation.json`, `month_end_model_selection_report.md`, `month_end_model_metadata.json` y `month_end_forecast_model.joblib`. Los artefactos preexistentes se mantienen temporalmente porque FastAPI todavía depende de ellos.
+- Se generaron `month_end_model_evaluation.json`, `month_end_model_selection_report.md`, `month_end_model_metadata.json` y `month_end_forecast_model.joblib`. Los artefactos técnicos preexistentes se mantienen temporalmente como respaldo histórico, pero ya no participan en el runtime de FastAPI.
 - T40 queda **Completada** y el Ítem 17 queda **Completado**. Los Ítems 18 y 19 permanecen **En desarrollo**, pendientes de completar su integración con el modelo de cierre mensual. Los Ítems 21 y 22 permanecen **Pendientes**.
 
 ### T41 - Crear el servicio predictivo con FastAPI
 
-- Se instalaron FastAPI y Uvicorn, y se creó un servicio predictivo independiente que reutiliza el modelo de T40 sin reentrenarlo.
-- El servicio carga una sola vez el pipeline Joblib y sus metadatos, e informa su disponibilidad mediante `GET /health`.
-- `POST /predict` recibe gastos históricos, rechaza información del período objetivo o posterior, agrega por mes y categoría y replica las variables temporales de T40 sin fuga de información futura.
-- Se generan diez proyecciones por categoría y un total mensual; cualquier valor negativo se conserva como predicción original y se ajusta explícitamente a cero solo en la salida funcional.
-- Se validaron historial vacío o insuficiente, categorías, fechas, montos y períodos inválidos, además de predicciones finitas y disponibilidad del modelo.
-- La prueba controlada para julio de 2026 utilizó 30 meses históricos, produjo un total proyectado de `$1.346.211,81` y no requirió ajustes por valores negativos.
-- Las pruebas automáticas y las comprobaciones manuales de `/health`, `/docs` y `/predict` finalizaron correctamente.
-- T41 queda **Completada**. El Ítem 18 pasa a **En desarrollo** porque todavía faltan la integración con Node.js/Express, la persistencia y el flujo completo. Los Ítems 19 y 22 permanecen **Pendientes**.
+- FastAPI carga `month_end_forecast_model.joblib` y `month_end_model_metadata.json`, correspondientes al pipeline LinearRegression seleccionado en T40, sin reentrenar ni modificar el modelo.
+- `GET /health` informa disponibilidad, nombre del modelo, objetivo de estimación al cierre del mes en curso y versión de Scikit-learn.
+- `POST /predict` recibe `cutoff_date` y los gastos disponibles hasta esa fecha, y proyecta el cierre del mismo mes del corte.
+- La actividad parcial del mes constituye la fuente principal. Debe existir al menos un gasto válido del mes actual; no se exigen tres meses anteriores.
+- El mes inmediatamente anterior se utiliza como historial opcional para `previous_month_category_total`, `previous_month_total` y `has_previous_month_data`. Su ausencia no impide generar la proyección.
+- Para cada una de las diez categorías se construyen las mismas variables de T40: progreso del mes, acumulados, transacciones, promedios, estacionalidad e historial opcional.
+- La respuesta incluye diez categorías, total proyectado, `spent_to_date`, `previous_month_total`, disponibilidad del historial anterior y cantidad de gastos actuales utilizados.
+- El presupuesto no se recibe ni se utiliza. Los gastos posteriores al cutoff se rechazan para evitar fuga de información y la no negatividad se aplica mediante `max(0, raw_prediction)`.
+- Once pruebas automáticas validaron `/health`, predicción con y sin historial, diez resultados finitos, entradas vacías o inválidas, movimientos posteriores y ausencia de gastos del mes actual.
+- La prueba sin historial anterior utilizó dos gastos de agosto por `$40.000`; la prueba con historial añadió `$150.000` de julio. Ambas generaron una proyección finita para el cierre de agosto de 2026.
+- T41 queda **Completada**. El Ítem 18 permanece **En desarrollo**, pendiente de adaptar Node.js/Express y MongoDB al contrato de cierre mensual. El Ítem 19 permanece **En desarrollo** y los Ítems 21 y 22 continúan **Pendientes**.
 
 ### T42 - Integrar Node/Express con FastAPI y persistir proyecciones
 

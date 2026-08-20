@@ -8,7 +8,7 @@ from app.schemas import PredictionRequest, PredictionResponse
 
 app = FastAPI(
     title="Ahorro Smart - Servicio predictivo",
-    description="Proyecciones informativas de gastos mensuales por categoría.",
+    description="Proyección informativa del gasto al cierre del mes en curso.",
     version="1.0.0",
 )
 
@@ -22,6 +22,7 @@ def health(response: Response):
         "service": "ahorro-smart-ia",
         "model_loaded": predictor.is_loaded,
         "model_name": predictor.model_name,
+        "prediction_objective": predictor.prediction_objective,
         "sklearn_version": predictor.sklearn_version,
     }
 
@@ -31,7 +32,7 @@ def predict(request: PredictionRequest):
     if not predictor.is_loaded:
         raise HTTPException(status_code=500, detail="El modelo predictivo no está disponible.")
     try:
-        return predictor.predict(request.target_period, request.expenses)
+        return predictor.predict(request.cutoff_date, request.expenses)
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from None
     except RuntimeError:

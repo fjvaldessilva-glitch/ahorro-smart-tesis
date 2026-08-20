@@ -1,10 +1,9 @@
 """Esquemas de entrada y salida del servicio predictivo."""
 
-import re
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 ExpenseCategory = Literal[
@@ -28,15 +27,8 @@ class HistoricalExpense(BaseModel):
 
 
 class PredictionRequest(BaseModel):
-    target_period: str
+    cutoff_date: date
     expenses: list[HistoricalExpense] = Field(min_length=1)
-
-    @field_validator("target_period")
-    @classmethod
-    def validate_target_period(cls, value):
-        if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", value):
-            raise ValueError("target_period debe utilizar el formato YYYY-MM.")
-        return value
 
 
 class CategoryProjection(BaseModel):
@@ -47,8 +39,13 @@ class CategoryProjection(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    target_period: str
+    cutoff_date: date
+    projected_period: str
     model_name: str
+    prediction_objective: str
     categories: list[CategoryProjection]
+    spent_to_date: float
     total_projected_amount: float
-    historical_months_used: int
+    previous_month_total: float
+    has_previous_month_data: bool
+    current_month_expenses_used: int

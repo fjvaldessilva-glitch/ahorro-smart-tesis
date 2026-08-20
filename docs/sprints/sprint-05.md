@@ -250,13 +250,17 @@ Las microtareas se incorporarán individualmente cuando sean definidas y autoriz
 
 ### T39 - Analizar datos e identificar patrones habituales de consumo
 
-- Se analizaron los 787 movimientos simulados y las 250 filas mensuales procesadas de T38, correspondientes a 30 meses y 10 categorías oficiales.
-- Por categoría se calcularon monto y transacciones totales, presencia mensual, cobertura, promedio, mediana, desviación estándar, coeficiente de variación, frecuencia media y participación en el gasto total.
-- El análisis temporal incluyó evolución mensual, promedios por mes calendario y tendencia descriptiva mediante regresión lineal simple.
-- Se identificaron y documentaron tres patrones respaldados: participación monetaria dominante de Vivienda, alta frecuencia de Alimentación y recurrencia con estabilidad relativa de Pago de deudas y créditos.
-- Se generaron `patterns_summary.json` y `patterns_report.md`; la repetición del análisis sobre los mismos datos produce resultados idénticos.
-- T38 cubrió la generación, limpieza, transformación, estructuración y validación; T39 cubrió el análisis y la identificación formal de al menos tres patrones.
-- Con ambos resultados, el Ítem 16 quedó **Completado**. Al finalizar T39, el Ítem 17 todavía permanecía pendiente y no se había seleccionado ni entrenado un algoritmo.
+- Se verificó la estructura completa de T38: 787 gastos simulados, 30 meses consecutivos entre 2024-01 y 2026-06 y las 10 categorías oficiales. El análisis destinado a patrones y variables candidatas utilizó exclusivamente las 624 transacciones de 2024-01 a 2025-12.
+- Los meses 2026-01 a 2026-06, con 163 transacciones, permanecieron reservados para el Ítem 22. No se utilizaron para seleccionar variables, ajustar umbrales, comparar modelos ni evaluar rendimiento predictivo.
+- El análisis transaccional calculó gasto total, gasto promedio diario, promedio, mediana y máximo por transacción, días activos e inactivos y frecuencia media por día calendario y por día con actividad.
+- Se construyó una serie diaria ordenada con cantidad de transacciones, gasto diario y monto promedio por transacción. Sobre 731 observaciones de desarrollo se calculó la asociación entre frecuencia y gasto mediante Pearson y Spearman, dejando explícito que una correlación estadística no permite establecer causalidad.
+- El análisis temporal incorporó ventanas de 7 y 14 días, comparación de los últimos 7 días frente a los 7 inmediatamente anteriores, descomposición de aumentos entre frecuencia y monto medio, comparación con el mismo número de días del mes anterior, primeras y segundas mitades del período observado y pendiente del gasto acumulado.
+- Por categoría se calcularon gasto, cantidad de transacciones, promedio, mediana, participación, frecuencia, recencia, peso histórico, variabilidad y ritmo reciente. Las comparaciones mensuales se realizaron sobre períodos equivalentes y sin utilizar información posterior a la fecha de corte.
+- Se mantuvieron los patrones de participación dominante de Vivienda, frecuencia dominante de Alimentación y estabilidad relativa de Pago de deudas y créditos. Se agregaron patrones cuantificados sobre asociación frecuencia-gasto y desaceleración reciente, cada uno con métrica, interpretación y limitación.
+- Se documentaron variables candidatas para T40, su disponibilidad, señales conceptualmente distintas y redundancias entre ventanas o transformaciones equivalentes. T39 no incorpora estas variables a un modelo ni selecciona un algoritmo.
+- La auditoría de viabilidad M→M+1 identificó 29 transiciones globales y 290 pares potenciales categoría-transición. Propuso una división temporal posible con desarrollo y validación hasta 2025-12, manteniendo íntegramente 2026-01 a 2026-06 como reserva; no se entrenó un modelo M+1.
+- Se actualizaron `patterns_summary.json` y `patterns_report.md`, y se creó `daily_spending_analysis.csv`. Dos ejecuciones consecutivas produjeron los mismos archivos y confirmaron ausencia de valores no finitos, manejo controlado de divisiones por cero, orden temporal y representación de las 10 categorías.
+- T38 cubrió la generación y validación de datos; T39 amplió el análisis reproducible y la identificación formal de patrones. El Ítem 16 se mantiene **Completado**.
 
 ### T40 - Seleccionar y entrenar el modelo predictivo de cierre mensual
 

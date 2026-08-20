@@ -1,344 +1,608 @@
 {
-  "analysis_period": "2024-01-01 a 2026-06-30",
-  "total_months": 30,
-  "total_transactions": 787,
-  "total_amount": 40360354.0,
-  "category_metrics": [
-    {
-      "category": "Alimentación",
-      "total_amount": 10158614.0,
-      "total_transactions": 323,
-      "months_present": 30,
-      "coverage_percentage": 100.0,
-      "average_monthly_amount": 338620.47,
-      "median_monthly_amount": 334562.5,
-      "standard_deviation_monthly_amount": 70546.27,
-      "coefficient_of_variation": 0.2083,
-      "average_transactions_per_month": 10.77,
-      "percentage_of_total_spending": 25.1698
+  "dataset_structure": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-06-30",
+    "total_months": 30,
+    "total_transactions": 787,
+    "total_spend": 40360354.0
+  },
+  "temporal_separation": {
+    "development_period": "2024-01-01 a 2025-12-31",
+    "reserved_item_22_period": "2026-01-01 a 2026-06-30",
+    "development_transactions": 624,
+    "reserved_transactions": 163,
+    "reserved_period_used_for_variable_selection": false,
+    "reserved_period_use": "conteo estructural de meses y transiciones exclusivamente"
+  },
+  "development_analysis": {
+    "period": "2024-01-01 a 2025-12-31",
+    "transactions": 624,
+    "general_metrics": {
+      "spend": 31994153.0,
+      "transactions": 624,
+      "average_transaction_amount": 51272.68,
+      "median_transaction_amount": 30419.0,
+      "max_transaction_amount": 445804.0,
+      "calendar_days": 731,
+      "average_daily_spend": 43767.65,
+      "active_spending_days": 432,
+      "inactive_spending_days": 299,
+      "transactions_per_calendar_day": 0.8536,
+      "transactions_per_active_day": 1.4444
     },
-    {
-      "category": "Educación",
-      "total_amount": 1159419.0,
-      "total_transactions": 14,
-      "months_present": 14,
-      "coverage_percentage": 46.67,
-      "average_monthly_amount": 82815.64,
-      "median_monthly_amount": 86243.0,
-      "standard_deviation_monthly_amount": 24853.11,
-      "coefficient_of_variation": 0.3001,
-      "average_transactions_per_month": 0.47,
-      "percentage_of_total_spending": 2.8727
+    "recent_windows": {
+      "cutoff_date": "2025-12-31",
+      "previous_7_days": {
+        "spend": 157549.0,
+        "transactions": 5,
+        "average_transaction_amount": 31509.8,
+        "median_transaction_amount": 31457.0,
+        "max_transaction_amount": 35630.0,
+        "daily_spend_rate": 22507.0
+      },
+      "last_7_days": {
+        "spend": 132938.0,
+        "transactions": 6,
+        "average_transaction_amount": 22156.33,
+        "median_transaction_amount": 18429.0,
+        "max_transaction_amount": 46560.0,
+        "daily_spend_rate": 18991.14
+      },
+      "last_14_days": {
+        "spend": 290487.0,
+        "transactions": 11,
+        "average_transaction_amount": 26407.91,
+        "median_transaction_amount": 28390.0,
+        "max_transaction_amount": 46560.0,
+        "daily_spend_rate": 20749.07
+      },
+      "changes_last_7_vs_previous_7": {
+        "spend": {
+          "absolute": -24611.0,
+          "percentage": -15.62,
+          "status": "calculada"
+        },
+        "transactions": {
+          "absolute": 1.0,
+          "percentage": 20.0,
+          "status": "calculada"
+        },
+        "average_transaction_amount": {
+          "absolute": -9353.47,
+          "percentage": -29.68,
+          "status": "calculada"
+        }
+      }
     },
-    {
-      "category": "Entretenimiento",
-      "total_amount": 3078896.0,
-      "total_transactions": 83,
-      "months_present": 30,
-      "coverage_percentage": 100.0,
-      "average_monthly_amount": 102629.87,
-      "median_monthly_amount": 110209.0,
-      "standard_deviation_monthly_amount": 45410.15,
-      "coefficient_of_variation": 0.4425,
-      "average_transactions_per_month": 2.77,
-      "percentage_of_total_spending": 7.6285
+    "daily_frequency_spend_correlation": {
+      "variables": [
+        "daily_transaction_count",
+        "daily_spend"
+      ],
+      "observations": 731,
+      "pearson": 0.563125,
+      "spearman": 0.916852,
+      "interpretation": "asociación estadística descriptiva; no implica causalidad"
     },
-    {
-      "category": "Mascotas",
-      "total_amount": 661947.0,
-      "total_transactions": 23,
-      "months_present": 23,
-      "coverage_percentage": 76.67,
-      "average_monthly_amount": 28780.3,
-      "median_monthly_amount": 29128.0,
-      "standard_deviation_monthly_amount": 10051.45,
-      "coefficient_of_variation": 0.3492,
-      "average_transactions_per_month": 0.77,
-      "percentage_of_total_spending": 1.6401
-    },
-    {
-      "category": "Otros gastos",
-      "total_amount": 815894.0,
-      "total_transactions": 21,
-      "months_present": 19,
-      "coverage_percentage": 63.33,
-      "average_monthly_amount": 42941.79,
-      "median_monthly_amount": 38220.0,
-      "standard_deviation_monthly_amount": 18253.86,
-      "coefficient_of_variation": 0.4251,
-      "average_transactions_per_month": 0.7,
-      "percentage_of_total_spending": 2.0215
-    },
-    {
-      "category": "Pago de deudas y créditos",
-      "total_amount": 3940192.0,
-      "total_transactions": 30,
-      "months_present": 30,
-      "coverage_percentage": 100.0,
-      "average_monthly_amount": 131339.73,
-      "median_monthly_amount": 132435.0,
-      "standard_deviation_monthly_amount": 10198.41,
-      "coefficient_of_variation": 0.0776,
-      "average_transactions_per_month": 1.0,
-      "percentage_of_total_spending": 9.7625
-    },
-    {
-      "category": "Salud",
-      "total_amount": 830479.0,
-      "total_transactions": 14,
-      "months_present": 14,
-      "coverage_percentage": 46.67,
-      "average_monthly_amount": 59319.93,
-      "median_monthly_amount": 60548.0,
-      "standard_deviation_monthly_amount": 20692.98,
-      "coefficient_of_variation": 0.3488,
-      "average_transactions_per_month": 0.47,
-      "percentage_of_total_spending": 2.0577
-    },
-    {
-      "category": "Servicios básicos",
-      "total_amount": 2702426.0,
-      "total_transactions": 30,
-      "months_present": 30,
-      "coverage_percentage": 100.0,
-      "average_monthly_amount": 90080.87,
-      "median_monthly_amount": 90553.5,
-      "standard_deviation_monthly_amount": 12777.49,
-      "coefficient_of_variation": 0.1418,
-      "average_transactions_per_month": 1.0,
-      "percentage_of_total_spending": 6.6957
-    },
-    {
-      "category": "Transporte",
-      "total_amount": 4283787.0,
-      "total_transactions": 219,
-      "months_present": 30,
-      "coverage_percentage": 100.0,
-      "average_monthly_amount": 142792.9,
-      "median_monthly_amount": 137372.5,
-      "standard_deviation_monthly_amount": 29823.58,
-      "coefficient_of_variation": 0.2089,
-      "average_transactions_per_month": 7.3,
-      "percentage_of_total_spending": 10.6138
-    },
-    {
-      "category": "Vivienda",
-      "total_amount": 12728700.0,
-      "total_transactions": 30,
-      "months_present": 30,
-      "coverage_percentage": 100.0,
-      "average_monthly_amount": 424290.0,
-      "median_monthly_amount": 423748.5,
-      "standard_deviation_monthly_amount": 12417.79,
-      "coefficient_of_variation": 0.0293,
-      "average_transactions_per_month": 1.0,
-      "percentage_of_total_spending": 31.5376
-    }
-  ],
-  "monthly_total_metrics": {
-    "evolution": [
+    "spending_increase_decomposition_examples": [
       {
-        "period": "2024-01",
-        "total_amount": 1316868.0
+        "cutoff_date": "2024-04-01",
+        "previous_period": "2024-03-19 a 2024-03-25",
+        "current_period": "2024-03-26 a 2024-04-01",
+        "previous_spend": 203558.0,
+        "current_spend": 445154.0,
+        "previous_transactions": 5,
+        "current_transactions": 13,
+        "previous_average_transaction": 40711.6,
+        "current_average_transaction": 34242.62,
+        "frequency_contribution": 325692.8,
+        "average_amount_contribution": -84096.74,
+        "main_association": "mayor frecuencia"
       },
       {
-        "period": "2024-02",
-        "total_amount": 1006327.0
+        "cutoff_date": "2025-04-11",
+        "previous_period": "2025-03-29 a 2025-04-04",
+        "current_period": "2025-04-05 a 2025-04-11",
+        "previous_spend": 113227.0,
+        "current_spend": 635378.0,
+        "previous_transactions": 6,
+        "current_transactions": 6,
+        "previous_average_transaction": 18871.17,
+        "current_average_transaction": 105896.33,
+        "frequency_contribution": 0.0,
+        "average_amount_contribution": 522150.96,
+        "main_association": "mayor monto promedio"
       },
       {
-        "period": "2024-03",
-        "total_amount": 1532167.0
-      },
-      {
-        "period": "2024-04",
-        "total_amount": 1435030.0
-      },
-      {
-        "period": "2024-05",
-        "total_amount": 1390995.0
-      },
-      {
-        "period": "2024-06",
-        "total_amount": 1369057.0
-      },
-      {
-        "period": "2024-07",
-        "total_amount": 1223449.0
-      },
-      {
-        "period": "2024-08",
-        "total_amount": 1356085.0
-      },
-      {
-        "period": "2024-09",
-        "total_amount": 1456695.0
-      },
-      {
-        "period": "2024-10",
-        "total_amount": 1357848.0
-      },
-      {
-        "period": "2024-11",
-        "total_amount": 1279098.0
-      },
-      {
-        "period": "2024-12",
-        "total_amount": 1357662.0
-      },
-      {
-        "period": "2025-01",
-        "total_amount": 1297645.0
-      },
-      {
-        "period": "2025-02",
-        "total_amount": 1419157.0
-      },
-      {
-        "period": "2025-03",
-        "total_amount": 1247051.0
-      },
-      {
-        "period": "2025-04",
-        "total_amount": 1378639.0
-      },
-      {
-        "period": "2025-05",
-        "total_amount": 1385264.0
-      },
-      {
-        "period": "2025-06",
-        "total_amount": 1258843.0
-      },
-      {
-        "period": "2025-07",
-        "total_amount": 1336811.0
-      },
-      {
-        "period": "2025-08",
-        "total_amount": 1300185.0
-      },
-      {
-        "period": "2025-09",
-        "total_amount": 1324939.0
-      },
-      {
-        "period": "2025-10",
-        "total_amount": 1398781.0
-      },
-      {
-        "period": "2025-11",
-        "total_amount": 1362303.0
-      },
-      {
-        "period": "2025-12",
-        "total_amount": 1203254.0
-      },
-      {
-        "period": "2026-01",
-        "total_amount": 1733632.0
-      },
-      {
-        "period": "2026-02",
-        "total_amount": 1376375.0
-      },
-      {
-        "period": "2026-03",
-        "total_amount": 1330032.0
-      },
-      {
-        "period": "2026-04",
-        "total_amount": 1231737.0
-      },
-      {
-        "period": "2026-05",
-        "total_amount": 1312648.0
-      },
-      {
-        "period": "2026-06",
-        "total_amount": 1381777.0
+        "cutoff_date": "2024-10-10",
+        "previous_period": "2024-09-27 a 2024-10-03",
+        "current_period": "2024-10-04 a 2024-10-10",
+        "previous_spend": 79713.0,
+        "current_spend": 789992.0,
+        "previous_transactions": 2,
+        "current_transactions": 10,
+        "previous_average_transaction": 39856.5,
+        "current_average_transaction": 78999.2,
+        "frequency_contribution": 318852.0,
+        "average_amount_contribution": 391427.0,
+        "main_association": "ambos factores"
       }
     ],
-    "average_total_monthly_amount": 1345345.13,
-    "median_total_monthly_amount": 1356873.5,
-    "standard_deviation_total_monthly_amount": 117488.2,
-    "calendar_month_average": {
-      "01": 1449381.67,
-      "02": 1267286.33,
-      "03": 1369750.0,
-      "04": 1348468.67,
-      "05": 1362969.0,
-      "06": 1336559.0,
-      "07": 1280130.0,
-      "08": 1328135.0,
-      "09": 1390817.0,
-      "10": 1378314.5,
-      "11": 1320700.5,
-      "12": 1280458.0
+    "previous_month_equivalent_comparison": {
+      "previous_equivalent_period": "2025-11-01 a 2025-11-30",
+      "current_period": "2025-12-01 a 2025-12-30",
+      "equivalent_days": 30,
+      "previous": {
+        "spend": 1362303.0,
+        "transactions": 28,
+        "average_transaction_amount": 48653.68,
+        "median_transaction_amount": 32109.5,
+        "max_transaction_amount": 429955.0,
+        "average_daily_spend": 45410.1
+      },
+      "current": {
+        "spend": 1203254.0,
+        "transactions": 24,
+        "average_transaction_amount": 50135.58,
+        "median_transaction_amount": 27262.0,
+        "max_transaction_amount": 445804.0,
+        "average_daily_spend": 40108.47
+      },
+      "changes": {
+        "spend": {
+          "absolute": -159049.0,
+          "percentage": -11.68,
+          "status": "calculada"
+        },
+        "transactions": {
+          "absolute": -4.0,
+          "percentage": -14.29,
+          "status": "calculada"
+        },
+        "average_daily_spend": {
+          "absolute": -5301.63,
+          "percentage": -11.68,
+          "status": "calculada"
+        },
+        "average_transaction_amount": {
+          "absolute": 1481.9,
+          "percentage": 3.05,
+          "status": "calculada"
+        }
+      },
+      "category_changes": [
+        {
+          "category": "Alimentación",
+          "previous_spend": 379654.0,
+          "current_spend": 297880.0,
+          "spend_change": {
+            "absolute": -81774.0,
+            "percentage": -21.54,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Transporte",
+          "previous_spend": 112313.0,
+          "current_spend": 133124.0,
+          "spend_change": {
+            "absolute": 20811.0,
+            "percentage": 18.53,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Vivienda",
+          "previous_spend": 429955.0,
+          "current_spend": 445804.0,
+          "spend_change": {
+            "absolute": 15849.0,
+            "percentage": 3.69,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Servicios básicos",
+          "previous_spend": 62788.0,
+          "current_spend": 82581.0,
+          "spend_change": {
+            "absolute": 19793.0,
+            "percentage": 31.52,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Salud",
+          "previous_spend": 41211.0,
+          "current_spend": 0.0,
+          "spend_change": {
+            "absolute": -41211.0,
+            "percentage": -100.0,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Educación",
+          "previous_spend": 0.0,
+          "current_spend": 0.0,
+          "spend_change": {
+            "absolute": 0.0,
+            "percentage": null,
+            "status": "sin variación"
+          }
+        },
+        {
+          "category": "Pago de deudas y créditos",
+          "previous_spend": 113449.0,
+          "current_spend": 130218.0,
+          "spend_change": {
+            "absolute": 16769.0,
+            "percentage": 14.78,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Entretenimiento",
+          "previous_spend": 131817.0,
+          "current_spend": 113647.0,
+          "spend_change": {
+            "absolute": -18170.0,
+            "percentage": -13.78,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Mascotas",
+          "previous_spend": 31810.0,
+          "current_spend": 0.0,
+          "spend_change": {
+            "absolute": -31810.0,
+            "percentage": -100.0,
+            "status": "calculada"
+          }
+        },
+        {
+          "category": "Otros gastos",
+          "previous_spend": 59306.0,
+          "current_spend": 0.0,
+          "spend_change": {
+            "absolute": -59306.0,
+            "percentage": -100.0,
+            "status": "calculada"
+          }
+        }
+      ]
     },
-    "trend": {
-      "slope_per_month": 1192.89,
-      "direction": "estable"
+    "trend_signals": {
+      "thresholds": "aceleración > 10 %, desaceleración < -10 %, estabilidad entre -10 % y 10 %",
+      "first_half": {
+        "spend": 856174.0,
+        "transactions": 10,
+        "average_transaction_amount": 85617.4,
+        "median_transaction_amount": 33228.5,
+        "max_transaction_amount": 445804.0,
+        "days": 15,
+        "daily_spend_rate": 57078.27
+      },
+      "second_half": {
+        "spend": 347080.0,
+        "transactions": 14,
+        "average_transaction_amount": 24791.43,
+        "median_transaction_amount": 20153.5,
+        "max_transaction_amount": 46560.0,
+        "days": 16,
+        "daily_spend_rate": 21692.5
+      },
+      "second_vs_first_daily_rate": {
+        "absolute": -35385.77,
+        "percentage": -62.0,
+        "status": "calculada"
+      },
+      "direction": "desaceleración",
+      "cumulative_spend_slope_per_day": 39032.96
     },
-    "highest_frequency_category": "Alimentación",
-    "highest_spending_share_category": "Vivienda",
-    "recurrent_categories": [
-      "Alimentación",
-      "Entretenimiento",
-      "Pago de deudas y créditos",
-      "Servicios básicos",
-      "Transporte",
-      "Vivienda"
+    "category_metrics": [
+      {
+        "category": "Alimentación",
+        "total_spend": 8048917.0,
+        "transactions": 257,
+        "average_transaction_amount": 31318.74,
+        "median_transaction_amount": 31926.0,
+        "spending_share_percentage": 25.16,
+        "transaction_frequency_per_month": 10.71,
+        "days_since_last_transaction": 1,
+        "historical_weight_percentage": 25.16,
+        "monthly_standard_deviation": 72072.2,
+        "monthly_coefficient_of_variation": 0.2149,
+        "last_7_days_spend": 18484.0,
+        "last_7_days_transactions": 1,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": -43588.0,
+          "percentage": -70.22,
+          "status": "calculada"
+        },
+        "recent_direction": "desaceleración"
+      },
+      {
+        "category": "Transporte",
+        "total_spend": 3371467.0,
+        "transactions": 171,
+        "average_transaction_amount": 19716.18,
+        "median_transaction_amount": 19318.0,
+        "spending_share_percentage": 10.54,
+        "transaction_frequency_per_month": 7.12,
+        "days_since_last_transaction": 3,
+        "historical_weight_percentage": 10.54,
+        "monthly_standard_deviation": 31331.27,
+        "monthly_coefficient_of_variation": 0.223,
+        "last_7_days_spend": 67894.0,
+        "last_7_days_transactions": 4,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 39504.0,
+          "percentage": 139.15,
+          "status": "calculada"
+        },
+        "recent_direction": "aceleración"
+      },
+      {
+        "category": "Vivienda",
+        "total_spend": 10132105.0,
+        "transactions": 24,
+        "average_transaction_amount": 422171.04,
+        "median_transaction_amount": 421609.5,
+        "spending_share_percentage": 31.67,
+        "transaction_frequency_per_month": 1.0,
+        "days_since_last_transaction": 26,
+        "historical_weight_percentage": 31.67,
+        "monthly_standard_deviation": 11342.28,
+        "monthly_coefficient_of_variation": 0.0269,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      },
+      {
+        "category": "Servicios básicos",
+        "total_spend": 2126011.0,
+        "transactions": 24,
+        "average_transaction_amount": 88583.79,
+        "median_transaction_amount": 90378.0,
+        "spending_share_percentage": 6.64,
+        "transaction_frequency_per_month": 1.0,
+        "days_since_last_transaction": 21,
+        "historical_weight_percentage": 6.64,
+        "monthly_standard_deviation": 13146.16,
+        "monthly_coefficient_of_variation": 0.1484,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      },
+      {
+        "category": "Salud",
+        "total_spend": 627495.0,
+        "transactions": 11,
+        "average_transaction_amount": 57045.0,
+        "median_transaction_amount": 60351.0,
+        "spending_share_percentage": 1.96,
+        "transaction_frequency_per_month": 0.46,
+        "days_since_last_transaction": 38,
+        "historical_weight_percentage": 1.96,
+        "monthly_standard_deviation": 29540.66,
+        "monthly_coefficient_of_variation": 1.1299,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      },
+      {
+        "category": "Educación",
+        "total_spend": 833635.0,
+        "transactions": 11,
+        "average_transaction_amount": 75785.0,
+        "median_transaction_amount": 75515.0,
+        "spending_share_percentage": 2.61,
+        "transaction_frequency_per_month": 0.46,
+        "days_since_last_transaction": 74,
+        "historical_weight_percentage": 2.61,
+        "monthly_standard_deviation": 40422.74,
+        "monthly_coefficient_of_variation": 1.1638,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      },
+      {
+        "category": "Pago de deudas y créditos",
+        "total_spend": 3141153.0,
+        "transactions": 24,
+        "average_transaction_amount": 130881.38,
+        "median_transaction_amount": 132435.0,
+        "spending_share_percentage": 9.82,
+        "transaction_frequency_per_month": 1.0,
+        "days_since_last_transaction": 16,
+        "historical_weight_percentage": 9.82,
+        "monthly_standard_deviation": 9804.98,
+        "monthly_coefficient_of_variation": 0.0749,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      },
+      {
+        "category": "Entretenimiento",
+        "total_spend": 2446232.0,
+        "transactions": 66,
+        "average_transaction_amount": 37064.12,
+        "median_transaction_amount": 37719.5,
+        "spending_share_percentage": 7.65,
+        "transaction_frequency_per_month": 2.75,
+        "days_since_last_transaction": 3,
+        "historical_weight_percentage": 7.65,
+        "monthly_standard_deviation": 48420.51,
+        "monthly_coefficient_of_variation": 0.4751,
+        "last_7_days_spend": 46560.0,
+        "last_7_days_transactions": 1,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": -20527.0,
+          "percentage": -30.6,
+          "status": "calculada"
+        },
+        "recent_direction": "desaceleración"
+      },
+      {
+        "category": "Mascotas",
+        "total_spend": 573072.0,
+        "transactions": 19,
+        "average_transaction_amount": 30161.68,
+        "median_transaction_amount": 30020.0,
+        "spending_share_percentage": 1.79,
+        "transaction_frequency_per_month": 0.79,
+        "days_since_last_transaction": 57,
+        "historical_weight_percentage": 1.79,
+        "monthly_standard_deviation": 15271.87,
+        "monthly_coefficient_of_variation": 0.6396,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      },
+      {
+        "category": "Otros gastos",
+        "total_spend": 694066.0,
+        "transactions": 17,
+        "average_transaction_amount": 40827.41,
+        "median_transaction_amount": 34940.0,
+        "spending_share_percentage": 2.17,
+        "transaction_frequency_per_month": 0.71,
+        "days_since_last_transaction": 41,
+        "historical_weight_percentage": 2.17,
+        "monthly_standard_deviation": 25581.86,
+        "monthly_coefficient_of_variation": 0.8846,
+        "last_7_days_spend": 0.0,
+        "last_7_days_transactions": 0,
+        "last_7_vs_previous_7_spend_change": {
+          "absolute": 0.0,
+          "percentage": null,
+          "status": "sin variación"
+        },
+        "recent_direction": "sin base suficiente"
+      }
     ]
   },
   "selected_patterns": [
     {
       "id": "P01",
       "name": "Participación monetaria dominante de Vivienda",
-      "description": "Categoría con la mayor proporción del gasto total del escenario simulado.",
-      "categories": [
-        "Vivienda"
-      ],
-      "period": "2024-01-01 a 2026-06-30",
-      "evidence": {
-        "percentage_of_total_spending": 31.5376,
-        "total_amount": 12728700.0,
-        "coverage_percentage": 100.0
-      },
-      "technical_interpretation": "La categoría concentra la mayor participación monetaria observada; se describe una asociación cuantitativa, no una causa.",
-      "predictive_relevance": "Su peso relativo justifica considerar categoría, período y monto al evaluar posteriormente técnicas predictivas."
+      "metric": "spending_share_percentage",
+      "value": 31.67,
+      "period": "2024-01-01 a 2025-12-31",
+      "interpretation": "Mayor peso monetario del período de desarrollo.",
+      "limitation": "Escenario simulado."
     },
     {
       "id": "P02",
-      "name": "Alta frecuencia de transacciones en Alimentación",
-      "description": "Categoría con la mayor cantidad de movimientos durante el período analizado.",
-      "categories": [
-        "Alimentación"
-      ],
-      "period": "2024-01-01 a 2026-06-30",
-      "evidence": {
-        "total_transactions": 323,
-        "average_transactions_per_month": 10.77,
-        "coverage_percentage": 100.0
-      },
-      "technical_interpretation": "La recurrencia transaccional es superior a la de las demás categorías del dataset simulado.",
-      "predictive_relevance": "La frecuencia aporta observaciones repetidas para estudiar la evolución temporal futura de los gastos."
+      "name": "Frecuencia dominante de Alimentación",
+      "metric": "transactions",
+      "value": 257,
+      "period": "2024-01-01 a 2025-12-31",
+      "interpretation": "Mayor cantidad de transacciones.",
+      "limitation": "Frecuencia no equivale a gasto total."
     },
     {
       "id": "P03",
-      "name": "Recurrencia y estabilidad relativa en Pago de deudas y créditos",
-      "description": "Categoría recurrente con la menor variabilidad relativa entre las alternativas de alta cobertura no seleccionadas como dominantes.",
-      "categories": [
-        "Pago de deudas y créditos"
-      ],
-      "period": "2024-01-01 a 2026-06-30",
-      "evidence": {
-        "coverage_percentage": 100.0,
-        "average_monthly_amount": 131339.73,
-        "standard_deviation_monthly_amount": 10198.41,
-        "coefficient_of_variation": 0.0776
-      },
-      "technical_interpretation": "La presencia mensual elevada y la dispersión relativa reducida muestran un comportamiento comparativamente estable.",
-      "predictive_relevance": "La regularidad puede servir como referencia al comparar posteriormente técnicas para estimar gastos futuros."
+      "name": "Estabilidad mensual relativa de Pago de deudas y créditos",
+      "metric": "monthly_coefficient_of_variation",
+      "value": 0.0749,
+      "period": "2024-01-01 a 2025-12-31",
+      "interpretation": "Menor dispersión relativa entre categorías no dominantes.",
+      "limitation": "Puede no repetirse fuera del dataset."
+    },
+    {
+      "id": "P04",
+      "name": "Asociación entre frecuencia diaria y gasto diario",
+      "metric": "pearson",
+      "value": 0.563125,
+      "period": "2024-01-01 a 2025-12-31",
+      "interpretation": "Asociación estadística cuantificada.",
+      "limitation": "Una correlación estadística no permite establecer causalidad."
+    },
+    {
+      "id": "P05",
+      "name": "Ritmo reciente: desaceleración",
+      "metric": "spend_change_last_7_vs_previous_7",
+      "value": -15.62,
+      "period": "corte 2025-12-31",
+      "interpretation": "Cambio entre ventanas equivalentes.",
+      "limitation": "Sensible a gastos puntuales."
     }
-  ]
+  ],
+  "candidate_variables": {
+    "variables": [
+      "spend_last_7_days",
+      "spend_last_14_days",
+      "transactions_last_7_days",
+      "transactions_last_14_days",
+      "spend_change_last_7_vs_previous_7",
+      "transaction_count_change_last_7_vs_previous_7",
+      "recent_daily_spend_rate",
+      "average_transaction_amount",
+      "median_transaction_amount",
+      "max_transaction_amount",
+      "active_spending_days",
+      "days_since_last_expense",
+      "category_share",
+      "previous_month_comparable_spend",
+      "previous_month_comparable_transactions",
+      "category_previous_month_comparable_spend",
+      "transaction_frequency_spend_correlation",
+      "cumulative_spend_slope"
+    ],
+    "availability": "sin información futura",
+    "redundancies": [
+      "spend_last_7_days ↔ recent_daily_spend_rate",
+      "spend_last_14_days ↔ dos ventanas de 7 días",
+      "category_share ↔ peso histórico"
+    ]
+  },
+  "m_plus_one_viability_audit": {
+    "consecutive_months": 30,
+    "global_transitions": 29,
+    "potential_category_month_pairs": 290,
+    "development_transitions": 23,
+    "proposed_temporal_split": {
+      "training_targets": "2024-02 a 2025-06 (17)",
+      "validation_targets": "2025-07 a 2025-12 (6)",
+      "reserved_targets": "2026-01 a 2026-06 (6)"
+    },
+    "limitations": [
+      "29 transiciones globales por categoría",
+      "sin entrenamiento M+1"
+    ]
+  },
+  "causality_statement": "Los resultados muestran correlación/asociación y no demuestran causalidad."
 }

@@ -1,112 +1,113 @@
-# Análisis de patrones habituales de consumo
+# Análisis ampliado de patrones habituales de consumo
 
-## 1. Propósito
+## Alcance temporal
 
-Este análisis descriptivo utiliza exclusivamente los datos 100 % simulados preparados y validados en T38. Su propósito es identificar patrones cuantificables del escenario sintético, sin interpretar psicológicamente al usuario, afirmar causalidad ni entregar asesoría financiera.
+El dataset contiene 787 gastos simulados entre 2024-01-01 y 2026-06-30 (30 meses). Patrones y variables candidatas usan exclusivamente 624 transacciones de 2024-01 a 2025-12. La reserva 2026-01 a 2026-06 no se utilizó para seleccionar variables, ajustar umbrales, comparar modelos ni evaluar rendimiento predictivo.
 
-## 2. Fuente de datos
+## Métricas generales de desarrollo
 
-- Período: 2024-01-01 a 2026-06-30 (30 meses).
-- Movimientos: 787.
-- Categorías oficiales: 10.
-- Monto simulado total: $40.360.354.
-- Fuentes: `processed_monthly_expenses.csv` y, para frecuencias, `simulated_expenses.csv`.
-- Carácter de los datos: completamente sintético, sin información personal, bancaria o financiera real.
+- Gasto total: **$31.994.153**; transacciones: **624**.
+- Gasto promedio diario: **$43.768**.
+- Promedio / mediana / máximo por transacción: **$51.273 / $30.419 / $445.804**.
+- Días con gasto / sin gasto: **432 / 299**.
+- Transacciones por día calendario / día activo: **0.8536 / 1.4444**.
 
-## 3. Método de análisis
+## Ventanas, ritmo y correlación
 
-Por categoría se calcularon monto y transacciones totales, meses con presencia, cobertura, promedio, mediana y desviación estándar mensual, coeficiente de variación, transacciones promedio mensuales y participación en el gasto total. También se calculó la evolución mensual, los promedios por mes calendario y una tendencia descriptiva mediante regresión lineal simple implementada con Python estándar.
+- Corte 2025-12-31: últimos 14 días $290.487 y 11 transacciones.
+- Siete días anteriores → últimos 7 días, gasto: $157.549 → $132.938; variación -15.62 %.
+- Siete días anteriores → últimos 7 días, transacciones: 5 → 6; variación 20.0 %.
+- Siete días anteriores → últimos 7 días, monto promedio: $31.510 → $22.156; variación -29.68 %.
+- Primer 50 % vs segundo 50 %: **desaceleración**. Umbrales: aceleración > 10 %, desaceleración < -10 %, estabilidad entre -10 % y 10 %.
+- Pendiente acumulada: $39.033 diarios.
+- Pearson: **0.563125**; Spearman: **0.916852**; observaciones: **731 días**.
 
-## 4. Resultados generales
+**Una correlación estadística no permite establecer causalidad.** Los resultados muestran correlación/asociación y no demuestran causalidad.
 
-| Categoría | Monto total | Transacciones | Cobertura | Promedio mensual | Coeficiente de variación | Participación |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Alimentación | $10.158.614 | 323 | 100.00 % | $338.620 | 0.2083 | 25.1698 % |
-| Educación | $1.159.419 | 14 | 46.67 % | $82.816 | 0.3001 | 2.8727 % |
-| Entretenimiento | $3.078.896 | 83 | 100.00 % | $102.630 | 0.4425 | 7.6285 % |
-| Mascotas | $661.947 | 23 | 76.67 % | $28.780 | 0.3492 | 1.6401 % |
-| Otros gastos | $815.894 | 21 | 63.33 % | $42.942 | 0.4251 | 2.0215 % |
-| Pago de deudas y créditos | $3.940.192 | 30 | 100.00 % | $131.340 | 0.0776 | 9.7625 % |
-| Salud | $830.479 | 14 | 46.67 % | $59.320 | 0.3488 | 2.0577 % |
-| Servicios básicos | $2.702.426 | 30 | 100.00 % | $90.081 | 0.1418 | 6.6957 % |
-| Transporte | $4.283.787 | 219 | 100.00 % | $142.793 | 0.2089 | 10.6138 % |
-| Vivienda | $12.728.700 | 30 | 100.00 % | $424.290 | 0.0293 | 31.5376 % |
+## Descomposición de aumentos
 
-- Categoría de mayor frecuencia: **Alimentación**.
-- Categoría de mayor participación monetaria: **Vivienda**.
-- Promedio de gasto total mensual: **$1.345.345**.
-- Tendencia lineal descriptiva: **estable**, con pendiente de **$1.193 por mes**.
+- Anterior (2024-03-19 a 2024-03-25) → actual (2024-03-26 a 2024-04-01): $203.558 → $445.154; asociación principal: **mayor frecuencia**; transacciones 5 → 13; monto medio $40.712 → $34.243.
+- Anterior (2025-03-29 a 2025-04-04) → actual (2025-04-05 a 2025-04-11): $113.227 → $635.378; asociación principal: **mayor monto promedio**; transacciones 6 → 6; monto medio $18.871 → $105.896.
+- Anterior (2024-09-27 a 2024-10-03) → actual (2024-10-04 a 2024-10-10): $79.713 → $789.992; asociación principal: **ambos factores**; transacciones 2 → 10; monto medio $39.856 → $78.999.
 
-## 5. Patrones identificados
+La descomposición usa gasto = frecuencia × monto medio y no constituye recomendación financiera.
+
+## Comparación mensual equivalente
+
+- Anterior: **2025-11-01 a 2025-11-30**.
+- Actual: **2025-12-01 a 2025-12-30**.
+- Gasto anterior → actual: $1.362.303 → $1.203.254; variación -11.68 %.
+- Transacciones anteriores → actuales: 28 → 24; variación -14.29 %.
+- Promedio diario anterior → actual: $45.410 → $40.108; variación -11.68 %.
+
+Se comparan 30 días en cada período; no se compara un mes parcial con uno completo.
+
+## Categorías
+
+| Categoría | Gasto | Transacciones | Promedio | Mediana | Participación | Ritmo reciente |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Alimentación | $8.048.917 | 257 | $31.319 | $31.926 | 25.16 % | desaceleración |
+| Transporte | $3.371.467 | 171 | $19.716 | $19.318 | 10.54 % | aceleración |
+| Vivienda | $10.132.105 | 24 | $422.171 | $421.610 | 31.67 % | sin base suficiente |
+| Servicios básicos | $2.126.011 | 24 | $88.584 | $90.378 | 6.64 % | sin base suficiente |
+| Salud | $627.495 | 11 | $57.045 | $60.351 | 1.96 % | sin base suficiente |
+| Educación | $833.635 | 11 | $75.785 | $75.515 | 2.61 % | sin base suficiente |
+| Pago de deudas y créditos | $3.141.153 | 24 | $130.881 | $132.435 | 9.82 % | sin base suficiente |
+| Entretenimiento | $2.446.232 | 66 | $37.064 | $37.720 | 7.65 % | desaceleración |
+| Mascotas | $573.072 | 19 | $30.162 | $30.020 | 1.79 % | sin base suficiente |
+| Otros gastos | $694.066 | 17 | $40.827 | $34.940 | 2.17 % | sin base suficiente |
+
+El JSON incluye ventanas, cambio, frecuencia, recencia, peso histórico, variabilidad y comparación mensual equivalente por categoría.
+
+## Patrones definitivos
 
 ### P01 - Participación monetaria dominante de Vivienda
 
-Categoría con la mayor proporción del gasto total del escenario simulado.
+- Métrica: `spending_share_percentage` = `31.67`.
+- Período: 2024-01-01 a 2025-12-31.
+- Interpretación: Mayor peso monetario del período de desarrollo.
+- Limitación: Escenario simulado.
 
-Categoría involucrada: Vivienda.  
-Período: 2024-01-01 a 2026-06-30.
+### P02 - Frecuencia dominante de Alimentación
 
-**Evidencia cuantitativa**
+- Métrica: `transactions` = `257`.
+- Período: 2024-01-01 a 2025-12-31.
+- Interpretación: Mayor cantidad de transacciones.
+- Limitación: Frecuencia no equivale a gasto total.
 
-- `percentage_of_total_spending`: 31.5376
-- `total_amount`: 12728700.0
-- `coverage_percentage`: 100.0
+### P03 - Estabilidad mensual relativa de Pago de deudas y créditos
 
-**Interpretación técnica:** La categoría concentra la mayor participación monetaria observada; se describe una asociación cuantitativa, no una causa.
+- Métrica: `monthly_coefficient_of_variation` = `0.0749`.
+- Período: 2024-01-01 a 2025-12-31.
+- Interpretación: Menor dispersión relativa entre categorías no dominantes.
+- Limitación: Puede no repetirse fuera del dataset.
 
-**Relevancia predictiva:** Su peso relativo justifica considerar categoría, período y monto al evaluar posteriormente técnicas predictivas.
+### P04 - Asociación entre frecuencia diaria y gasto diario
 
-### P02 - Alta frecuencia de transacciones en Alimentación
+- Métrica: `pearson` = `0.563125`.
+- Período: 2024-01-01 a 2025-12-31.
+- Interpretación: Asociación estadística cuantificada.
+- Limitación: Una correlación estadística no permite establecer causalidad.
 
-Categoría con la mayor cantidad de movimientos durante el período analizado.
+### P05 - Ritmo reciente: desaceleración
 
-Categoría involucrada: Alimentación.  
-Período: 2024-01-01 a 2026-06-30.
+- Métrica: `spend_change_last_7_vs_previous_7` = `-15.62`.
+- Período: corte 2025-12-31.
+- Interpretación: Cambio entre ventanas equivalentes.
+- Limitación: Sensible a gastos puntuales.
 
-**Evidencia cuantitativa**
+## Variables candidatas para T40
 
-- `total_transactions`: 323
-- `average_transactions_per_month`: 10.77
-- `coverage_percentage`: 100.0
+`spend_last_7_days`, `spend_last_14_days`, `transactions_last_7_days`, `transactions_last_14_days`, `spend_change_last_7_vs_previous_7`, `transaction_count_change_last_7_vs_previous_7`, `recent_daily_spend_rate`, `average_transaction_amount`, `median_transaction_amount`, `max_transaction_amount`, `active_spending_days`, `days_since_last_expense`, `category_share`, `previous_month_comparable_spend`, `previous_month_comparable_transactions`, `category_previous_month_comparable_spend`, `transaction_frequency_spend_correlation`, `cumulative_spend_slope`.
 
-**Interpretación técnica:** La recurrencia transaccional es superior a la de las demás categorías del dataset simulado.
+Disponibilidad buena en desarrollo. Redundancias: gasto 7 días con su tasa diaria; gasto 14 días con dos ventanas de 7; `category_share` con peso histórico. Frecuencia, estadísticas de monto, recencia, comparación mensual, categoría y pendiente aportan señales conceptualmente distintas. T39 no incorpora variables ni decide un modelo.
 
-**Relevancia predictiva:** La frecuencia aporta observaciones repetidas para estudiar la evolución temporal futura de los gastos.
+## Auditoría M→M+1
 
-### P03 - Recurrencia y estabilidad relativa en Pago de deudas y créditos
+- Meses consecutivos: **30**; transiciones globales: **29**; pares categoría-transición: **290**.
+- Desarrollo: **23** transiciones. División posible: objetivos 2024-02 a 2025-06 para desarrollo, 2025-07 a 2025-12 para validación y 2026-01 a 2026-06 reservados para el Ítem 22.
+- Es una auditoría de viabilidad; no se entrenó un modelo M+1. La cantidad de transiciones independientes es limitada.
 
-Categoría recurrente con la menor variabilidad relativa entre las alternativas de alta cobertura no seleccionadas como dominantes.
+## Limitaciones
 
-Categoría involucrada: Pago de deudas y créditos.  
-Período: 2024-01-01 a 2026-06-30.
-
-**Evidencia cuantitativa**
-
-- `coverage_percentage`: 100.0
-- `average_monthly_amount`: 131339.73
-- `standard_deviation_monthly_amount`: 10198.41
-- `coefficient_of_variation`: 0.0776
-
-**Interpretación técnica:** La presencia mensual elevada y la dispersión relativa reducida muestran un comportamiento comparativamente estable.
-
-**Relevancia predictiva:** La regularidad puede servir como referencia al comparar posteriormente técnicas para estimar gastos futuros.
-
-## 6. Relación con las variables de la ERS
-
-- **VE-01, monto del gasto:** sustenta totales, promedios, dispersión, participación y evolución monetaria.
-- **VE-02, fecha del gasto:** permite ordenar, agrupar por mes, medir cobertura y evaluar tendencias temporales.
-- **VE-03, categoría del gasto:** permite comparar frecuencia, recurrencia, estabilidad y participación entre categorías.
-
-Todas las métricas derivan de estas variables y conservan su trazabilidad.
-
-## 7. Utilidad para el modelo predictivo
-
-Los patrones aportan antecedentes empíricos sobre peso monetario, frecuencia y estabilidad temporal que deberán considerarse en una microtarea posterior al evaluar y seleccionar una técnica predictiva. Este análisis no selecciona algoritmos ni entrena modelos.
-
-## 8. Limitaciones
-
-- Los datos son simulados y corresponden a un período controlado.
-- Los patrones representan exclusivamente el escenario sintético analizado.
-- No se garantiza que usuarios reales presenten el mismo comportamiento.
-- Las asociaciones observadas no demuestran causalidad.
-- El análisis no constituye asesoría financiera.
+Datos simulados, ventanas sensibles a gastos puntuales, asociaciones sin causalidad y sin recomendaciones financieras.

@@ -1,322 +1,411 @@
-"""Analiza patrones descriptivos en los gastos simulados de Ahorro Smart."""
+"""Análisis descriptivo reproducible de T39 con reserva temporal protegida."""
 
 import csv
 import json
 import math
 from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from statistics import mean, median, pstdev
 
+BASE = Path(__file__).resolve().parent.parent
+SOURCE = BASE / "data" / "simulated_expenses.csv"
+OUT = BASE / "analysis"
+SUMMARY = OUT / "patterns_summary.json"
+REPORT = OUT / "patterns_report.md"
+DAILY = OUT / "daily_spending_analysis.csv"
+DEV_END = date(2025, 12, 31)
+HOLDOUT_START = date(2026, 1, 1)
+CATEGORIES = ["Alimentación", "Transporte", "Vivienda", "Servicios básicos", "Salud",
+              "Educación", "Pago de deudas y créditos", "Entretenimiento", "Mascotas", "Otros gastos"]
+CANDIDATES = ["spend_last_7_days", "spend_last_14_days", "transactions_last_7_days",
+              "transactions_last_14_days", "spend_change_last_7_vs_previous_7",
+              "transaction_count_change_last_7_vs_previous_7", "recent_daily_spend_rate",
+              "average_transaction_amount", "median_transaction_amount", "max_transaction_amount",
+              "active_spending_days", "days_since_last_expense", "category_share",
+              "previous_month_comparable_spend", "previous_month_comparable_transactions",
+              "category_previous_month_comparable_spend", "transaction_frequency_spend_correlation",
+              "cumulative_spend_slope"]
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-RAW_PATH = BASE_DIR / "data" / "simulated_expenses.csv"
-PROCESSED_PATH = BASE_DIR / "data" / "processed_monthly_expenses.csv"
-ANALYSIS_DIR = BASE_DIR / "analysis"
-SUMMARY_PATH = ANALYSIS_DIR / "patterns_summary.json"
-REPORT_PATH = ANALYSIS_DIR / "patterns_report.md"
+
+def rnd(value, digits=2):
+    value = round(float(value), digits)
+    if not math.isfinite(value):
+        raise ValueError("Valor numérico no finito.")
+    return value
 
 
-def rounded(value, digits=2):
-    result = round(float(value), digits)
-    if not math.isfinite(result):
-        raise ValueError("El análisis produjo un valor numérico no finito.")
+def change(current, previous):
+    return {"absolute": rnd(current - previous),
+            "percentage": rnd((current - previous) / previous * 100) if previous else None,
+            "status": "calculada" if previous else ("sin base porcentual" if current else "sin variación")}
+
+
+def load():
+    rows = []
+    with SOURCE.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if reader.fieldnames != ["date", "category", "amount"]:
+            raise ValueError("Columnas inesperadas.")
+        for source in reader:
+            row = {"date": date.fromisoformat(source["date"]), "category": source["category"],
+                   "amount": float(source["amount"])}
+            if row["category"] not in CATEGORIES or row["amount"] <= 0:
+                raise ValueError("Categoría o monto inválido.")
+            rows.append(row)
+    return sorted(rows, key=lambda item: (item["date"], item["category"], item["amount"]))
+
+
+def months(start, end):
+    result, year, month = [], start.year, start.month
+    while (year, month) <= (end.year, end.month):
+        result.append(f"{year:04d}-{month:02d}")
+        year, month = (year + 1, 1) if month == 12 else (year, month + 1)
     return result
 
 
-def load_raw_data():
-    rows = []
-    with RAW_PATH.open(newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        if reader.fieldnames != ["date", "category", "amount"]:
-            raise ValueError("Las columnas del dataset original no corresponden a T38.")
-        for row in reader:
-            rows.append(
-                {
-                    "date": date.fromisoformat(row["date"]),
-                    "category": row["category"],
-                    "amount": float(row["amount"]),
-                }
-            )
-    return rows
+def between(rows, start, end, category=None):
+    return [row for row in rows if start <= row["date"] <= end
+            and (category is None or row["category"] == category)]
 
 
-def load_processed_data():
-    rows = []
-    expected = ["year", "month", "period", "category", "monthly_amount", "transaction_count"]
-    with PROCESSED_PATH.open(newline="", encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file)
-        if reader.fieldnames != expected:
-            raise ValueError("Las columnas del dataset procesado no corresponden a T38.")
-        for row in reader:
-            rows.append(
-                {
-                    "year": int(row["year"]),
-                    "month": int(row["month"]),
-                    "period": row["period"],
-                    "category": row["category"],
-                    "monthly_amount": float(row["monthly_amount"]),
-                    "transaction_count": int(row["transaction_count"]),
-                }
-            )
-    return rows
+def aggregate(rows):
+    values = [row["amount"] for row in rows]
+    return {"spend": rnd(sum(values)), "transactions": len(values),
+            "average_transaction_amount": rnd(mean(values)) if values else 0.0,
+            "median_transaction_amount": rnd(median(values)) if values else 0.0,
+            "max_transaction_amount": rnd(max(values)) if values else 0.0}
 
 
-def month_sequence(start_date, end_date):
-    periods = []
-    year, month = start_date.year, start_date.month
-    while (year, month) <= (end_date.year, end_date.month):
-        periods.append(f"{year:04d}-{month:02d}")
-        year, month = (year + 1, 1) if month == 12 else (year, month + 1)
-    return periods
+def daily_series(rows, start, end):
+    grouped = defaultdict(list)
+    for row in between(rows, start, end):
+        grouped[row["date"]].append(row["amount"])
+    output, current = [], start
+    while current <= end:
+        values = grouped[current]
+        output.append({"date": current.isoformat(), "daily_transaction_count": len(values),
+                       "daily_spend": rnd(sum(values)),
+                       "average_transaction_amount": rnd(mean(values)) if values else 0.0})
+        current += timedelta(days=1)
+    return output
 
 
-def linear_trend(values):
-    count = len(values)
-    if count < 2:
-        return {"slope_per_month": 0.0, "direction": "sin tendencia suficiente"}
-    x_mean = (count - 1) / 2
-    y_mean = mean(values)
-    denominator = sum((index - x_mean) ** 2 for index in range(count))
-    slope = sum((index - x_mean) * (value - y_mean) for index, value in enumerate(values)) / denominator
-    tolerance = y_mean * 0.001
-    direction = "ascendente" if slope > tolerance else "descendente" if slope < -tolerance else "estable"
-    return {"slope_per_month": rounded(slope), "direction": direction}
+def pearson(left, right):
+    left_mean, right_mean = mean(left), mean(right)
+    numerator = sum((x-left_mean)*(y-right_mean) for x, y in zip(left, right))
+    denominator = math.sqrt(sum((x-left_mean)**2 for x in left)*sum((y-right_mean)**2 for y in right))
+    return rnd(numerator/denominator, 6) if denominator else 0.0
 
 
-def calculate_metrics(raw_rows, processed_rows):
-    start_date = min(row["date"] for row in raw_rows)
-    end_date = max(row["date"] for row in raw_rows)
-    periods = month_sequence(start_date, end_date)
-    total_months = len(periods)
-    total_amount = sum(row["amount"] for row in raw_rows)
-
-    raw_by_category = defaultdict(list)
-    processed_by_category = defaultdict(list)
-    monthly_totals = {period: 0.0 for period in periods}
-    for row in raw_rows:
-        raw_by_category[row["category"]].append(row)
-    for row in processed_rows:
-        processed_by_category[row["category"]].append(row)
-        monthly_totals[row["period"]] += row["monthly_amount"]
-
-    category_metrics = []
-    for category in sorted(raw_by_category):
-        raw_category = raw_by_category[category]
-        monthly_category = processed_by_category[category]
-        amounts = [row["monthly_amount"] for row in monthly_category]
-        category_total = sum(row["amount"] for row in raw_category)
-        average_amount = mean(amounts)
-        deviation = pstdev(amounts) if len(amounts) > 1 else 0.0
-        category_metrics.append(
-            {
-                "category": category,
-                "total_amount": rounded(category_total),
-                "total_transactions": len(raw_category),
-                "months_present": len(monthly_category),
-                "coverage_percentage": rounded(len(monthly_category) / total_months * 100),
-                "average_monthly_amount": rounded(average_amount),
-                "median_monthly_amount": rounded(median(amounts)),
-                "standard_deviation_monthly_amount": rounded(deviation),
-                "coefficient_of_variation": rounded(deviation / average_amount, 4) if average_amount else 0.0,
-                "average_transactions_per_month": rounded(len(raw_category) / total_months),
-                "percentage_of_total_spending": rounded(category_total / total_amount * 100, 4),
-            }
-        )
-
-    monthly_values = [monthly_totals[period] for period in periods]
-    calendar_month_values = defaultdict(list)
-    for period, amount in monthly_totals.items():
-        calendar_month_values[int(period[5:7])].append(amount)
-    calendar_averages = {
-        f"{month:02d}": rounded(mean(values))
-        for month, values in sorted(calendar_month_values.items())
-    }
-    trend = linear_trend(monthly_values)
-    monthly_metrics = {
-        "evolution": [
-            {"period": period, "total_amount": rounded(monthly_totals[period])}
-            for period in periods
-        ],
-        "average_total_monthly_amount": rounded(mean(monthly_values)),
-        "median_total_monthly_amount": rounded(median(monthly_values)),
-        "standard_deviation_total_monthly_amount": rounded(pstdev(monthly_values)),
-        "calendar_month_average": calendar_averages,
-        "trend": trend,
-        "highest_frequency_category": max(category_metrics, key=lambda item: item["total_transactions"])["category"],
-        "highest_spending_share_category": max(category_metrics, key=lambda item: item["total_amount"])["category"],
-        "recurrent_categories": [
-            item["category"] for item in category_metrics if item["coverage_percentage"] >= 90
-        ],
-    }
-    return start_date, end_date, total_months, total_amount, category_metrics, monthly_metrics
+def ranks(values):
+    ordered, result, index = sorted(enumerate(values), key=lambda item: item[1]), [0.0]*len(values), 0
+    while index < len(ordered):
+        end = index
+        while end+1 < len(ordered) and ordered[end+1][1] == ordered[index][1]:
+            end += 1
+        rank = (index+end+2)/2
+        for position in range(index, end+1):
+            result[ordered[position][0]] = rank
+        index = end+1
+    return result
 
 
-def select_patterns(category_metrics, analysis_period):
-    dominant = max(category_metrics, key=lambda item: item["percentage_of_total_spending"])
-    frequent = max(category_metrics, key=lambda item: item["total_transactions"])
-    stable_candidates = [
-        item
-        for item in category_metrics
-        if item["coverage_percentage"] >= 90 and item["category"] != dominant["category"]
-    ]
-    stable = min(stable_candidates or category_metrics, key=lambda item: item["coefficient_of_variation"])
+def slope(values):
+    x_mean, y_mean = (len(values)-1)/2, mean(values)
+    denominator = sum((i-x_mean)**2 for i in range(len(values)))
+    return rnd(sum((i-x_mean)*(value-y_mean) for i, value in enumerate(values))/denominator) if denominator else 0.0
 
+
+def windows(rows, cutoff, category=None):
+    last7 = aggregate(between(rows, cutoff-timedelta(days=6), cutoff, category))
+    prev7 = aggregate(between(rows, cutoff-timedelta(days=13), cutoff-timedelta(days=7), category))
+    last14 = aggregate(between(rows, cutoff-timedelta(days=13), cutoff, category))
+    for item, days in [(last7, 7), (prev7, 7), (last14, 14)]:
+        item["daily_spend_rate"] = rnd(item["spend"]/days)
+    return {"cutoff_date": cutoff.isoformat(), "previous_7_days": prev7, "last_7_days": last7,
+            "last_14_days": last14, "changes_last_7_vs_previous_7": {
+                "spend": change(last7["spend"], prev7["spend"]),
+                "transactions": change(last7["transactions"], prev7["transactions"]),
+                "average_transaction_amount": change(last7["average_transaction_amount"],
+                                                     prev7["average_transaction_amount"])}}
+
+
+def previous_month(rows, cutoff):
+    previous_end = cutoff.replace(day=1)-timedelta(days=1)
+    equivalent_day = min(cutoff.day, previous_end.day)
+    current_start, previous_start = cutoff.replace(day=1), previous_end.replace(day=1)
+    current_end, previous_equal_end = cutoff.replace(day=equivalent_day), previous_end.replace(day=equivalent_day)
+    current = aggregate(between(rows, current_start, current_end))
+    previous = aggregate(between(rows, previous_start, previous_equal_end))
+    current["average_daily_spend"], previous["average_daily_spend"] = (
+        rnd(current["spend"]/equivalent_day), rnd(previous["spend"]/equivalent_day))
+    by_category = []
+    for category in CATEGORIES:
+        now = aggregate(between(rows, current_start, current_end, category))
+        before = aggregate(between(rows, previous_start, previous_equal_end, category))
+        by_category.append({"category": category, "previous_spend": before["spend"],
+                            "current_spend": now["spend"], "spend_change": change(now["spend"], before["spend"])})
+    return {"previous_equivalent_period": f"{previous_start} a {previous_equal_end}",
+            "current_period": f"{current_start} a {current_end}",
+            "equivalent_days": equivalent_day, "previous": previous, "current": current,
+            "changes": {"spend": change(current["spend"], previous["spend"]),
+                        "transactions": change(current["transactions"], previous["transactions"]),
+                        "average_daily_spend": change(current["average_daily_spend"], previous["average_daily_spend"]),
+                        "average_transaction_amount": change(current["average_transaction_amount"],
+                                                             previous["average_transaction_amount"])},
+            "category_changes": by_category}
+
+
+def trend(rows, cutoff):
+    start, days = cutoff.replace(day=1), cutoff.day
+    first_days = max(1, days//2)
+    first_end, second_start = start+timedelta(days=first_days-1), start+timedelta(days=first_days)
+    first, second = aggregate(between(rows, start, first_end)), aggregate(between(rows, second_start, cutoff))
+    second_days = max(1, days-first_days)
+    first_rate, second_rate = first["spend"]/first_days, second["spend"]/second_days
+    variation = change(second_rate, first_rate)
+    percent = variation["percentage"]
+    direction = "sin base suficiente" if percent is None else (
+        "aceleración" if percent > 10 else "desaceleración" if percent < -10 else "estabilidad")
+    running, cumulative = 0.0, []
+    for item in daily_series(rows, start, cutoff):
+        running += item["daily_spend"]
+        cumulative.append(running)
+    return {"thresholds": "aceleración > 10 %, desaceleración < -10 %, estabilidad entre -10 % y 10 %",
+            "first_half": {**first, "days": first_days, "daily_spend_rate": rnd(first_rate)},
+            "second_half": {**second, "days": second_days, "daily_spend_rate": rnd(second_rate)},
+            "second_vs_first_daily_rate": variation, "direction": direction,
+            "cumulative_spend_slope_per_day": slope(cumulative)}
+
+
+def categories(rows, cutoff, total):
+    periods = months(rows[0]["date"], cutoff)
+    result = []
+    for category in CATEGORIES:
+        selected = [row for row in rows if row["category"] == category and row["date"] <= cutoff]
+        values, monthly = [row["amount"] for row in selected], defaultdict(float)
+        for row in selected:
+            monthly[row["date"].strftime("%Y-%m")] += row["amount"]
+        monthly_values = [monthly.get(period, 0.0) for period in periods]
+        recent = windows(rows, cutoff, category)
+        percent = recent["changes_last_7_vs_previous_7"]["spend"]["percentage"]
+        direction = "sin base suficiente" if percent is None else (
+            "aceleración" if percent > 10 else "desaceleración" if percent < -10 else "estabilidad")
+        average_monthly, deviation = mean(monthly_values), pstdev(monthly_values)
+        result.append({"category": category, "total_spend": rnd(sum(values)), "transactions": len(values),
+                       "average_transaction_amount": rnd(mean(values)), "median_transaction_amount": rnd(median(values)),
+                       "spending_share_percentage": rnd(sum(values)/total*100),
+                       "transaction_frequency_per_month": rnd(len(values)/len(periods)),
+                       "days_since_last_transaction": (cutoff-max(row["date"] for row in selected)).days,
+                       "historical_weight_percentage": rnd(sum(values)/total*100),
+                       "monthly_standard_deviation": rnd(deviation),
+                       "monthly_coefficient_of_variation": rnd(deviation/average_monthly, 4) if average_monthly else None,
+                       "last_7_days_spend": recent["last_7_days"]["spend"],
+                       "last_7_days_transactions": recent["last_7_days"]["transactions"],
+                       "last_7_vs_previous_7_spend_change": recent["changes_last_7_vs_previous_7"]["spend"],
+                       "recent_direction": direction})
+    return result
+
+
+def decompositions(rows):
+    candidates = []
+    cutoff = rows[0]["date"]+timedelta(days=13)
+    while cutoff <= DEV_END:
+        data = windows(rows, cutoff); now, before = data["last_7_days"], data["previous_7_days"]
+        if now["spend"] > before["spend"] and now["transactions"] and before["transactions"]:
+            frequency = (now["transactions"]-before["transactions"])*before["average_transaction_amount"]
+            amount = now["transactions"]*(now["average_transaction_amount"]-before["average_transaction_amount"])
+            driver = "ambos factores" if frequency > 0 and amount > 0 else (
+                "mayor frecuencia" if frequency > amount else "mayor monto promedio")
+            candidates.append({"cutoff_date": cutoff.isoformat(),
+                "previous_period": f"{cutoff-timedelta(days=13)} a {cutoff-timedelta(days=7)}",
+                "current_period": f"{cutoff-timedelta(days=6)} a {cutoff}",
+                "previous_spend": before["spend"], "current_spend": now["spend"],
+                "previous_transactions": before["transactions"], "current_transactions": now["transactions"],
+                "previous_average_transaction": before["average_transaction_amount"],
+                "current_average_transaction": now["average_transaction_amount"],
+                "frequency_contribution": rnd(frequency), "average_amount_contribution": rnd(amount),
+                "main_association": driver})
+        cutoff += timedelta(days=1)
+    result = []
+    for driver in ["mayor frecuencia", "mayor monto promedio", "ambos factores"]:
+        matches = [item for item in candidates if item["main_association"] == driver]
+        if matches:
+            result.append(max(matches, key=lambda item: item["current_spend"]-item["previous_spend"]))
+    return result
+
+
+def patterns(metrics, correlation, recent, rhythm, period):
+    dominant = max(metrics, key=lambda item: item["spending_share_percentage"])
+    frequent = max(metrics, key=lambda item: item["transactions"])
+    stable = min((item for item in metrics if item != dominant),
+                 key=lambda item: item["monthly_coefficient_of_variation"] or float("inf"))
     return [
-        {
-            "id": "P01",
-            "name": f"Participación monetaria dominante de {dominant['category']}",
-            "description": "Categoría con la mayor proporción del gasto total del escenario simulado.",
-            "categories": [dominant["category"]],
-            "period": analysis_period,
-            "evidence": {
-                "percentage_of_total_spending": dominant["percentage_of_total_spending"],
-                "total_amount": dominant["total_amount"],
-                "coverage_percentage": dominant["coverage_percentage"],
-            },
-            "technical_interpretation": "La categoría concentra la mayor participación monetaria observada; se describe una asociación cuantitativa, no una causa.",
-            "predictive_relevance": "Su peso relativo justifica considerar categoría, período y monto al evaluar posteriormente técnicas predictivas.",
-        },
-        {
-            "id": "P02",
-            "name": f"Alta frecuencia de transacciones en {frequent['category']}",
-            "description": "Categoría con la mayor cantidad de movimientos durante el período analizado.",
-            "categories": [frequent["category"]],
-            "period": analysis_period,
-            "evidence": {
-                "total_transactions": frequent["total_transactions"],
-                "average_transactions_per_month": frequent["average_transactions_per_month"],
-                "coverage_percentage": frequent["coverage_percentage"],
-            },
-            "technical_interpretation": "La recurrencia transaccional es superior a la de las demás categorías del dataset simulado.",
-            "predictive_relevance": "La frecuencia aporta observaciones repetidas para estudiar la evolución temporal futura de los gastos.",
-        },
-        {
-            "id": "P03",
-            "name": f"Recurrencia y estabilidad relativa en {stable['category']}",
-            "description": "Categoría recurrente con la menor variabilidad relativa entre las alternativas de alta cobertura no seleccionadas como dominantes.",
-            "categories": [stable["category"]],
-            "period": analysis_period,
-            "evidence": {
-                "coverage_percentage": stable["coverage_percentage"],
-                "average_monthly_amount": stable["average_monthly_amount"],
-                "standard_deviation_monthly_amount": stable["standard_deviation_monthly_amount"],
-                "coefficient_of_variation": stable["coefficient_of_variation"],
-            },
-            "technical_interpretation": "La presencia mensual elevada y la dispersión relativa reducida muestran un comportamiento comparativamente estable.",
-            "predictive_relevance": "La regularidad puede servir como referencia al comparar posteriormente técnicas para estimar gastos futuros.",
-        },
-    ]
+        {"id": "P01", "name": f"Participación monetaria dominante de {dominant['category']}",
+         "metric": "spending_share_percentage", "value": dominant["spending_share_percentage"], "period": period,
+         "interpretation": "Mayor peso monetario del período de desarrollo.", "limitation": "Escenario simulado."},
+        {"id": "P02", "name": f"Frecuencia dominante de {frequent['category']}", "metric": "transactions",
+         "value": frequent["transactions"], "period": period,
+         "interpretation": "Mayor cantidad de transacciones.", "limitation": "Frecuencia no equivale a gasto total."},
+        {"id": "P03", "name": f"Estabilidad mensual relativa de {stable['category']}",
+         "metric": "monthly_coefficient_of_variation", "value": stable["monthly_coefficient_of_variation"],
+         "period": period, "interpretation": "Menor dispersión relativa entre categorías no dominantes.",
+         "limitation": "Puede no repetirse fuera del dataset."},
+        {"id": "P04", "name": "Asociación entre frecuencia diaria y gasto diario", "metric": "pearson",
+         "value": correlation["pearson"], "period": period,
+         "interpretation": "Asociación estadística cuantificada.",
+         "limitation": "Una correlación estadística no permite establecer causalidad."},
+        {"id": "P05", "name": f"Ritmo reciente: {rhythm['direction']}",
+         "metric": "spend_change_last_7_vs_previous_7",
+         "value": recent["changes_last_7_vs_previous_7"]["spend"]["percentage"],
+         "period": f"corte {recent['cutoff_date']}",
+         "interpretation": "Cambio entre ventanas equivalentes.", "limitation": "Sensible a gastos puntuales."}]
 
 
-def currency(value):
+def money(value):
     return f"${value:,.0f}".replace(",", ".")
 
 
-def build_report(summary):
-    metrics = summary["category_metrics"]
-    monthly = summary["monthly_total_metrics"]
-    metric_rows = "\n".join(
-        f"| {item['category']} | {currency(item['total_amount'])} | {item['total_transactions']} | "
-        f"{item['coverage_percentage']:.2f} % | {currency(item['average_monthly_amount'])} | "
-        f"{item['coefficient_of_variation']:.4f} | {item['percentage_of_total_spending']:.4f} % |"
-        for item in metrics
-    )
-    pattern_sections = []
-    for pattern in summary["selected_patterns"]:
-        evidence = "\n".join(f"- `{key}`: {value}" for key, value in pattern["evidence"].items())
-        pattern_sections.append(
-            f"### {pattern['id']} - {pattern['name']}\n\n"
-            f"{pattern['description']}\n\n"
-            f"Categoría involucrada: {', '.join(pattern['categories'])}.  \n"
-            f"Período: {pattern['period']}.\n\n"
-            f"**Evidencia cuantitativa**\n\n{evidence}\n\n"
-            f"**Interpretación técnica:** {pattern['technical_interpretation']}\n\n"
-            f"**Relevancia predictiva:** {pattern['predictive_relevance']}"
-        )
+def build_report(data):
+    dev, general = data["development_analysis"], data["development_analysis"]["general_metrics"]
+    recent, corr, previous = dev["recent_windows"], dev["daily_frequency_spend_correlation"], dev["previous_month_equivalent_comparison"]
+    category_rows = "\n".join(f"| {x['category']} | {money(x['total_spend'])} | {x['transactions']} | "
+        f"{money(x['average_transaction_amount'])} | {money(x['median_transaction_amount'])} | "
+        f"{x['spending_share_percentage']:.2f} % | {x['recent_direction']} |" for x in dev["category_metrics"])
+    pattern_text = "\n\n".join(f"### {x['id']} - {x['name']}\n\n- Métrica: `{x['metric']}` = `{x['value']}`.\n"
+        f"- Período: {x['period']}.\n- Interpretación: {x['interpretation']}\n- Limitación: {x['limitation']}"
+        for x in data["selected_patterns"])
+    examples = "\n".join(f"- Anterior ({x['previous_period']}) → actual ({x['current_period']}): {money(x['previous_spend'])} → "
+        f"{money(x['current_spend'])}; asociación principal: **{x['main_association']}**; transacciones "
+        f"{x['previous_transactions']} → {x['current_transactions']}; monto medio "
+        f"{money(x['previous_average_transaction'])} → {money(x['current_average_transaction'])}."
+        for x in dev["spending_increase_decomposition_examples"])
+    audit = data["m_plus_one_viability_audit"]
+    return f"""# Análisis ampliado de patrones habituales de consumo
 
-    return f"""# Análisis de patrones habituales de consumo
+## Alcance temporal
 
-## 1. Propósito
+El dataset contiene {data['dataset_structure']['total_transactions']} gastos simulados entre {data['dataset_structure']['start_date']} y {data['dataset_structure']['end_date']} ({data['dataset_structure']['total_months']} meses). Patrones y variables candidatas usan exclusivamente {dev['transactions']} transacciones de 2024-01 a 2025-12. La reserva 2026-01 a 2026-06 no se utilizó para seleccionar variables, ajustar umbrales, comparar modelos ni evaluar rendimiento predictivo.
 
-Este análisis descriptivo utiliza exclusivamente los datos 100 % simulados preparados y validados en T38. Su propósito es identificar patrones cuantificables del escenario sintético, sin interpretar psicológicamente al usuario, afirmar causalidad ni entregar asesoría financiera.
+## Métricas generales de desarrollo
 
-## 2. Fuente de datos
+- Gasto total: **{money(general['spend'])}**; transacciones: **{general['transactions']}**.
+- Gasto promedio diario: **{money(general['average_daily_spend'])}**.
+- Promedio / mediana / máximo por transacción: **{money(general['average_transaction_amount'])} / {money(general['median_transaction_amount'])} / {money(general['max_transaction_amount'])}**.
+- Días con gasto / sin gasto: **{general['active_spending_days']} / {general['inactive_spending_days']}**.
+- Transacciones por día calendario / día activo: **{general['transactions_per_calendar_day']:.4f} / {general['transactions_per_active_day']:.4f}**.
 
-- Período: {summary['analysis_period']} ({summary['total_months']} meses).
-- Movimientos: {summary['total_transactions']}.
-- Categorías oficiales: {len(metrics)}.
-- Monto simulado total: {currency(summary['total_amount'])}.
-- Fuentes: `processed_monthly_expenses.csv` y, para frecuencias, `simulated_expenses.csv`.
-- Carácter de los datos: completamente sintético, sin información personal, bancaria o financiera real.
+## Ventanas, ritmo y correlación
 
-## 3. Método de análisis
+- Corte {recent['cutoff_date']}: últimos 14 días {money(recent['last_14_days']['spend'])} y {recent['last_14_days']['transactions']} transacciones.
+- Siete días anteriores → últimos 7 días, gasto: {money(recent['previous_7_days']['spend'])} → {money(recent['last_7_days']['spend'])}; variación {recent['changes_last_7_vs_previous_7']['spend']['percentage']} %.
+- Siete días anteriores → últimos 7 días, transacciones: {recent['previous_7_days']['transactions']} → {recent['last_7_days']['transactions']}; variación {recent['changes_last_7_vs_previous_7']['transactions']['percentage']} %.
+- Siete días anteriores → últimos 7 días, monto promedio: {money(recent['previous_7_days']['average_transaction_amount'])} → {money(recent['last_7_days']['average_transaction_amount'])}; variación {recent['changes_last_7_vs_previous_7']['average_transaction_amount']['percentage']} %.
+- Primer 50 % vs segundo 50 %: **{dev['trend_signals']['direction']}**. Umbrales: {dev['trend_signals']['thresholds']}.
+- Pendiente acumulada: {money(dev['trend_signals']['cumulative_spend_slope_per_day'])} diarios.
+- Pearson: **{corr['pearson']:.6f}**; Spearman: **{corr['spearman']:.6f}**; observaciones: **{corr['observations']} días**.
 
-Por categoría se calcularon monto y transacciones totales, meses con presencia, cobertura, promedio, mediana y desviación estándar mensual, coeficiente de variación, transacciones promedio mensuales y participación en el gasto total. También se calculó la evolución mensual, los promedios por mes calendario y una tendencia descriptiva mediante regresión lineal simple implementada con Python estándar.
+**Una correlación estadística no permite establecer causalidad.** Los resultados muestran correlación/asociación y no demuestran causalidad.
 
-## 4. Resultados generales
+## Descomposición de aumentos
 
-| Categoría | Monto total | Transacciones | Cobertura | Promedio mensual | Coeficiente de variación | Participación |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-{metric_rows}
+{examples}
 
-- Categoría de mayor frecuencia: **{monthly['highest_frequency_category']}**.
-- Categoría de mayor participación monetaria: **{monthly['highest_spending_share_category']}**.
-- Promedio de gasto total mensual: **{currency(monthly['average_total_monthly_amount'])}**.
-- Tendencia lineal descriptiva: **{monthly['trend']['direction']}**, con pendiente de **{currency(monthly['trend']['slope_per_month'])} por mes**.
+La descomposición usa gasto = frecuencia × monto medio y no constituye recomendación financiera.
 
-## 5. Patrones identificados
+## Comparación mensual equivalente
 
-{(chr(10) * 2).join(pattern_sections)}
+- Anterior: **{previous['previous_equivalent_period']}**.
+- Actual: **{previous['current_period']}**.
+- Gasto anterior → actual: {money(previous['previous']['spend'])} → {money(previous['current']['spend'])}; variación {previous['changes']['spend']['percentage']} %.
+- Transacciones anteriores → actuales: {previous['previous']['transactions']} → {previous['current']['transactions']}; variación {previous['changes']['transactions']['percentage']} %.
+- Promedio diario anterior → actual: {money(previous['previous']['average_daily_spend'])} → {money(previous['current']['average_daily_spend'])}; variación {previous['changes']['average_daily_spend']['percentage']} %.
 
-## 6. Relación con las variables de la ERS
+Se comparan {previous['equivalent_days']} días en cada período; no se compara un mes parcial con uno completo.
 
-- **VE-01, monto del gasto:** sustenta totales, promedios, dispersión, participación y evolución monetaria.
-- **VE-02, fecha del gasto:** permite ordenar, agrupar por mes, medir cobertura y evaluar tendencias temporales.
-- **VE-03, categoría del gasto:** permite comparar frecuencia, recurrencia, estabilidad y participación entre categorías.
+## Categorías
 
-Todas las métricas derivan de estas variables y conservan su trazabilidad.
+| Categoría | Gasto | Transacciones | Promedio | Mediana | Participación | Ritmo reciente |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+{category_rows}
 
-## 7. Utilidad para el modelo predictivo
+El JSON incluye ventanas, cambio, frecuencia, recencia, peso histórico, variabilidad y comparación mensual equivalente por categoría.
 
-Los patrones aportan antecedentes empíricos sobre peso monetario, frecuencia y estabilidad temporal que deberán considerarse en una microtarea posterior al evaluar y seleccionar una técnica predictiva. Este análisis no selecciona algoritmos ni entrena modelos.
+## Patrones definitivos
 
-## 8. Limitaciones
+{pattern_text}
 
-- Los datos son simulados y corresponden a un período controlado.
-- Los patrones representan exclusivamente el escenario sintético analizado.
-- No se garantiza que usuarios reales presenten el mismo comportamiento.
-- Las asociaciones observadas no demuestran causalidad.
-- El análisis no constituye asesoría financiera.
+## Variables candidatas para T40
+
+{', '.join(f'`{x}`' for x in CANDIDATES)}.
+
+Disponibilidad buena en desarrollo. Redundancias: gasto 7 días con su tasa diaria; gasto 14 días con dos ventanas de 7; `category_share` con peso histórico. Frecuencia, estadísticas de monto, recencia, comparación mensual, categoría y pendiente aportan señales conceptualmente distintas. T39 no incorpora variables ni decide un modelo.
+
+## Auditoría M→M+1
+
+- Meses consecutivos: **{audit['consecutive_months']}**; transiciones globales: **{audit['global_transitions']}**; pares categoría-transición: **{audit['potential_category_month_pairs']}**.
+- Desarrollo: **{audit['development_transitions']}** transiciones. División posible: objetivos 2024-02 a 2025-06 para desarrollo, 2025-07 a 2025-12 para validación y 2026-01 a 2026-06 reservados para el Ítem 22.
+- Es una auditoría de viabilidad; no se entrenó un modelo M+1. La cantidad de transiciones independientes es limitada.
+
+## Limitaciones
+
+Datos simulados, ventanas sensibles a gastos puntuales, asociaciones sin causalidad y sin recomendaciones financieras.
 """
 
 
 def main():
-    raw_rows = load_raw_data()
-    processed_rows = load_processed_data()
-    start_date, end_date, total_months, total_amount, category_metrics, monthly_metrics = calculate_metrics(
-        raw_rows, processed_rows
-    )
-    analysis_period = f"{start_date.isoformat()} a {end_date.isoformat()}"
-    selected_patterns = select_patterns(category_metrics, analysis_period)
-    if len(selected_patterns) < 3:
-        raise ValueError("El análisis no encontró al menos tres patrones respaldados.")
-
-    summary = {
-        "analysis_period": analysis_period,
-        "total_months": total_months,
-        "total_transactions": len(raw_rows),
-        "total_amount": rounded(total_amount),
-        "category_metrics": category_metrics,
-        "monthly_total_metrics": monthly_metrics,
-        "selected_patterns": selected_patterns,
-    }
-    ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
-    with SUMMARY_PATH.open("w", encoding="utf-8") as json_file:
-        json.dump(summary, json_file, ensure_ascii=False, indent=2)
-        json_file.write("\n")
-    REPORT_PATH.write_text(build_report(summary), encoding="utf-8")
-    print(f"Análisis generado: {len(selected_patterns)} patrones en {ANALYSIS_DIR}")
+    all_rows = load(); start, end = all_rows[0]["date"], all_rows[-1]["date"]
+    periods = months(start, end); dev_rows = [x for x in all_rows if x["date"] <= DEV_END]
+    holdout = [x for x in all_rows if x["date"] >= HOLDOUT_START]
+    daily = daily_series(dev_rows, start, DEV_END); general = aggregate(dev_rows)
+    active = sum(x["daily_transaction_count"] > 0 for x in daily)
+    general.update({"calendar_days": len(daily), "average_daily_spend": rnd(general["spend"]/len(daily)),
+                    "active_spending_days": active, "inactive_spending_days": len(daily)-active,
+                    "transactions_per_calendar_day": rnd(len(dev_rows)/len(daily), 4),
+                    "transactions_per_active_day": rnd(len(dev_rows)/active, 4)})
+    counts, spends = [x["daily_transaction_count"] for x in daily], [x["daily_spend"] for x in daily]
+    corr = {"variables": ["daily_transaction_count", "daily_spend"], "observations": len(daily),
+            "pearson": pearson(counts, spends), "spearman": pearson(ranks(counts), ranks(spends)),
+            "interpretation": "asociación estadística descriptiva; no implica causalidad"}
+    recent, rhythm = windows(dev_rows, DEV_END), trend(dev_rows, DEV_END)
+    category_metrics = categories(dev_rows, DEV_END, general["spend"])
+    period = f"{start} a {DEV_END}"
+    data = {"dataset_structure": {"start_date": start.isoformat(), "end_date": end.isoformat(),
+            "total_months": len(periods), "total_transactions": len(all_rows),
+            "total_spend": rnd(sum(x["amount"] for x in all_rows))},
+        "temporal_separation": {"development_period": period, "reserved_item_22_period": "2026-01-01 a 2026-06-30",
+            "development_transactions": len(dev_rows), "reserved_transactions": len(holdout),
+            "reserved_period_used_for_variable_selection": False,
+            "reserved_period_use": "conteo estructural de meses y transiciones exclusivamente"},
+        "development_analysis": {"period": period, "transactions": len(dev_rows), "general_metrics": general,
+            "recent_windows": recent, "daily_frequency_spend_correlation": corr,
+            "spending_increase_decomposition_examples": decompositions(dev_rows),
+            "previous_month_equivalent_comparison": previous_month(dev_rows, DEV_END),
+            "trend_signals": rhythm, "category_metrics": category_metrics},
+        "selected_patterns": patterns(category_metrics, corr, recent, rhythm, period),
+        "candidate_variables": {"variables": CANDIDATES, "availability": "sin información futura",
+            "redundancies": ["spend_last_7_days ↔ recent_daily_spend_rate",
+                             "spend_last_14_days ↔ dos ventanas de 7 días", "category_share ↔ peso histórico"]},
+        "m_plus_one_viability_audit": {"consecutive_months": len(periods), "global_transitions": len(periods)-1,
+            "potential_category_month_pairs": (len(periods)-1)*len(CATEGORIES),
+            "development_transitions": len([x for x in periods if x <= "2025-12"])-1,
+            "proposed_temporal_split": {"training_targets": "2024-02 a 2025-06 (17)",
+                "validation_targets": "2025-07 a 2025-12 (6)", "reserved_targets": "2026-01 a 2026-06 (6)"},
+            "limitations": ["29 transiciones globales por categoría", "sin entrenamiento M+1"]},
+        "causality_statement": "Los resultados muestran correlación/asociación y no demuestran causalidad."}
+    if len(category_metrics) != 10 or [x["date"] for x in daily] != sorted(x["date"] for x in daily):
+        raise ValueError("Validación de categorías u orden temporal fallida.")
+    encoded = json.dumps(data, ensure_ascii=False)
+    if any(token in encoded for token in ["NaN", "Infinity", "-Infinity"]):
+        raise ValueError("Resultado no finito.")
+    OUT.mkdir(parents=True, exist_ok=True)
+    with DAILY.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(daily[0])); writer.writeheader(); writer.writerows(daily)
+    with SUMMARY.open("w", encoding="utf-8", newline="\n") as stream:
+        json.dump(data, stream, ensure_ascii=False, indent=2); stream.write("\n")
+    REPORT.write_text(build_report(data), encoding="utf-8", newline="\n")
+    print(f"T39 generado: {len(all_rows)} totales, {len(dev_rows)} de desarrollo, {len(daily)} días.")
 
 
 if __name__ == "__main__":

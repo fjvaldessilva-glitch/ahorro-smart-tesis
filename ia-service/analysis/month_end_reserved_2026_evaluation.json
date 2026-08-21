@@ -1,0 +1,328 @@
+{
+  "task": "T40.4",
+  "purpose": "Evaluación final fuera de muestra sobre la reserva 2026.",
+  "reserved_period": "2026-01 a 2026-06",
+  "reserved_period_used_for_training": false,
+  "reserved_period_used_for_selection": false,
+  "target": "category_month_end_total",
+  "categories": [
+    "Alimentación",
+    "Transporte",
+    "Vivienda",
+    "Servicios básicos",
+    "Salud",
+    "Educación",
+    "Pago de deudas y créditos",
+    "Entretenimiento",
+    "Mascotas",
+    "Otros gastos"
+  ],
+  "models": {
+    "A": {
+      "role": "Modelo oficial congelado",
+      "features": [
+        "category",
+        "month",
+        "day_of_month",
+        "days_in_month",
+        "month_progress",
+        "category_spend_to_date",
+        "category_transactions_to_date",
+        "total_spend_to_date",
+        "total_transactions_to_date",
+        "category_average_transaction_to_date",
+        "overall_average_transaction_to_date",
+        "month_sin",
+        "month_cos",
+        "previous_month_category_total",
+        "previous_month_total",
+        "has_previous_month_data"
+      ],
+      "artifact": "C:\\TESIS\\AhorroSmart_Tesis\\ia-service\\models\\month_end_forecast_model.joblib",
+      "artifact_sha256": "86E85470D8DB1B36F982C81B879FDE6330154024C378162760EAC3A050AF2486",
+      "final_training_period": "2024-01 a 2025-12"
+    },
+    "B3": {
+      "role": "Reconstrucción experimental congelada de T40.3.x",
+      "features": [
+        "category",
+        "month",
+        "day_of_month",
+        "days_in_month",
+        "month_progress",
+        "category_spend_to_date",
+        "category_transactions_to_date",
+        "total_spend_to_date",
+        "total_transactions_to_date",
+        "category_average_transaction_to_date",
+        "overall_average_transaction_to_date",
+        "month_sin",
+        "month_cos",
+        "previous_month_category_total",
+        "previous_month_total",
+        "has_previous_month_data",
+        "previous_month_comparable_spend",
+        "previous_month_comparable_transactions",
+        "category_previous_month_comparable_spend"
+      ],
+      "artifact": "C:\\TESIS\\AhorroSmart_Tesis\\ia-service\\models\\experimental\\month_end_b3_reserved_evaluation.joblib",
+      "artifact_sha256": "2FA5879E621CB65B74DDC18E544F5EAFAFA07A4E7BC7808F6360CFDEF795E0DA",
+      "training_period": "2024-01 a 2025-06",
+      "training_rows": 1060,
+      "new_model_selection": false
+    }
+  },
+  "reserved_dataset": {
+    "rows_per_model": 350,
+    "scenarios": 35,
+    "period_start": "2026-01",
+    "period_end": "2026-06",
+    "same_rows_keys_targets": true,
+    "all_official_categories_present": true,
+    "features_use_only_information_available_at_cutoff": true
+  },
+  "evaluation": {
+    "A": {
+      "global": {
+        "mae": 116614.023,
+        "rmse": 169618.704,
+        "wape_percentage": 8.3611,
+        "observations": 35,
+        "negative_raw_predictions": 16,
+        "evaluated_scenarios": 35
+      },
+      "by_month": {
+        "2026-01": {
+          "mae": 377313.8371,
+          "rmse": 380182.403,
+          "wape_percentage": 21.7644,
+          "observations": 6
+        },
+        "2026-02": {
+          "mae": 63883.0932,
+          "rmse": 71820.1395,
+          "wape_percentage": 4.6414,
+          "observations": 6
+        },
+        "2026-03": {
+          "mae": 61328.1798,
+          "rmse": 71769.04,
+          "wape_percentage": 4.611,
+          "observations": 6
+        },
+        "2026-04": {
+          "mae": 69533.2203,
+          "rmse": 74795.0646,
+          "wape_percentage": 5.6451,
+          "observations": 6
+        },
+        "2026-05": {
+          "mae": 54121.6605,
+          "rmse": 58534.0497,
+          "wape_percentage": 4.1231,
+          "observations": 6
+        },
+        "2026-06": {
+          "mae": 64882.172,
+          "rmse": 68933.1901,
+          "wape_percentage": 4.6956,
+          "observations": 5
+        }
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 62708.0869,
+          "rmse": 76889.4897,
+          "wape_percentage": 17.9416,
+          "observations": 35
+        },
+        "Transporte": {
+          "mae": 22406.6653,
+          "rmse": 25879.0785,
+          "wape_percentage": 14.7534,
+          "observations": 35
+        },
+        "Vivienda": {
+          "mae": 27208.358,
+          "rmse": 38033.1353,
+          "wape_percentage": 6.2908,
+          "observations": 35
+        },
+        "Servicios básicos": {
+          "mae": 13914.6348,
+          "rmse": 16734.4856,
+          "wape_percentage": 14.4601,
+          "observations": 35
+        },
+        "Salud": {
+          "mae": 37772.6459,
+          "rmse": 49132.1923,
+          "wape_percentage": 108.5506,
+          "observations": 35
+        },
+        "Educación": {
+          "mae": 66041.7381,
+          "rmse": 76707.5838,
+          "wape_percentage": 118.2512,
+          "observations": 35
+        },
+        "Pago de deudas y créditos": {
+          "mae": 19069.6662,
+          "rmse": 26145.0943,
+          "wape_percentage": 14.2768,
+          "observations": 35
+        },
+        "Entretenimiento": {
+          "mae": 25387.8,
+          "rmse": 31314.3839,
+          "wape_percentage": 23.9512,
+          "observations": 35
+        },
+        "Mascotas": {
+          "mae": 11783.8421,
+          "rmse": 16402.4959,
+          "wape_percentage": 77.3435,
+          "observations": 35
+        },
+        "Otros gastos": {
+          "mae": 25918.367,
+          "rmse": 31621.6124,
+          "wape_percentage": 135.3435,
+          "observations": 35
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 7.5801,
+        "monthly_wape_standard_deviation": 6.3595,
+        "months": 6
+      }
+    },
+    "B3": {
+      "global": {
+        "mae": 114614.8072,
+        "rmse": 166439.0756,
+        "wape_percentage": 8.2177,
+        "observations": 35,
+        "negative_raw_predictions": 11,
+        "evaluated_scenarios": 35
+      },
+      "by_month": {
+        "2026-01": {
+          "mae": 369227.4483,
+          "rmse": 372183.0504,
+          "wape_percentage": 21.2979,
+          "observations": 6
+        },
+        "2026-02": {
+          "mae": 57676.4164,
+          "rmse": 59732.9242,
+          "wape_percentage": 4.1905,
+          "observations": 6
+        },
+        "2026-03": {
+          "mae": 57459.8495,
+          "rmse": 66901.5781,
+          "wape_percentage": 4.3202,
+          "observations": 6
+        },
+        "2026-04": {
+          "mae": 55986.2634,
+          "rmse": 68511.8239,
+          "wape_percentage": 4.5453,
+          "observations": 6
+        },
+        "2026-05": {
+          "mae": 69351.3457,
+          "rmse": 73911.9397,
+          "wape_percentage": 5.2833,
+          "observations": 6
+        },
+        "2026-06": {
+          "mae": 70662.0623,
+          "rmse": 76476.5835,
+          "wape_percentage": 5.1139,
+          "observations": 5
+        }
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 57038.1163,
+          "rmse": 74758.8788,
+          "wape_percentage": 16.3194,
+          "observations": 35
+        },
+        "Transporte": {
+          "mae": 22216.9827,
+          "rmse": 25604.1121,
+          "wape_percentage": 14.6285,
+          "observations": 35
+        },
+        "Vivienda": {
+          "mae": 18287.0607,
+          "rmse": 24867.0206,
+          "wape_percentage": 4.2281,
+          "observations": 35
+        },
+        "Servicios básicos": {
+          "mae": 13983.0625,
+          "rmse": 17720.5633,
+          "wape_percentage": 14.5312,
+          "observations": 35
+        },
+        "Salud": {
+          "mae": 32216.7274,
+          "rmse": 42792.6416,
+          "wape_percentage": 92.5841,
+          "observations": 35
+        },
+        "Educación": {
+          "mae": 67454.9404,
+          "rmse": 78812.6375,
+          "wape_percentage": 120.7816,
+          "observations": 35
+        },
+        "Pago de deudas y créditos": {
+          "mae": 17898.2544,
+          "rmse": 24970.6455,
+          "wape_percentage": 13.3998,
+          "observations": 35
+        },
+        "Entretenimiento": {
+          "mae": 25983.7328,
+          "rmse": 31511.9493,
+          "wape_percentage": 24.5134,
+          "observations": 35
+        },
+        "Mascotas": {
+          "mae": 9467.0107,
+          "rmse": 14083.3441,
+          "wape_percentage": 62.137,
+          "observations": 35
+        },
+        "Otros gastos": {
+          "mae": 24255.1708,
+          "rmse": 29349.7819,
+          "wape_percentage": 126.6585,
+          "observations": 35
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 7.4585,
+        "monthly_wape_standard_deviation": 6.2018,
+        "months": 6
+      }
+    }
+  },
+  "comparison": {
+    "wape_absolute_improvement_points_b3_vs_a": 0.1434,
+    "wape_relative_improvement_percentage_b3_vs_a": 1.7151,
+    "lower_wape_model": "B3"
+  },
+  "limitations": [
+    "Los resultados provienen de datos simulados.",
+    "La reserva contiene seis meses y un número limitado de escenarios.",
+    "A fue ajustado finalmente con 2024-01 a 2025-12; B3 se reconstruyó exclusivamente con 2024-01 a 2025-06 según la autorización, por lo que sus ventanas de entrenamiento no son equivalentes.",
+    "La evaluación reservada no se utiliza para seleccionar variables, ajustar modelos ni modificar el sistema productivo."
+  ],
+  "product_model_replaced": false
+}

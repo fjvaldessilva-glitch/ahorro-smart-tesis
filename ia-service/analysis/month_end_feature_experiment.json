@@ -1,0 +1,1673 @@
+{
+  "task": "T40.3.2",
+  "algorithm": "LinearRegression",
+  "target": "category_month_end_total",
+  "development_period": "2024-01 a 2025-12",
+  "training_period": "2024-01 a 2025-06",
+  "final_validation_period": "2025-07 a 2025-12",
+  "reserved_period": "2026-01 a 2026-06 (excluido del experimento)",
+  "uses_reserved_2026": false,
+  "dataset_diagnostics": {
+    "reserved_period": "2026-01 a 2026-06 (excluido del experimento)",
+    "models": {
+      "A": {
+        "rows": 1420,
+        "features": 16,
+        "period_start": "2024-01",
+        "period_end": "2025-12",
+        "train_rows": 1060,
+        "validation_rows": 360,
+        "categories": [
+          "Alimentación",
+          "Educación",
+          "Entretenimiento",
+          "Mascotas",
+          "Otros gastos",
+          "Pago de deudas y créditos",
+          "Salud",
+          "Servicios básicos",
+          "Transporte",
+          "Vivienda"
+        ],
+        "missing_values": 0
+      },
+      "B1": {
+        "rows": 1420,
+        "features": 18,
+        "period_start": "2024-01",
+        "period_end": "2025-12",
+        "train_rows": 1060,
+        "validation_rows": 360,
+        "categories": [
+          "Alimentación",
+          "Educación",
+          "Entretenimiento",
+          "Mascotas",
+          "Otros gastos",
+          "Pago de deudas y créditos",
+          "Salud",
+          "Servicios básicos",
+          "Transporte",
+          "Vivienda"
+        ],
+        "missing_values": 0
+      },
+      "B2": {
+        "rows": 1420,
+        "features": 20,
+        "period_start": "2024-01",
+        "period_end": "2025-12",
+        "train_rows": 1060,
+        "validation_rows": 360,
+        "categories": [
+          "Alimentación",
+          "Educación",
+          "Entretenimiento",
+          "Mascotas",
+          "Otros gastos",
+          "Pago de deudas y créditos",
+          "Salud",
+          "Servicios básicos",
+          "Transporte",
+          "Vivienda"
+        ],
+        "missing_values": 0
+      },
+      "B3": {
+        "rows": 1420,
+        "features": 19,
+        "period_start": "2024-01",
+        "period_end": "2025-12",
+        "train_rows": 1060,
+        "validation_rows": 360,
+        "categories": [
+          "Alimentación",
+          "Educación",
+          "Entretenimiento",
+          "Mascotas",
+          "Otros gastos",
+          "Pago de deudas y créditos",
+          "Salud",
+          "Servicios básicos",
+          "Transporte",
+          "Vivienda"
+        ],
+        "missing_values": 0
+      },
+      "B": {
+        "rows": 1420,
+        "features": 25,
+        "period_start": "2024-01",
+        "period_end": "2025-12",
+        "train_rows": 1060,
+        "validation_rows": 360,
+        "categories": [
+          "Alimentación",
+          "Educación",
+          "Entretenimiento",
+          "Mascotas",
+          "Otros gastos",
+          "Pago de deudas y créditos",
+          "Salud",
+          "Servicios básicos",
+          "Transporte",
+          "Vivienda"
+        ],
+        "missing_values": 0
+      }
+    },
+    "pending_diagnostics": {
+      "correlation_matrix": "no ejecutada en T40.3.1",
+      "condition_number": "no ejecutado en T40.3.1",
+      "coefficient_comparison": "requiere entrenamiento experimental posterior"
+    }
+  },
+  "feature_groups": {
+    "A": [
+      "category",
+      "month",
+      "day_of_month",
+      "days_in_month",
+      "month_progress",
+      "category_spend_to_date",
+      "category_transactions_to_date",
+      "total_spend_to_date",
+      "total_transactions_to_date",
+      "category_average_transaction_to_date",
+      "overall_average_transaction_to_date",
+      "month_sin",
+      "month_cos",
+      "previous_month_category_total",
+      "previous_month_total",
+      "has_previous_month_data"
+    ],
+    "B1": [
+      "category",
+      "month",
+      "day_of_month",
+      "days_in_month",
+      "month_progress",
+      "category_spend_to_date",
+      "category_transactions_to_date",
+      "total_spend_to_date",
+      "total_transactions_to_date",
+      "category_average_transaction_to_date",
+      "overall_average_transaction_to_date",
+      "month_sin",
+      "month_cos",
+      "previous_month_category_total",
+      "previous_month_total",
+      "has_previous_month_data",
+      "spend_last_7_days",
+      "transactions_last_7_days"
+    ],
+    "B2": [
+      "category",
+      "month",
+      "day_of_month",
+      "days_in_month",
+      "month_progress",
+      "category_spend_to_date",
+      "category_transactions_to_date",
+      "total_spend_to_date",
+      "total_transactions_to_date",
+      "category_average_transaction_to_date",
+      "overall_average_transaction_to_date",
+      "month_sin",
+      "month_cos",
+      "previous_month_category_total",
+      "previous_month_total",
+      "has_previous_month_data",
+      "median_transaction_amount",
+      "active_spending_days",
+      "days_since_last_expense",
+      "has_category_expense_history"
+    ],
+    "B3": [
+      "category",
+      "month",
+      "day_of_month",
+      "days_in_month",
+      "month_progress",
+      "category_spend_to_date",
+      "category_transactions_to_date",
+      "total_spend_to_date",
+      "total_transactions_to_date",
+      "category_average_transaction_to_date",
+      "overall_average_transaction_to_date",
+      "month_sin",
+      "month_cos",
+      "previous_month_category_total",
+      "previous_month_total",
+      "has_previous_month_data",
+      "previous_month_comparable_spend",
+      "previous_month_comparable_transactions",
+      "category_previous_month_comparable_spend"
+    ],
+    "B": [
+      "category",
+      "month",
+      "day_of_month",
+      "days_in_month",
+      "month_progress",
+      "category_spend_to_date",
+      "category_transactions_to_date",
+      "total_spend_to_date",
+      "total_transactions_to_date",
+      "category_average_transaction_to_date",
+      "overall_average_transaction_to_date",
+      "month_sin",
+      "month_cos",
+      "previous_month_category_total",
+      "previous_month_total",
+      "has_previous_month_data",
+      "spend_last_7_days",
+      "transactions_last_7_days",
+      "median_transaction_amount",
+      "active_spending_days",
+      "days_since_last_expense",
+      "has_category_expense_history",
+      "previous_month_comparable_spend",
+      "previous_month_comparable_transactions",
+      "category_previous_month_comparable_spend"
+    ]
+  },
+  "internal_temporal_validation": {
+    "A": [
+      {
+        "fold": "F1",
+        "train_period": "2024-01 a 2024-06",
+        "validation_period": "2024-07 a 2024-09",
+        "train_rows": 340,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 184164.583,
+          "rmse": 193942.8413,
+          "wape_percentage": 13.6884,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F2",
+        "train_period": "2024-01 a 2024-09",
+        "validation_period": "2024-10 a 2024-12",
+        "train_rows": 520,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 55547.5124,
+          "rmse": 63941.5311,
+          "wape_percentage": 4.1717,
+          "observations": 18.0,
+          "negative_raw_predictions": 10,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F3",
+        "train_period": "2024-01 a 2024-12",
+        "validation_period": "2025-01 a 2025-03",
+        "train_rows": 700,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 137749.8688,
+          "rmse": 159278.1253,
+          "wape_percentage": 10.4255,
+          "observations": 18.0,
+          "negative_raw_predictions": 5,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F4",
+        "train_period": "2024-01 a 2025-03",
+        "validation_period": "2025-04 a 2025-06",
+        "train_rows": 880,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 50352.1005,
+          "rmse": 64277.0148,
+          "wape_percentage": 3.7551,
+          "observations": 18.0,
+          "negative_raw_predictions": 6,
+          "evaluated_scenarios": 18
+        }
+      }
+    ],
+    "B1": [
+      {
+        "fold": "F1",
+        "train_period": "2024-01 a 2024-06",
+        "validation_period": "2024-07 a 2024-09",
+        "train_rows": 340,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 193805.5937,
+          "rmse": 202562.207,
+          "wape_percentage": 14.405,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F2",
+        "train_period": "2024-01 a 2024-09",
+        "validation_period": "2024-10 a 2024-12",
+        "train_rows": 520,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 58992.2259,
+          "rmse": 68617.4707,
+          "wape_percentage": 4.4304,
+          "observations": 18.0,
+          "negative_raw_predictions": 10,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F3",
+        "train_period": "2024-01 a 2024-12",
+        "validation_period": "2025-01 a 2025-03",
+        "train_rows": 700,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 133230.9374,
+          "rmse": 156484.6882,
+          "wape_percentage": 10.0834,
+          "observations": 18.0,
+          "negative_raw_predictions": 5,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F4",
+        "train_period": "2024-01 a 2025-03",
+        "validation_period": "2025-04 a 2025-06",
+        "train_rows": 880,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 45294.9803,
+          "rmse": 58813.6539,
+          "wape_percentage": 3.3779,
+          "observations": 18.0,
+          "negative_raw_predictions": 8,
+          "evaluated_scenarios": 18
+        }
+      }
+    ],
+    "B2": [
+      {
+        "fold": "F1",
+        "train_period": "2024-01 a 2024-06",
+        "validation_period": "2024-07 a 2024-09",
+        "train_rows": 340,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 107127.8023,
+          "rmse": 123922.3358,
+          "wape_percentage": 7.9625,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F2",
+        "train_period": "2024-01 a 2024-09",
+        "validation_period": "2024-10 a 2024-12",
+        "train_rows": 520,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 109585.4712,
+          "rmse": 133785.369,
+          "wape_percentage": 8.23,
+          "observations": 18.0,
+          "negative_raw_predictions": 10,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F3",
+        "train_period": "2024-01 a 2024-12",
+        "validation_period": "2025-01 a 2025-03",
+        "train_rows": 700,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 110998.0061,
+          "rmse": 127313.4178,
+          "wape_percentage": 8.4008,
+          "observations": 18.0,
+          "negative_raw_predictions": 1,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F4",
+        "train_period": "2024-01 a 2025-03",
+        "validation_period": "2025-04 a 2025-06",
+        "train_rows": 880,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 58031.7838,
+          "rmse": 67772.1776,
+          "wape_percentage": 4.3278,
+          "observations": 18.0,
+          "negative_raw_predictions": 2,
+          "evaluated_scenarios": 18
+        }
+      }
+    ],
+    "B3": [
+      {
+        "fold": "F1",
+        "train_period": "2024-01 a 2024-06",
+        "validation_period": "2024-07 a 2024-09",
+        "train_rows": 340,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 196431.9593,
+          "rmse": 204612.8161,
+          "wape_percentage": 14.6002,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F2",
+        "train_period": "2024-01 a 2024-09",
+        "validation_period": "2024-10 a 2024-12",
+        "train_rows": 520,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 46511.3915,
+          "rmse": 52611.629,
+          "wape_percentage": 3.4931,
+          "observations": 18.0,
+          "negative_raw_predictions": 6,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F3",
+        "train_period": "2024-01 a 2024-12",
+        "validation_period": "2025-01 a 2025-03",
+        "train_rows": 700,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 90718.7522,
+          "rmse": 107466.5706,
+          "wape_percentage": 6.866,
+          "observations": 18.0,
+          "negative_raw_predictions": 7,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F4",
+        "train_period": "2024-01 a 2025-03",
+        "validation_period": "2025-04 a 2025-06",
+        "train_rows": 880,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 45193.0684,
+          "rmse": 59231.9504,
+          "wape_percentage": 3.3703,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      }
+    ],
+    "B": [
+      {
+        "fold": "F1",
+        "train_period": "2024-01 a 2024-06",
+        "validation_period": "2024-07 a 2024-09",
+        "train_rows": 340,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 67588.6981,
+          "rmse": 81544.201,
+          "wape_percentage": 5.0237,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F2",
+        "train_period": "2024-01 a 2024-09",
+        "validation_period": "2024-10 a 2024-12",
+        "train_rows": 520,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 52038.1513,
+          "rmse": 67119.1576,
+          "wape_percentage": 3.9081,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F3",
+        "train_period": "2024-01 a 2024-12",
+        "validation_period": "2025-01 a 2025-03",
+        "train_rows": 700,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 57141.6966,
+          "rmse": 66748.8212,
+          "wape_percentage": 4.3247,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      },
+      {
+        "fold": "F4",
+        "train_period": "2024-01 a 2025-03",
+        "validation_period": "2025-04 a 2025-06",
+        "train_rows": 880,
+        "validation_rows": 180,
+        "metrics": {
+          "mae": 56215.1894,
+          "rmse": 70560.0301,
+          "wape_percentage": 4.1923,
+          "observations": 18.0,
+          "negative_raw_predictions": 0,
+          "evaluated_scenarios": 18
+        }
+      }
+    ]
+  },
+  "internal_summary": {
+    "A": {
+      "mean_wape_percentage": 8.0102,
+      "folds_better_than_a": 0,
+      "fold_wape_delta_vs_a": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "B1": {
+      "mean_wape_percentage": 8.0742,
+      "folds_better_than_a": 2,
+      "fold_wape_delta_vs_a": [
+        0.7166,
+        0.2587,
+        -0.3421,
+        -0.3772
+      ]
+    },
+    "B2": {
+      "mean_wape_percentage": 7.2303,
+      "folds_better_than_a": 2,
+      "fold_wape_delta_vs_a": [
+        -5.7259,
+        4.0583,
+        -2.0247,
+        0.5727
+      ]
+    },
+    "B3": {
+      "mean_wape_percentage": 7.0824,
+      "folds_better_than_a": 3,
+      "fold_wape_delta_vs_a": [
+        0.9118,
+        -0.6786,
+        -3.5595,
+        -0.3848
+      ]
+    },
+    "B": {
+      "mean_wape_percentage": 4.3622,
+      "folds_better_than_a": 3,
+      "fold_wape_delta_vs_a": [
+        -8.6647,
+        -0.2636,
+        -6.1008,
+        0.4372
+      ]
+    }
+  },
+  "final_validation": {
+    "A": {
+      "global": {
+        "mae": 54894.3302,
+        "rmse": 67676.842,
+        "wape_percentage": 4.1554,
+        "observations": 36.0,
+        "negative_raw_predictions": 8,
+        "evaluated_scenarios": 36
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 75509.5556,
+          "rmse": 90977.6819,
+          "wape_percentage": 23.4052,
+          "observations": 36.0
+        },
+        "Transporte": {
+          "mae": 46735.8877,
+          "rmse": 55229.6744,
+          "wape_percentage": 32.3167,
+          "observations": 36.0
+        },
+        "Vivienda": {
+          "mae": 27542.5962,
+          "rmse": 39711.5148,
+          "wape_percentage": 6.4619,
+          "observations": 36.0
+        },
+        "Servicios básicos": {
+          "mae": 11993.9697,
+          "rmse": 14546.5158,
+          "wape_percentage": 14.5566,
+          "observations": 36.0
+        },
+        "Salud": {
+          "mae": 23923.3054,
+          "rmse": 30633.6824,
+          "wape_percentage": 141.3322,
+          "observations": 36.0
+        },
+        "Educación": {
+          "mae": 41514.1069,
+          "rmse": 50486.1131,
+          "wape_percentage": 112.1973,
+          "observations": 36.0
+        },
+        "Pago de deudas y créditos": {
+          "mae": 15385.0542,
+          "rmse": 19003.8049,
+          "wape_percentage": 11.6212,
+          "observations": 36.0
+        },
+        "Entretenimiento": {
+          "mae": 49693.7707,
+          "rmse": 60485.6706,
+          "wape_percentage": 51.6977,
+          "observations": 36.0
+        },
+        "Mascotas": {
+          "mae": 16035.0301,
+          "rmse": 20527.1533,
+          "wape_percentage": 60.6442,
+          "observations": 36.0
+        },
+        "Otros gastos": {
+          "mae": 41429.4232,
+          "rmse": 44172.281,
+          "wape_percentage": 114.1244,
+          "observations": 36.0
+        }
+      },
+      "by_month": {
+        "2025-07": {
+          "mae": 95129.4035,
+          "rmse": 99468.5982,
+          "wape_percentage": 7.1161,
+          "observations": 6.0
+        },
+        "2025-08": {
+          "mae": 41397.0148,
+          "rmse": 46661.5916,
+          "wape_percentage": 3.1839,
+          "observations": 6.0
+        },
+        "2025-09": {
+          "mae": 15700.7949,
+          "rmse": 16725.8328,
+          "wape_percentage": 1.185,
+          "observations": 6.0
+        },
+        "2025-10": {
+          "mae": 67011.2142,
+          "rmse": 73310.5389,
+          "wape_percentage": 4.7907,
+          "observations": 6.0
+        },
+        "2025-11": {
+          "mae": 16028.8608,
+          "rmse": 18719.964,
+          "wape_percentage": 1.1766,
+          "observations": 6.0
+        },
+        "2025-12": {
+          "mae": 94098.6928,
+          "rmse": 96979.3683,
+          "wape_percentage": 7.8204,
+          "observations": 6.0
+        }
+      },
+      "by_cutoff": {
+        "day_10": {
+          "mae": 59813.9679,
+          "rmse": 73536.6325,
+          "wape_percentage": 4.5278,
+          "observations": 6.0
+        },
+        "day_15": {
+          "mae": 52545.9306,
+          "rmse": 61306.4699,
+          "wape_percentage": 3.9776,
+          "observations": 6.0
+        },
+        "day_20": {
+          "mae": 55673.7731,
+          "rmse": 73156.4511,
+          "wape_percentage": 4.2144,
+          "observations": 6.0
+        },
+        "day_25": {
+          "mae": 50040.4755,
+          "rmse": 65416.9932,
+          "wape_percentage": 3.7879,
+          "observations": 6.0
+        },
+        "day_5": {
+          "mae": 58079.9627,
+          "rmse": 69754.7972,
+          "wape_percentage": 4.3965,
+          "observations": 6.0
+        },
+        "first_expense_day": {
+          "mae": 53211.8713,
+          "rmse": 61788.5836,
+          "wape_percentage": 4.028,
+          "observations": 6.0
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 4.2121,
+        "monthly_wape_standard_deviation": 2.6212
+      }
+    },
+    "B1": {
+      "global": {
+        "mae": 53804.9237,
+        "rmse": 67278.6005,
+        "wape_percentage": 4.0729,
+        "observations": 36.0,
+        "negative_raw_predictions": 8,
+        "evaluated_scenarios": 36
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 75250.8688,
+          "rmse": 90803.3087,
+          "wape_percentage": 23.325,
+          "observations": 36.0
+        },
+        "Transporte": {
+          "mae": 46737.2662,
+          "rmse": 55194.6309,
+          "wape_percentage": 32.3176,
+          "observations": 36.0
+        },
+        "Vivienda": {
+          "mae": 27441.651,
+          "rmse": 39580.6535,
+          "wape_percentage": 6.4382,
+          "observations": 36.0
+        },
+        "Servicios básicos": {
+          "mae": 12185.2538,
+          "rmse": 14868.7354,
+          "wape_percentage": 14.7888,
+          "observations": 36.0
+        },
+        "Salud": {
+          "mae": 23992.4513,
+          "rmse": 30680.9035,
+          "wape_percentage": 141.7407,
+          "observations": 36.0
+        },
+        "Educación": {
+          "mae": 41719.6474,
+          "rmse": 50720.4269,
+          "wape_percentage": 112.7528,
+          "observations": 36.0
+        },
+        "Pago de deudas y créditos": {
+          "mae": 15008.5408,
+          "rmse": 18620.2995,
+          "wape_percentage": 11.3368,
+          "observations": 36.0
+        },
+        "Entretenimiento": {
+          "mae": 49592.6995,
+          "rmse": 60324.1988,
+          "wape_percentage": 51.5925,
+          "observations": 36.0
+        },
+        "Mascotas": {
+          "mae": 16749.6857,
+          "rmse": 21043.5248,
+          "wape_percentage": 63.347,
+          "observations": 36.0
+        },
+        "Otros gastos": {
+          "mae": 41681.5889,
+          "rmse": 44419.0122,
+          "wape_percentage": 114.819,
+          "observations": 36.0
+        }
+      },
+      "by_month": {
+        "2025-07": {
+          "mae": 87576.4076,
+          "rmse": 92467.7405,
+          "wape_percentage": 6.5511,
+          "observations": 6.0
+        },
+        "2025-08": {
+          "mae": 44954.1538,
+          "rmse": 46363.0371,
+          "wape_percentage": 3.4575,
+          "observations": 6.0
+        },
+        "2025-09": {
+          "mae": 21843.7794,
+          "rmse": 25343.4787,
+          "wape_percentage": 1.6487,
+          "observations": 6.0
+        },
+        "2025-10": {
+          "mae": 59415.7379,
+          "rmse": 67782.9435,
+          "wape_percentage": 4.2477,
+          "observations": 6.0
+        },
+        "2025-11": {
+          "mae": 6401.8781,
+          "rmse": 7814.2639,
+          "wape_percentage": 0.4699,
+          "observations": 6.0
+        },
+        "2025-12": {
+          "mae": 102637.5855,
+          "rmse": 105644.5181,
+          "wape_percentage": 8.53,
+          "observations": 6.0
+        }
+      },
+      "by_cutoff": {
+        "day_10": {
+          "mae": 66097.6841,
+          "rmse": 78785.5815,
+          "wape_percentage": 5.0034,
+          "observations": 6.0
+        },
+        "day_15": {
+          "mae": 48800.2924,
+          "rmse": 53006.8441,
+          "wape_percentage": 3.6941,
+          "observations": 6.0
+        },
+        "day_20": {
+          "mae": 54684.3438,
+          "rmse": 75064.0905,
+          "wape_percentage": 4.1395,
+          "observations": 6.0
+        },
+        "day_25": {
+          "mae": 53296.3978,
+          "rmse": 66081.2012,
+          "wape_percentage": 4.0344,
+          "observations": 6.0
+        },
+        "day_5": {
+          "mae": 56766.0473,
+          "rmse": 70783.6816,
+          "wape_percentage": 4.2971,
+          "observations": 6.0
+        },
+        "first_expense_day": {
+          "mae": 43184.7769,
+          "rmse": 55945.4622,
+          "wape_percentage": 3.269,
+          "observations": 6.0
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 4.1508,
+        "monthly_wape_standard_deviation": 2.7459
+      }
+    },
+    "B2": {
+      "global": {
+        "mae": 62550.5581,
+        "rmse": 73932.7348,
+        "wape_percentage": 4.7349,
+        "observations": 36.0,
+        "negative_raw_predictions": 1,
+        "evaluated_scenarios": 36
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 76833.5975,
+          "rmse": 93323.3817,
+          "wape_percentage": 23.8156,
+          "observations": 36.0
+        },
+        "Transporte": {
+          "mae": 49535.2414,
+          "rmse": 58546.1476,
+          "wape_percentage": 34.2524,
+          "observations": 36.0
+        },
+        "Vivienda": {
+          "mae": 27460.5851,
+          "rmse": 37917.5474,
+          "wape_percentage": 6.4427,
+          "observations": 36.0
+        },
+        "Servicios básicos": {
+          "mae": 11919.6416,
+          "rmse": 14470.3175,
+          "wape_percentage": 14.4664,
+          "observations": 36.0
+        },
+        "Salud": {
+          "mae": 29726.2745,
+          "rmse": 34034.3419,
+          "wape_percentage": 175.6145,
+          "observations": 36.0
+        },
+        "Educación": {
+          "mae": 43114.9042,
+          "rmse": 50882.0671,
+          "wape_percentage": 116.5236,
+          "observations": 36.0
+        },
+        "Pago de deudas y créditos": {
+          "mae": 15466.2042,
+          "rmse": 19260.9404,
+          "wape_percentage": 11.6825,
+          "observations": 36.0
+        },
+        "Entretenimiento": {
+          "mae": 49446.0415,
+          "rmse": 59263.6903,
+          "wape_percentage": 51.4399,
+          "observations": 36.0
+        },
+        "Mascotas": {
+          "mae": 16994.8139,
+          "rmse": 21682.2463,
+          "wape_percentage": 64.2741,
+          "observations": 36.0
+        },
+        "Otros gastos": {
+          "mae": 41885.5008,
+          "rmse": 44914.603,
+          "wape_percentage": 115.3807,
+          "observations": 36.0
+        }
+      },
+      "by_month": {
+        "2025-07": {
+          "mae": 66869.054,
+          "rmse": 67481.0761,
+          "wape_percentage": 5.0021,
+          "observations": 6.0
+        },
+        "2025-08": {
+          "mae": 49846.1895,
+          "rmse": 58547.4594,
+          "wape_percentage": 3.8338,
+          "observations": 6.0
+        },
+        "2025-09": {
+          "mae": 27300.9317,
+          "rmse": 32046.4624,
+          "wape_percentage": 2.0605,
+          "observations": 6.0
+        },
+        "2025-10": {
+          "mae": 59172.0731,
+          "rmse": 66764.179,
+          "wape_percentage": 4.2303,
+          "observations": 6.0
+        },
+        "2025-11": {
+          "mae": 52746.2058,
+          "rmse": 60117.625,
+          "wape_percentage": 3.8718,
+          "observations": 6.0
+        },
+        "2025-12": {
+          "mae": 119368.8942,
+          "rmse": 125364.408,
+          "wape_percentage": 9.9205,
+          "observations": 6.0
+        }
+      },
+      "by_cutoff": {
+        "day_10": {
+          "mae": 60106.2905,
+          "rmse": 66098.4402,
+          "wape_percentage": 4.5499,
+          "observations": 6.0
+        },
+        "day_15": {
+          "mae": 51305.2752,
+          "rmse": 54617.3215,
+          "wape_percentage": 3.8837,
+          "observations": 6.0
+        },
+        "day_20": {
+          "mae": 68828.663,
+          "rmse": 82017.8512,
+          "wape_percentage": 5.2102,
+          "observations": 6.0
+        },
+        "day_25": {
+          "mae": 73247.2548,
+          "rmse": 77958.5654,
+          "wape_percentage": 5.5446,
+          "observations": 6.0
+        },
+        "day_5": {
+          "mae": 62020.5405,
+          "rmse": 79927.8307,
+          "wape_percentage": 4.6948,
+          "observations": 6.0
+        },
+        "first_expense_day": {
+          "mae": 59795.3243,
+          "rmse": 79065.2646,
+          "wape_percentage": 4.5264,
+          "observations": 6.0
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 4.8198,
+        "monthly_wape_standard_deviation": 2.4455
+      }
+    },
+    "B3": {
+      "global": {
+        "mae": 52647.3167,
+        "rmse": 66351.6913,
+        "wape_percentage": 3.9853,
+        "observations": 36.0,
+        "negative_raw_predictions": 2,
+        "evaluated_scenarios": 36
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 77878.3055,
+          "rmse": 92891.1876,
+          "wape_percentage": 24.1394,
+          "observations": 36.0
+        },
+        "Transporte": {
+          "mae": 39250.6473,
+          "rmse": 50211.1246,
+          "wape_percentage": 27.1408,
+          "observations": 36.0
+        },
+        "Vivienda": {
+          "mae": 14258.0207,
+          "rmse": 21734.3122,
+          "wape_percentage": 3.3451,
+          "observations": 36.0
+        },
+        "Servicios básicos": {
+          "mae": 8278.3277,
+          "rmse": 10861.6128,
+          "wape_percentage": 10.0471,
+          "observations": 36.0
+        },
+        "Salud": {
+          "mae": 24480.2297,
+          "rmse": 29751.8981,
+          "wape_percentage": 144.6224,
+          "observations": 36.0
+        },
+        "Educación": {
+          "mae": 41819.4725,
+          "rmse": 54461.007,
+          "wape_percentage": 113.0225,
+          "observations": 36.0
+        },
+        "Pago de deudas y créditos": {
+          "mae": 9807.4721,
+          "rmse": 12568.6784,
+          "wape_percentage": 7.4081,
+          "observations": 36.0
+        },
+        "Entretenimiento": {
+          "mae": 52040.5427,
+          "rmse": 60232.2069,
+          "wape_percentage": 54.1391,
+          "observations": 36.0
+        },
+        "Mascotas": {
+          "mae": 17023.3185,
+          "rmse": 19765.4277,
+          "wape_percentage": 64.3819,
+          "observations": 36.0
+        },
+        "Otros gastos": {
+          "mae": 36061.9752,
+          "rmse": 41150.599,
+          "wape_percentage": 99.3388,
+          "observations": 36.0
+        }
+      },
+      "by_month": {
+        "2025-07": {
+          "mae": 93536.6882,
+          "rmse": 99714.6679,
+          "wape_percentage": 6.997,
+          "observations": 6.0
+        },
+        "2025-08": {
+          "mae": 40032.0999,
+          "rmse": 47851.1334,
+          "wape_percentage": 3.079,
+          "observations": 6.0
+        },
+        "2025-09": {
+          "mae": 18442.8444,
+          "rmse": 21523.8011,
+          "wape_percentage": 1.392,
+          "observations": 6.0
+        },
+        "2025-10": {
+          "mae": 62763.037,
+          "rmse": 70475.9713,
+          "wape_percentage": 4.487,
+          "observations": 6.0
+        },
+        "2025-11": {
+          "mae": 13161.5454,
+          "rmse": 18072.5154,
+          "wape_percentage": 0.9661,
+          "observations": 6.0
+        },
+        "2025-12": {
+          "mae": 87947.6851,
+          "rmse": 91792.0656,
+          "wape_percentage": 7.3092,
+          "observations": 6.0
+        }
+      },
+      "by_cutoff": {
+        "day_10": {
+          "mae": 55434.6082,
+          "rmse": 70803.524,
+          "wape_percentage": 4.1963,
+          "observations": 6.0
+        },
+        "day_15": {
+          "mae": 56976.4128,
+          "rmse": 63059.4938,
+          "wape_percentage": 4.313,
+          "observations": 6.0
+        },
+        "day_20": {
+          "mae": 57587.1925,
+          "rmse": 74420.069,
+          "wape_percentage": 4.3592,
+          "observations": 6.0
+        },
+        "day_25": {
+          "mae": 42920.1347,
+          "rmse": 62186.8966,
+          "wape_percentage": 3.249,
+          "observations": 6.0
+        },
+        "day_5": {
+          "mae": 49881.5579,
+          "rmse": 62778.801,
+          "wape_percentage": 3.7759,
+          "observations": 6.0
+        },
+        "first_expense_day": {
+          "mae": 53083.9939,
+          "rmse": 63866.3311,
+          "wape_percentage": 4.0183,
+          "observations": 6.0
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 4.0384,
+        "monthly_wape_standard_deviation": 2.4838
+      }
+    },
+    "B": {
+      "global": {
+        "mae": 65073.9912,
+        "rmse": 76258.7627,
+        "wape_percentage": 4.9259,
+        "observations": 36.0,
+        "negative_raw_predictions": 0,
+        "evaluated_scenarios": 36
+      },
+      "by_category": {
+        "Alimentación": {
+          "mae": 80611.2563,
+          "rmse": 96504.8656,
+          "wape_percentage": 24.9865,
+          "observations": 36.0
+        },
+        "Transporte": {
+          "mae": 41816.3529,
+          "rmse": 53825.9672,
+          "wape_percentage": 28.9149,
+          "observations": 36.0
+        },
+        "Vivienda": {
+          "mae": 13308.7689,
+          "rmse": 19153.9938,
+          "wape_percentage": 3.1224,
+          "observations": 36.0
+        },
+        "Servicios básicos": {
+          "mae": 8287.1293,
+          "rmse": 10849.6246,
+          "wape_percentage": 10.0578,
+          "observations": 36.0
+        },
+        "Salud": {
+          "mae": 33925.1059,
+          "rmse": 38520.2745,
+          "wape_percentage": 200.4201,
+          "observations": 36.0
+        },
+        "Educación": {
+          "mae": 43711.1163,
+          "rmse": 53496.7901,
+          "wape_percentage": 118.135,
+          "observations": 36.0
+        },
+        "Pago de deudas y créditos": {
+          "mae": 10477.0359,
+          "rmse": 13070.7426,
+          "wape_percentage": 7.9139,
+          "observations": 36.0
+        },
+        "Entretenimiento": {
+          "mae": 50467.9691,
+          "rmse": 59221.9254,
+          "wape_percentage": 52.5031,
+          "observations": 36.0
+        },
+        "Mascotas": {
+          "mae": 17571.5162,
+          "rmse": 20997.49,
+          "wape_percentage": 66.4551,
+          "observations": 36.0
+        },
+        "Otros gastos": {
+          "mae": 36927.5288,
+          "rmse": 41523.3411,
+          "wape_percentage": 101.7231,
+          "observations": 36.0
+        }
+      },
+      "by_month": {
+        "2025-07": {
+          "mae": 65477.4575,
+          "rmse": 67837.2126,
+          "wape_percentage": 4.898,
+          "observations": 6.0
+        },
+        "2025-08": {
+          "mae": 55013.3168,
+          "rmse": 64432.3853,
+          "wape_percentage": 4.2312,
+          "observations": 6.0
+        },
+        "2025-09": {
+          "mae": 36833.3886,
+          "rmse": 40921.5549,
+          "wape_percentage": 2.78,
+          "observations": 6.0
+        },
+        "2025-10": {
+          "mae": 50458.5916,
+          "rmse": 54613.6454,
+          "wape_percentage": 3.6073,
+          "observations": 6.0
+        },
+        "2025-11": {
+          "mae": 54820.7941,
+          "rmse": 59990.2473,
+          "wape_percentage": 4.0241,
+          "observations": 6.0
+        },
+        "2025-12": {
+          "mae": 127840.3986,
+          "rmse": 133727.0353,
+          "wape_percentage": 10.6246,
+          "observations": 6.0
+        }
+      },
+      "by_cutoff": {
+        "day_10": {
+          "mae": 66937.3354,
+          "rmse": 70849.8305,
+          "wape_percentage": 5.067,
+          "observations": 6.0
+        },
+        "day_15": {
+          "mae": 47060.0436,
+          "rmse": 52173.4537,
+          "wape_percentage": 3.5623,
+          "observations": 6.0
+        },
+        "day_20": {
+          "mae": 66550.0289,
+          "rmse": 83433.7251,
+          "wape_percentage": 5.0377,
+          "observations": 6.0
+        },
+        "day_25": {
+          "mae": 74105.9925,
+          "rmse": 78626.7529,
+          "wape_percentage": 5.6096,
+          "observations": 6.0
+        },
+        "day_5": {
+          "mae": 67069.3007,
+          "rmse": 83507.0109,
+          "wape_percentage": 5.077,
+          "observations": 6.0
+        },
+        "first_expense_day": {
+          "mae": 68721.2462,
+          "rmse": 83868.0627,
+          "wape_percentage": 5.202,
+          "observations": 6.0
+        }
+      },
+      "stability": {
+        "monthly_wape_mean": 5.0275,
+        "monthly_wape_standard_deviation": 2.5837
+      }
+    }
+  },
+  "comparisons_to_a": {
+    "B1": {
+      "variant": "B1",
+      "wape_absolute_improvement_points": 0.0825,
+      "wape_relative_improvement_percentage": 1.9854,
+      "mae_change_percentage": -1.9846,
+      "rmse_change_percentage": -0.5884,
+      "months_improved": 3,
+      "months_worsened": 3,
+      "monthly_wape_delta_vs_a": {
+        "2025-07": -0.565,
+        "2025-08": 0.2736,
+        "2025-09": 0.4637,
+        "2025-10": -0.543,
+        "2025-11": -0.7067,
+        "2025-12": 0.7096
+      },
+      "low_volume_categories": [
+        "Educación",
+        "Mascotas",
+        "Otros gastos",
+        "Salud",
+        "Servicios básicos"
+      ],
+      "severe_category_deterioration_points": {},
+      "acceptance_criteria": {
+        "wape_lower": true,
+        "minimum_wape_improvement": false,
+        "improves_at_least_four_months": false,
+        "mae_not_worse_than_two_percent": true,
+        "rmse_not_worse_than_two_percent": true,
+        "negative_predictions_not_significantly_higher": true,
+        "no_severe_low_volume_category_deterioration": true
+      },
+      "accepted": false
+    },
+    "B2": {
+      "variant": "B2",
+      "wape_absolute_improvement_points": -0.5795,
+      "wape_relative_improvement_percentage": -13.9457,
+      "mae_change_percentage": 13.9472,
+      "rmse_change_percentage": 9.2438,
+      "months_improved": 2,
+      "months_worsened": 4,
+      "monthly_wape_delta_vs_a": {
+        "2025-07": -2.114,
+        "2025-08": 0.6499,
+        "2025-09": 0.8755,
+        "2025-10": -0.5604,
+        "2025-11": 2.6952,
+        "2025-12": 2.1001
+      },
+      "low_volume_categories": [
+        "Educación",
+        "Mascotas",
+        "Otros gastos",
+        "Salud",
+        "Servicios básicos"
+      ],
+      "severe_category_deterioration_points": {
+        "Salud": 34.2823
+      },
+      "acceptance_criteria": {
+        "wape_lower": false,
+        "minimum_wape_improvement": false,
+        "improves_at_least_four_months": false,
+        "mae_not_worse_than_two_percent": false,
+        "rmse_not_worse_than_two_percent": false,
+        "negative_predictions_not_significantly_higher": true,
+        "no_severe_low_volume_category_deterioration": false
+      },
+      "accepted": false
+    },
+    "B3": {
+      "variant": "B3",
+      "wape_absolute_improvement_points": 0.1701,
+      "wape_relative_improvement_percentage": 4.0935,
+      "mae_change_percentage": -4.0933,
+      "rmse_change_percentage": -1.9581,
+      "months_improved": 5,
+      "months_worsened": 1,
+      "monthly_wape_delta_vs_a": {
+        "2025-07": -0.1191,
+        "2025-08": -0.1049,
+        "2025-09": 0.207,
+        "2025-10": -0.3037,
+        "2025-11": -0.2105,
+        "2025-12": -0.5112
+      },
+      "low_volume_categories": [
+        "Educación",
+        "Mascotas",
+        "Otros gastos",
+        "Salud",
+        "Servicios básicos"
+      ],
+      "severe_category_deterioration_points": {},
+      "acceptance_criteria": {
+        "wape_lower": true,
+        "minimum_wape_improvement": false,
+        "improves_at_least_four_months": true,
+        "mae_not_worse_than_two_percent": true,
+        "rmse_not_worse_than_two_percent": true,
+        "negative_predictions_not_significantly_higher": true,
+        "no_severe_low_volume_category_deterioration": true
+      },
+      "accepted": false
+    },
+    "B": {
+      "variant": "B",
+      "wape_absolute_improvement_points": -0.7705,
+      "wape_relative_improvement_percentage": -18.5421,
+      "mae_change_percentage": 18.5441,
+      "rmse_change_percentage": 12.6807,
+      "months_improved": 2,
+      "months_worsened": 4,
+      "monthly_wape_delta_vs_a": {
+        "2025-07": -2.2181,
+        "2025-08": 1.0473,
+        "2025-09": 1.595,
+        "2025-10": -1.1834,
+        "2025-11": 2.8475,
+        "2025-12": 2.8042
+      },
+      "low_volume_categories": [
+        "Educación",
+        "Mascotas",
+        "Otros gastos",
+        "Salud",
+        "Servicios básicos"
+      ],
+      "severe_category_deterioration_points": {
+        "Salud": 59.0879
+      },
+      "acceptance_criteria": {
+        "wape_lower": false,
+        "minimum_wape_improvement": false,
+        "improves_at_least_four_months": false,
+        "mae_not_worse_than_two_percent": false,
+        "rmse_not_worse_than_two_percent": false,
+        "negative_predictions_not_significantly_higher": true,
+        "no_severe_low_volume_category_deterioration": false
+      },
+      "accepted": false
+    }
+  },
+  "diagnostics": {
+    "A": {
+      "correlation_and_condition": {
+        "numeric_features": 15,
+        "constant_features": [],
+        "high_correlation_threshold": 0.95,
+        "high_correlation_pairs": [
+          {
+            "left": "day_of_month",
+            "right": "month_progress",
+            "correlation": 0.99857
+          }
+        ],
+        "standardized_matrix_rank": 15,
+        "standardized_matrix_columns": 15,
+        "standardized_condition_number": 107.3159
+      },
+      "coefficients": {
+        "matrix_rank": 12,
+        "transformed_features": 25,
+        "largest_absolute_coefficients": [
+          {
+            "feature": "numeric__x6",
+            "coefficient": 3343.996679
+          },
+          {
+            "feature": "numeric__x3",
+            "coefficient": 2589.705606
+          },
+          {
+            "feature": "numeric__x8",
+            "coefficient": 2282.838657
+          },
+          {
+            "feature": "numeric__x12",
+            "coefficient": -2166.106272
+          },
+          {
+            "feature": "numeric__x2",
+            "coefficient": -1646.820197
+          },
+          {
+            "feature": "category__x0_Transporte",
+            "coefficient": 1116.493921
+          },
+          {
+            "feature": "category__x0_Salud",
+            "coefficient": -342.366295
+          },
+          {
+            "feature": "category__x0_Educación",
+            "coefficient": -308.483535
+          },
+          {
+            "feature": "numeric__x1",
+            "coefficient": 216.285324
+          },
+          {
+            "feature": "category__x0_Servicios básicos",
+            "coefficient": 173.774723
+          },
+          {
+            "feature": "category__x0_Alimentación",
+            "coefficient": -147.390636
+          },
+          {
+            "feature": "category__x0_Mascotas",
+            "coefficient": -145.714743
+          }
+        ]
+      }
+    },
+    "B": {
+      "correlation_and_condition": {
+        "numeric_features": 24,
+        "constant_features": [],
+        "high_correlation_threshold": 0.95,
+        "high_correlation_pairs": [
+          {
+            "left": "day_of_month",
+            "right": "month_progress",
+            "correlation": 0.99857
+          },
+          {
+            "left": "day_of_month",
+            "right": "active_spending_days",
+            "correlation": 0.962999
+          },
+          {
+            "left": "month_progress",
+            "right": "active_spending_days",
+            "correlation": 0.959453
+          },
+          {
+            "left": "total_transactions_to_date",
+            "right": "active_spending_days",
+            "correlation": 0.95501
+          },
+          {
+            "left": "category_average_transaction_to_date",
+            "right": "median_transaction_amount",
+            "correlation": 0.999971
+          }
+        ],
+        "standardized_matrix_rank": 24,
+        "standardized_matrix_columns": 24,
+        "standardized_condition_number": 517.859
+      },
+      "coefficients": {
+        "matrix_rank": 20,
+        "transformed_features": 34,
+        "largest_absolute_coefficients": [
+          {
+            "feature": "numeric__x3",
+            "coefficient": 3592.01425
+          },
+          {
+            "feature": "numeric__x8",
+            "coefficient": 3141.56506
+          },
+          {
+            "feature": "numeric__x19",
+            "coefficient": -2612.114462
+          },
+          {
+            "feature": "numeric__x6",
+            "coefficient": 1988.682539
+          },
+          {
+            "feature": "numeric__x12",
+            "coefficient": -1501.677677
+          },
+          {
+            "feature": "category__x0_Transporte",
+            "coefficient": 709.699924
+          },
+          {
+            "feature": "numeric__x1",
+            "coefficient": 658.644757
+          },
+          {
+            "feature": "numeric__x2",
+            "coefficient": -580.959373
+          },
+          {
+            "feature": "numeric__x17",
+            "coefficient": 576.975688
+          },
+          {
+            "feature": "numeric__x23",
+            "coefficient": 245.758373
+          },
+          {
+            "feature": "numeric__x20",
+            "coefficient": 199.019785
+          },
+          {
+            "feature": "category__x0_Mascotas",
+            "coefficient": -188.590873
+          }
+        ]
+      }
+    }
+  },
+  "best_observed_variant_by_final_wape": "B3",
+  "product_model_replaced": false
+}
